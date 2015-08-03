@@ -47,6 +47,8 @@ import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
 import io.hops.experiments.controller.commands.WarmUpCommand;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -87,6 +89,8 @@ public class Master {
         startCommander();
 
         sendToAllSlaves(new KillSlave());
+        
+        printAllResults();
 
         System.exit(0);
     }
@@ -192,9 +196,9 @@ public class Master {
         }
         printMasterResultMessages("Successful-Ops: " + successfulOps.getSum()
                 + " Failed-Ops: " + failedOps.getSum()
-                + " Speed-/sec: " + speed.getSum()
-                + " AvgTimePerReport: " + avgTimePerReport.getMean()
-                + " AvgTimeToGetNameNodeToReport: " + avgTimeTogetANewNameNode.getMean());
+                + " Speed-/sec: " + Math.ceil(speed.getSum())
+                + " AvgTimePerReport: " + Math.ceil(avgTimePerReport.getMean())
+                + " AvgTimeToGetNameNodeToReport: " + Math.ceil(avgTimeTogetANewNameNode.getMean()));
     }
 
     private void startInterleavedCommander() throws IOException, ClassNotFoundException {
@@ -227,8 +231,8 @@ public class Master {
         }
         printMasterResultMessages("Successful-Ops: " + successfulOps.getSum()
             + " Failed-Ops: " + failedOps.getSum()
-            + " Avg-Test-Duration-sec " + duration.getMean() / 1000
-            + " Speed-/sec: " + speed.getSum());
+            + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000)
+            + " Speed-/sec: " + Math.ceil(speed.getSum()));
     }
 
     private void handShakeWithSlaves() throws IOException, ClassNotFoundException {
@@ -315,10 +319,10 @@ public class Master {
                 duration.addValue(response.getRunTime());
             }
         }
-        printMasterResultMessages(request.getPhase() + " Successful-Ops: " + successfulOps.getSum()
+        printMasterResultMessages(request.getPhase() +" " + Math.ceil(speed.getSum()) + " ops/sec. " +
+                " Successful-Ops: " + successfulOps.getSum()
                 + " Failed-Ops: " + failedOps.getSum()
-                + " Avg-Test-Duration-sec " + duration.getMean() / 1000
-                + " Speed-/sec: " + speed.getSum());
+                + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000));
     }
 
     private void startListener() throws SocketException, UnknownHostException {
@@ -387,13 +391,11 @@ public class Master {
     }
 
     private void printMasterLogMessages(String msg) {
-        System.out.println((char) 27 + "[31m" + msg);
-        System.out.print((char) 27 + "[0m");
+        redColoredText(msg);
     }
 
     private void printMasterResultMessages(String msg) throws FileNotFoundException, IOException {
-        System.out.println((char) 27 + "[36m" + msg);
-        System.out.print((char) 27 + "[0m");
+        blueColoredText(msg);
 
         FileWriter out = new FileWriter(args.getResultFile(), true);
         out.write(msg + "\n");
@@ -405,5 +407,34 @@ public class Master {
         if (file.exists()) {
             file.delete();
         }
+    }
+    
+    private void redColoredText(String msg){
+        System.out.println((char) 27 + "[31m" + msg);
+        System.out.print((char) 27 + "[0m");
+    }
+    
+    private void blueColoredText(String msg){
+        System.out.println((char) 27 + "[36m" + msg);
+        System.out.print((char) 27 + "[0m");
+    }
+    
+    private void printAllResults() throws FileNotFoundException, IOException{
+        System.out.println("\n\n\n");
+        System.out.println("************************ All Results ************************");
+        System.out.println("\n\n\n");
+        BufferedReader br = new BufferedReader(new FileReader(args.getResultFile()));
+        try {
+            
+            String line = br.readLine();
+
+            while (line != null) {
+                blueColoredText(line);
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        System.out.println("\n\n\n");
     }
 }

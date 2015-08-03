@@ -24,9 +24,6 @@ source $DIR/../exp-deployment.properties
     #Build Experiments
     CMD="mvn "	    
     if [ $HOP_Rebuild_Experiments = true -a $HOP_Upload_Experiments = true ]; then
-	    if [ $HOP_Do_Clean_Build = true ]; then
-		    CMD="$CMD clean "
-	    fi	
-    	CMD="$CMD assembly:assembly -f $HOP_Experiments_Folder/pom.xml"  
-	$CMD
+    	CMD="$CMD clean assembly:assembly -f $HOP_Experiments_Folder/pom.xml"  
+        $CMD
     fi
