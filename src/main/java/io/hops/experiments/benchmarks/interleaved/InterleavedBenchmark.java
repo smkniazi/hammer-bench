@@ -44,7 +44,7 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
  */
 public class InterleavedBenchmark extends Benchmark {
 
-    private long maxOperations;
+    private long duration;
     private long startTime = 0;
     AtomicLong operationsCompleted = new AtomicLong(0);
     AtomicLong operationsFailed = new AtomicLong(0);
@@ -124,7 +124,7 @@ public class InterleavedBenchmark extends Benchmark {
         command) throws IOException, InterruptedException {
         InterleavedBenchmarkCommand.Request req = (InterleavedBenchmarkCommand
             .Request) command;
-        maxOperations = req.getMaxOperations();
+        duration = req.getDuration();
 
         List workers = new ArrayList<Worker>();
         for (int i = 0; i < numThreads; i++) {
@@ -163,7 +163,7 @@ public class InterleavedBenchmark extends Benchmark {
 
             while (true) {
                 try {
-                    if (maxOperations < (operationsCompleted.get() + operationsFailed.get())) {
+                    if (duration > (System.currentTimeMillis() + startTime)) {
                         return null;
                     }
 

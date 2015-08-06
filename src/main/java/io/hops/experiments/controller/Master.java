@@ -209,7 +209,7 @@ public class Master {
                 args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
                 args.getInterleavedStatFilePercentage(), args.getInterleavedStatDirPercentage(),
                 args.getInterleavedChmodFilesPercentage(),
-                args.getInterleavedMkdirPercentage(),args.getMaxInterleavedOperations(), args.getFileSize(),
+                args.getInterleavedMkdirPercentage(),args.getInterleavedBMDuration(), args.getFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);
 

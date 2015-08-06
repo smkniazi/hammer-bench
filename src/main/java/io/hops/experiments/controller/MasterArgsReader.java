@@ -275,8 +275,8 @@ public class MasterArgsReader {
         return getInt(ConfigKeys.FILES_TO_CRAETE_IN_WARM_UP_PHASE_KEY, ConfigKeys.FILES_TO_CRAETE_IN_WARM_UP_PHASE_DEFAULT);
     }
 
-    public long getMaxInterleavedOperations() {
-        return getLong(ConfigKeys.MAX_INTERLEAVED_OPERATIONS_KEY, ConfigKeys.MAX_INTERLEAVED_OPERATIONS_DEFAULT);
+    public long getInterleavedBMDuration() {
+        return getLong(ConfigKeys.INTERLEAVED_BM_DURATION_KEY, ConfigKeys.INTERLEAVED_BM_DURATION_DEFAULT);
     }
     
     public int getWarmUpPhaseWaitTime(){

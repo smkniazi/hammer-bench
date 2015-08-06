@@ -27,8 +27,8 @@ public class ConfigKeys {
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
     public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED."
     
-    public static String MAX_INTERLEAVED_OPERATIONS_KEY = "max.interleaved.operations";
-    public static long   MAX_INTERLEAVED_OPERATIONS_DEFAULT = 10000;
+    public static String INTERLEAVED_BM_DURATION_KEY = "interleaved.bm.duration";
+    public static long   INTERLEAVED_BM_DURATION_DEFAULT = 60*1000;
     
     public static String RAW_CREATE_PHASE_MAX_FILES_TO_CRAETE_KEY = "raw.create.phase.max.files.to.create";
     public static long RAW_CREATE_PHASE_MAX_FILES_TO_CRAETE_DEFAULT = Long.MAX_VALUE;
