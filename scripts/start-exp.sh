@@ -33,7 +33,8 @@ fi
 
 
 $DIR/internals/start-exp-slaves.sh 
-
+echo "sleeping for a while to make sure that the slaves have initialized"
+sleep 5
 $DIR/internals/start-exp-master.sh $1
 
 

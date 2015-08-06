@@ -229,10 +229,10 @@ public class Master {
                 duration.addValue(response.getRunTime());
             }
         }
-        printMasterResultMessages("Successful-Ops: " + successfulOps.getSum()
+        printMasterResultMessages("Speed-/sec: " + Math.ceil(speed.getSum())
+            + " Successful-Ops: " + successfulOps.getSum()
             + " Failed-Ops: " + failedOps.getSum()
-            + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000)
-            + " Speed-/sec: " + Math.ceil(speed.getSum()));
+            + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000));
     }
 
     private void handShakeWithSlaves() throws IOException, ClassNotFoundException {
