@@ -163,7 +163,7 @@ public class InterleavedBenchmark extends Benchmark {
 
             while (true) {
                 try {
-                    if (duration > (System.currentTimeMillis() - startTime)) {
+                    if ((System.currentTimeMillis() - startTime) > duration) {
                         return null;
                     }
 
