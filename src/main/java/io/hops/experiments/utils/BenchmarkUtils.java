@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.permission.FsPermission;
 import io.hops.experiments.workload.generator.FilePool;
 import io.hops.experiments.workload.generator.TreeFileGenerator;
+import java.text.DecimalFormat;
 
 public class BenchmarkUtils {
 
@@ -110,10 +111,10 @@ public class BenchmarkUtils {
     public static void mkdirs(DistributedFileSystem dfs, Path path) throws IOException {
         dfs.mkdirs(path);
     }
-
-    public static double speedPSec(AtomicInteger ops, long startTime) {
-        long timePassed = (System.currentTimeMillis() - startTime);
-        double opsPerMSec = (double) (ops.get()) / (double) timePassed;
-        return opsPerMSec * 1000;
+    
+    public static double round(double val){
+      double round = val * 100;
+      round = Math.ceil(round);
+      return round / 100;
     }
 }

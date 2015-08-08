@@ -98,19 +98,6 @@ public class MasterArgsReader {
         }
         return listOfSlaves;
     }
-    
-//    public List<String> getListOfNameNodes(){
-//        if(nameNodeList == null){
-//            nameNodeList = new ArrayList<String>();
-//            String nameNodeListString = getString(ConfigKeys.NAME_NODE_LIST_KEY, ConfigKeys.NAME_NODE_LIST_DEFAULT);
-//            StringTokenizer st = new StringTokenizer(nameNodeListString, ", ");
-//            while (st.hasMoreTokens()) {
-//                String namenode = st.nextToken();
-//                nameNodeList.add(namenode);
-//            }
-//        }
-//        return nameNodeList;
-//    }
 
     public int getSlaveListeningPort() {
         return getInt(ConfigKeys.SLAVE_LISTENING_PORT_KEY, ConfigKeys.SLAVE_LISTENING_PORT_DEFAULT);
@@ -123,6 +110,10 @@ public class MasterArgsReader {
     public BenchmarkType getBenchMarkType() {
         String val = getString(ConfigKeys.BENCHMARK_TYPE_KEY, ConfigKeys.BENCHMARK_TYPE_DEFAULT);
         return BenchmarkType.valueOf(val);
+    }
+    
+    public int getNamenodeCount() {
+        return getInt(ConfigKeys.NO_OF_NAMENODES_KEY, ConfigKeys.NUM_SLAVE_THREADS_DEFAULT);
     }
 
     public long getRawCreateFilesPhaseDuration() {

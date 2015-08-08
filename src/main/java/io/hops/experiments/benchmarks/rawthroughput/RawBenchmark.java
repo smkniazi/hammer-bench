@@ -162,7 +162,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers);// blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -197,7 +197,7 @@ public class RawBenchmark extends Benchmark {
                     BenchmarkUtils.mkdirs(dfs, new Path(filePath));
                     successfulOps.incrementAndGet();
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful mkdirs ops " + successfulOps.get() + " Failed read ops " + failedOps.get() + " Speed " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime) + " ops/sec");
+                        Logger.printMsg("Successful mkdirs ops " + successfulOps.get() + " Failed read ops " + failedOps.get() + " Speed " + speedPSec(successfulOps, phaseStartTime) + " ops/sec");
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -219,7 +219,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers); // blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -258,7 +258,7 @@ public class RawBenchmark extends Benchmark {
                             fileSize);
                     successfulOps.incrementAndGet();
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful write ops " + successfulOps.get() + " Failed write ops " + failedOps.get() + " Write Speed " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime) + " ops/sec ");
+                        Logger.printMsg("Successful write ops " + successfulOps.get() + " Failed write ops " + failedOps.get() + " Write Speed " + speedPSec(successfulOps, phaseStartTime) + " ops/sec ");
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -280,7 +280,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers);// blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -316,7 +316,7 @@ public class RawBenchmark extends Benchmark {
                     BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
                     successfulOps.incrementAndGet();
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful read ops " + successfulOps.get() + " Failed read ops " + failedOps.get() + " Speed " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime) + " ops/sec");
+                        Logger.printMsg("Successful read ops " + successfulOps.get() + " Failed read ops " + failedOps.get() + " Speed " + speedPSec(successfulOps, phaseStartTime) + " ops/sec");
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -337,7 +337,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers);// blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -377,7 +377,7 @@ public class RawBenchmark extends Benchmark {
                         failedOps.incrementAndGet();
                     }
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful rename ops " + successfulOps.get() + " Failed rename ops " + failedOps.get() + " Speed: " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime));
+                        Logger.printMsg("Successful rename ops " + successfulOps.get() + " Failed rename ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -436,7 +436,7 @@ public class RawBenchmark extends Benchmark {
                         failedOps.incrementAndGet();
                     }
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful delete ops " + successfulOps.get() + " Failed delete ops " + failedOps.get() + " Speed: " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime));
+                        Logger.printMsg("Successful delete ops " + successfulOps.get() + " Failed delete ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
                     }
 
                 } catch (Exception e) {
@@ -457,7 +457,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers);// blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -499,7 +499,7 @@ public class RawBenchmark extends Benchmark {
                     successfulOps.incrementAndGet();
 
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful "+opType+" ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime));
+                        Logger.printMsg("Successful "+opType+" ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -520,7 +520,7 @@ public class RawBenchmark extends Benchmark {
         setMeasurementVariables(duration);
         executor.invokeAll(workers);// blocking call
 
-        double speed = ((successfulOps.get()) / (double) (phaseDurationInMS)); // p / ms
+        double speed = ((double)successfulOps.get() / (double) phaseDurationInMS); // p / ms
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
@@ -554,7 +554,7 @@ public class RawBenchmark extends Benchmark {
                     successfulOps.incrementAndGet();
 
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful chmod ops " + successfulOps.get() + " Failed chmod ops " + failedOps.get() + " Speed: " + BenchmarkUtils.speedPSec(successfulOps, phaseStartTime));
+                        Logger.printMsg("Successful chmod ops " + successfulOps.get() + " Failed chmod ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
@@ -569,6 +569,12 @@ public class RawBenchmark extends Benchmark {
         phaseStartTime = System.currentTimeMillis();
         successfulOps = new AtomicInteger(0);
         failedOps = new AtomicInteger(0);
+    }
+    
+    public double speedPSec(AtomicInteger ops, long startTime) {
+        long timePassed = (System.currentTimeMillis() - startTime);
+        double opsPerMSec = (double) (ops.get()) / (double) timePassed;
+        return opsPerMSec * 1000;
     }
 
 }

@@ -203,14 +203,14 @@ public class InterleavedBenchmark extends Benchmark {
                         String message = "Total Completed Ops: " + operationsCompleted +" "+
                                 "Total Failed Ops: " + operationsFailed +" "+
                                 "Speed: " + speedPSec(operationsCompleted.get(), startTime)+" ops/s "+
-                                " Creates: "+createOperations+" ["+round(((double)createOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Mkdirs: "+mkdirOperations+" ["+round(((double)mkdirOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Reads: "+readOperations+" ["+round(((double)readOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " file Stat: "+fileStatOperations+" ["+round(((double)fileStatOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " dir Stat: "+dirStatOperations+" ["+round(((double)dirStatOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Rename: "+renameOperations+" ["+round(((double)renameOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Chmod: "+chmodOperations+" ["+round(((double)chmodOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Delete: "+deleteOperations+" ["+round(((double)deleteOperations.get()/operationsCompleted.get())*100)+"%] "
+                                " Creates: "+createOperations+" ["+BenchmarkUtils.round(((double)createOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Mkdirs: "+mkdirOperations+" ["+BenchmarkUtils.round(((double)mkdirOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Reads: "+readOperations+" ["+BenchmarkUtils.round(((double)readOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " file Stat: "+fileStatOperations+" ["+BenchmarkUtils.round(((double)fileStatOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " dir Stat: "+dirStatOperations+" ["+BenchmarkUtils.round(((double)dirStatOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Rename: "+renameOperations+" ["+BenchmarkUtils.round(((double)renameOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Chmod: "+chmodOperations+" ["+BenchmarkUtils.round(((double)chmodOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Delete: "+deleteOperations+" ["+BenchmarkUtils.round(((double)deleteOperations.get()/operationsCompleted.get())*100)+"%] "
                                 ;
                         
                         Logger.printMsg(message);
@@ -360,12 +360,6 @@ public class InterleavedBenchmark extends Benchmark {
     private double speedPSec(long ops, long startTime) {
         long timePassed = (System.currentTimeMillis() - startTime);
         double opsPerMSec = (double) (ops) / (double) timePassed;
-        return round(opsPerMSec * 1000);
-    }
-    
-    private double round(double val){
-        double round = val * 10;
-        round = Math.ceil(round);
-        return round / 10;
+        return BenchmarkUtils.round(opsPerMSec * 1000);
     }
 }

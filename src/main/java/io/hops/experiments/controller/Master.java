@@ -47,7 +47,12 @@ import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
 import io.hops.experiments.controller.commands.WarmUpCommand;
+import io.hops.experiments.results.BMResults;
+import io.hops.experiments.results.BlockReportBMResults;
+import io.hops.experiments.results.InterleavedBMResults;
+import io.hops.experiments.results.RawBMResults;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -57,6 +62,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class Master {
 
+    List<BMResults> results = new ArrayList<BMResults>();
     public static void main(String[] argv) throws Exception {
         String configFilePath = "master.properties";
         if (argv.length == 1) {
@@ -91,6 +97,8 @@ public class Master {
         sendToAllSlaves(new KillSlave());
         
         printAllResults();
+        
+        generateBinaryFile();
 
         System.exit(0);
     }
@@ -194,11 +202,12 @@ public class Master {
                 avgTimeTogetANewNameNode.addValue(response.getAvgTimeTogetNewNameNode());
             }
         }
-        printMasterResultMessages("Successful-Ops: " + successfulOps.getSum()
-                + " Failed-Ops: " + failedOps.getSum()
-                + " Speed-/sec: " + Math.ceil(speed.getSum())
-                + " AvgTimePerReport: " + Math.ceil(avgTimePerReport.getMean())
-                + " AvgTimeToGetNameNodeToReport: " + Math.ceil(avgTimeTogetANewNameNode.getMean()));
+       
+        BlockReportBMResults result  = new BlockReportBMResults(args.getNamenodeCount(), 
+                speed.getSum(), successfulOps.getSum(), 
+                failedOps.getSum(), avgTimePerReport.getMean(), avgTimeTogetANewNameNode.getMean());
+        
+        printMasterResultMessages(result);
     }
 
     private void startInterleavedCommander() throws IOException, ClassNotFoundException {
@@ -229,10 +238,11 @@ public class Master {
                 duration.addValue(response.getRunTime());
             }
         }
-        printMasterResultMessages("Speed-/sec: " + Math.ceil(speed.getSum())
-            + " Successful-Ops: " + successfulOps.getSum()
-            + " Failed-Ops: " + failedOps.getSum()
-            + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000));
+        
+        InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount()
+                ,(speed.getSum()),  (duration.getMean() / 1000)
+                , (successfulOps.getSum()), (failedOps.getSum()));
+        printMasterResultMessages(result);
     }
 
     private void handShakeWithSlaves() throws IOException, ClassNotFoundException {
@@ -319,10 +329,11 @@ public class Master {
                 duration.addValue(response.getRunTime());
             }
         }
-        printMasterResultMessages(request.getPhase() +" " + Math.ceil(speed.getSum()) + " ops/sec. " +
-                " Successful-Ops: " + successfulOps.getSum()
-                + " Failed-Ops: " + failedOps.getSum()
-                + " Avg-Test-Duration-sec " + Math.ceil(duration.getMean() / 1000));
+        
+        RawBMResults result = new RawBMResults(args.getNamenodeCount(),request.getPhase(),
+                (speed.getSum()),  (duration.getMean() / 1000), 
+                (successfulOps.getSum()), (failedOps.getSum()) );
+        printMasterResultMessages(result);
     }
 
     private void startListener() throws SocketException, UnknownHostException {
@@ -394,12 +405,13 @@ public class Master {
         redColoredText(msg);
     }
 
-    private void printMasterResultMessages(String msg) throws FileNotFoundException, IOException {
-        blueColoredText(msg);
-
+    private void printMasterResultMessages(BMResults result) throws FileNotFoundException, IOException {    
+        blueColoredText(result.toString());
         FileWriter out = new FileWriter(args.getResultFile(), true);
-        out.write(msg + "\n");
+        out.write(result.toString() + "\n");
         out.close();
+        
+        results.add(result);
     }
 
     private void resetResultFile() {
@@ -407,8 +419,21 @@ public class Master {
         if (file.exists()) {
             file.delete();
         }
+        
+        file = new File(args.getResultFile()+ConfigKeys.BINARY_RESULT_FILE_EXT);
+        if (file.exists()) {
+            file.delete();
+        }
     }
     
+    private void generateBinaryFile() throws FileNotFoundException, IOException{
+      FileOutputStream fout = new FileOutputStream(args.getResultFile()+ConfigKeys.BINARY_RESULT_FILE_EXT);
+      ObjectOutputStream oos = new ObjectOutputStream(fout);   
+      for(BMResults result: results){
+        oos.writeObject(result);
+      }
+      oos.close();
+    }
     private void redColoredText(String msg){
         System.out.println((char) 27 + "[31m" + msg);
         System.out.print((char) 27 + "[0m");

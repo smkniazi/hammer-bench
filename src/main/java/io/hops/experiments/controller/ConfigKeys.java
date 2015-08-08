@@ -22,7 +22,11 @@ package io.hops.experiments.controller;
  * @author salman
  */
 public class ConfigKeys {
-    public static final int BUFFER_SIZE = 4096;   
+  
+    public static final int BUFFER_SIZE = 4096;
+    
+    public static String NO_OF_NAMENODES_KEY = "no.of.namenodes";
+    public static int NO_OF_NAMENODES_DEFAULT = 1;
     
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
     public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED."
@@ -140,6 +144,7 @@ public class ConfigKeys {
     
     public static String RESULTS_FIlE_KEY = "results.file";
     public static String RESULTS_FIlE_DEFAULT = "results.txt";
+    public static String BINARY_RESULT_FILE_EXT = ".hopsbin";
     
     public static String FILES_TO_CRAETE_IN_WARM_UP_PHASE_KEY = "files.to.create.in.warmup.phase";
     public static int    FILES_TO_CRAETE_IN_WARM_UP_PHASE_DEFAULT = 10;
