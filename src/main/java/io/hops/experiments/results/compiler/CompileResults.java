@@ -40,8 +40,8 @@ public class CompileResults {
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
     argv = new String[3];
     argv[0] = "/home/salman/Dropbox/hdfs";
-    argv[1] = "/home/salman/Dropbox/hopsfs";    
-    argv[2] = "/tmp/test";
+    argv[1] = "/home/salman/bm";    
+    argv[2] = "/home/salman/res";
 
 
     if (argv.length != 3) {

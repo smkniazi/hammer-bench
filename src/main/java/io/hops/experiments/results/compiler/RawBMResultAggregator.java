@@ -23,10 +23,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  *
@@ -102,6 +106,9 @@ public class RawBMResultAggregator {
           diff = val;
         } else {
           diff = (val - previousVal);
+          if(diff < 0){
+            diff = 0;
+          }
           previousVal = val;
         }
         histo.add(diff);
@@ -142,10 +149,12 @@ public class RawBMResultAggregator {
     histogram(hdfsCr, hopsFsCr, outputFolder);
 
   }
+
+  
   
   private static void histogram(CompiledResults hdfsCr, CompiledResults hopsFsCr, String outputFolder) throws IOException{
-    
-    String header = format("NameNodes:");
+  
+    String header = format("NameNodes");
     header += format("SingleNN");
     for(Integer i : hopsFsCr.nnCounts){
       header+=format(i+"-NN");
@@ -154,7 +163,15 @@ public class RawBMResultAggregator {
   
     boolean isFirstRecord = true;
     String col  = "t col";
-    for (BenchmarkOperations op : hopsFsCr.valsMap.keySet()) {
+    
+    //TODO use String buffer everywhere
+    String allData = "";
+    String plotCommands = "";
+    
+    SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+    sorted.addAll(hopsFsCr.valsMap.keySet());
+    for (BenchmarkOperations op : sorted) {
+      int colorIndex = 0;
       List<Double> hopsHisto = hopsFsCr.histoMap.get(op);
       String msg = format("#"+op)+"\n";
       msg+=header+"\n";
@@ -185,7 +202,7 @@ public class RawBMResultAggregator {
       }
       msg+="\n";
       
-      writeToFile(outputFolder+"/histogram-all-data.dat", msg, true);
+      allData += msg;
       
       writeToFile(outputFolder+"/"+op+".dat", msg, false);
       
@@ -194,11 +211,11 @@ public class RawBMResultAggregator {
         plotCommand += "plot ";
       }
       
-      plotCommand += " newhistogram \""+op+"\", ";
+      plotCommand += " newhistogram \""+op.toString().replace("_", "\\n")+"\", ";
       plotCommand += "\'"+op+".dat\' ";
-      plotCommand += " using \"SingleNN\":xtic(1) not, "; 
+      plotCommand += " using \"SingleNN\":xtic(1) not "+getColor(colorIndex++)+", "; 
       for(Integer i : hopsFsCr.nnCounts){
-        plotCommand += "'' u \""+i+"-NN\" "+col+", ";
+        plotCommand += "'' u \""+i+"-NN\" "+col+getColor(colorIndex++)+" , ";
       }
       plotCommand +="\\\n";
       
@@ -207,27 +224,38 @@ public class RawBMResultAggregator {
         col = "not";
       }
       
-      writeToFile(outputFolder+"/histo-internal.gnuplot", plotCommand, true);
+
+      plotCommands+=plotCommand;
         
       
     }
-    
-    
+    writeToFile(outputFolder+"/histo-internal.gnuplot", plotCommands, false);
+    writeToFile(outputFolder+"/histogram-all-data.dat", allData, false);
   }
+  
+  private static String getColor(int index){
+    //String[] colorMap = {"#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9" };
+    String[] colorMap = {"#a6cee3", "#1f78b4", "#b2df8a", "#33a02c" , "#fb9a99", "#e31a1c", "#fdbf6f" , "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
+    return " lc rgb '"+ colorMap[index % colorMap.length]+"' ";
+  }
+  
+  
   
   private static void lines(CompiledResults hdfsCr, CompiledResults hopsFsCr, String outputFolder) throws IOException{
     //  linear graph
     String outputFile = outputFolder+"/lines.txt";
-    
+    String allData = "";
     String header = format("NameNodes:");
     for(Integer i : hopsFsCr.nnCounts){
       header+=format(i+"-NN");
     }
     header+="\n";
-    writeToFile(outputFile, header, true);
+    allData+=header;
 
     
-    for (BenchmarkOperations op : hopsFsCr.valsMap.keySet()) {
+    SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+    sorted.addAll(hopsFsCr.valsMap.keySet());
+    for (BenchmarkOperations op : sorted) {
       List<Double> hopsVals = hopsFsCr.valsMap.get(op);
       String msg = format("HopsFS_" + op.toString());
       for (Double val : hopsVals) {
@@ -257,8 +285,10 @@ public class RawBMResultAggregator {
       }
 
       msg+="\n";
-      writeToFile(outputFile, msg, true);
+      allData+=msg;
     }
+    
+    writeToFile(outputFile, allData, false);
 
   }
 
