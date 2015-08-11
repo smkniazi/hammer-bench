@@ -26,6 +26,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -39,9 +40,9 @@ public class CompileResults {
 
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
     argv = new String[3];
-    argv[0] = "/home/salman/Dropbox/hdfs";
+    argv[0] = "/home/salman/Dropbox/hdfs32t";
     argv[1] = "/home/salman/bm";    
-    argv[2] = "/home/salman/res";
+    argv[2] = "/home/salman/code/hopg/hops-papers/hopsfs-2015/imgs";
 
 
     if (argv.length != 3) {
@@ -170,13 +171,29 @@ public class CompileResults {
 
     CompiledResults hdfsRawCr = hdfsRawAggregatredResults.processAllRecords();
     CompiledResults hopsRawCr = hopsRawAggregatredResults.processAllRecords();
-
     RawBMResultAggregator.combineHDFSandHopsFS(hdfsRawCr, hopsRawCr, outputDir);
 
-//    hdfsInterleavedAggregatedResults.processAllRecords();
-//    hopsInterleavedAggregatedResults.processAllRecords();
+    
+    InterleavedBMResultsAggregator.combineResults(
+            hdfsInterleavedAggregatedResults.getResults(),
+            hopsInterleavedAggregatedResults.getResults(),
+            outputDir);
+    
+    
+    
 //    
 //    hdfsBlockReportAggregatedResults.processAllRecords();
 //    hopsBlockReportAggregatedResults.processAllRecords();
+  }
+  
+  protected static void writeToFile(String file, String msg, boolean append) throws IOException {
+    System.out.println(msg);
+    FileWriter out = new FileWriter(file, append);
+    out.write(msg);
+    out.close();
+  }
+  
+  protected static String format(String val) {
+    return String.format("%1$-20s", val);
   }
 }

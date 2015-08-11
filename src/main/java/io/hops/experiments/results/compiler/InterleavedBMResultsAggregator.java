@@ -17,6 +17,7 @@
 package io.hops.experiments.results.compiler;
 
 import io.hops.experiments.results.InterleavedBMResults;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,12 +45,38 @@ public class InterleavedBMResultsAggregator {
     agg.addSucessfulOps(result.getSuccessfulOps());
     agg.addRunDuration(result.getDuration());
   }
-
-  void processAllRecords() {
-    System.out.println("Generating compiled results for INTERLEAVED Benchmarks");
-    for (Integer key : allResults.keySet()) {
-      InterleavedAggregate agg = allResults.get(key);
-      System.out.println("NN Count " + key + " Speed " + agg.getSpeed());
+  
+  public Map<Integer, InterleavedAggregate> getResults(){
+    return allResults;
+  }
+  
+  public static void combineResults(Map<Integer, InterleavedAggregate> hdfs, Map<Integer, InterleavedAggregate> hopsfs, String outpuFolder) throws IOException {
+    
+    String data = "";
+    String plot = "set terminal postscript eps enhanced color font \"Helvetica,14\"  #monochrome\n";
+    plot += "set output '| ps2pdf - interleaved.pdf'\n";
+    
+    if(hdfs.keySet().size() > 1 ){
+      System.out.println("NN count for HDFS cannot be greater than 1");
+      return;
     }
+    
+    double hdfsVal = 0; 
+    if(hdfs.keySet().size() == 1){
+      hdfsVal = ((InterleavedAggregate)hdfs.values().toArray()[0]).getSpeed();
+    }
+    //plot 'interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title "HopsFS" with errorbars, 23330.08 title "HDFS"
+    plot+="plot 'interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS\" with errorbars, "+hdfsVal+" title \"HDFS\" \n";;
+    
+    for(Integer nn: hopsfs.keySet()){
+      InterleavedAggregate agg = hopsfs.get(nn);
+      data+=CompileResults.format(nn+"-NN")+CompileResults.format(agg.getSpeed()+"")+
+              CompileResults.format(agg.getMinSpeed()+"")+CompileResults.format(agg.getMaxSpeed()+"")+
+              "\n";
+    }
+    
+    
+    CompileResults.writeToFile(outpuFolder+"/interleaved.gnuplot", plot, false);
+    CompileResults.writeToFile(outpuFolder+"/interleaved.dat", data, false);
   }
 }

@@ -23,44 +23,53 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author salman
  */
-public abstract class Aggregate{
-    private DescriptiveStatistics speed = new DescriptiveStatistics();
-    private DescriptiveStatistics sucessfulOps = new DescriptiveStatistics();
-    private DescriptiveStatistics failedOps = new DescriptiveStatistics();
-    private DescriptiveStatistics runDuration = new DescriptiveStatistics();
+public abstract class Aggregate {
 
-    public Aggregate() {
-    }
-    
-    public void addSpeed(double val){
-      speed.addValue(val);
-    }
-    
-    public void addSucessfulOps(double val){
-      sucessfulOps.addValue(val);
-    }
-    
-    public void addFailedOps(double val){
-      failedOps.addValue(val);
-    }
+  private DescriptiveStatistics speed = new DescriptiveStatistics();
+  private DescriptiveStatistics sucessfulOps = new DescriptiveStatistics();
+  private DescriptiveStatistics failedOps = new DescriptiveStatistics();
+  private DescriptiveStatistics runDuration = new DescriptiveStatistics();
 
-    public void addRunDuration(double val){
-      runDuration.addValue(val);
-    }
-    
-    public double getSpeed(){
-      return BenchmarkUtils.round(speed.getMean());
-    }
-    
-    public double getSucessfulOps(){
-      return BenchmarkUtils.round(sucessfulOps.getMean());
-    }
-    
-    public double getFailedOps(){
-      return BenchmarkUtils.round(failedOps.getMean());
-    }
-    
-    public double getRunDuration(){
-      return BenchmarkUtils.round(runDuration.getMean());
-    }
+  public Aggregate() {
   }
+
+  public void addSpeed(double val) {
+    speed.addValue(val);
+  }
+
+  public void addSucessfulOps(double val) {
+    sucessfulOps.addValue(val);
+  }
+
+  public void addFailedOps(double val) {
+    failedOps.addValue(val);
+  }
+
+  public void addRunDuration(double val) {
+    runDuration.addValue(val);
+  }
+
+  public double getSpeed() {
+    return BenchmarkUtils.round(speed.getMean());
+  }
+
+  public double getMaxSpeed() {
+    return BenchmarkUtils.round(speed.getMax());
+  }
+
+  public double getMinSpeed() {
+    return BenchmarkUtils.round(speed.getMin());
+  }
+
+  public double getSucessfulOps() {
+    return BenchmarkUtils.round(sucessfulOps.getMean());
+  }
+
+  public double getFailedOps() {
+    return BenchmarkUtils.round(failedOps.getMean());
+  }
+
+  public double getRunDuration() {
+    return BenchmarkUtils.round(runDuration.getMean());
+  }
+}

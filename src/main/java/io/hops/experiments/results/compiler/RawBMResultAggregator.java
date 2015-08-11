@@ -1,7 +1,7 @@
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
+ * work for additional inCompileResults.formation regarding copyright ownership. The ASF
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,12 +118,7 @@ public class RawBMResultAggregator {
     return cr;
   }
 
-  private static String format(String val) {
-    return String.format("%1$-20s", val);
-  }
-
   class CompiledResults {
-
     Map<BenchmarkOperations, List<Double>> valsMap = new HashMap<BenchmarkOperations, List<Double>>();
     Map<BenchmarkOperations, List<Double>> histoMap = new HashMap<BenchmarkOperations, List<Double>>();
     List<Integer> nnCounts = new ArrayList<Integer>();
@@ -154,10 +149,10 @@ public class RawBMResultAggregator {
   
   private static void histogram(CompiledResults hdfsCr, CompiledResults hopsFsCr, String outputFolder) throws IOException{
   
-    String header = format("NameNodes");
-    header += format("SingleNN");
+    String header = CompileResults.format("NameNodes");
+    header += CompileResults.format("SingleNN");
     for(Integer i : hopsFsCr.nnCounts){
-      header+=format(i+"-NN");
+      header+=CompileResults.format(i+"-NN");
     }
    
   
@@ -173,16 +168,16 @@ public class RawBMResultAggregator {
     for (BenchmarkOperations op : sorted) {
       int colorIndex = 0;
       List<Double> hopsHisto = hopsFsCr.histoMap.get(op);
-      String msg = format("#"+op)+"\n";
+      String msg = CompileResults.format("#"+op)+"\n";
       msg+=header+"\n";
-      msg+=format("HopsFS");
-      msg+=format(RECORD_NOT_FOUND); // first col 
+      msg+=CompileResults.format("HopsFS");
+      msg+=CompileResults.format(RECORD_NOT_FOUND); // first col 
       for(Double val : hopsHisto){
-        msg+=format(BenchmarkUtils.round(val)+"");
+        msg+=CompileResults.format(BenchmarkUtils.round(val)+"");
       }
       
       msg+="\n";
-      msg+=format("HDFS");
+      msg+=CompileResults.format("HDFS");
       List<Double> hdfsVals = hdfsCr.valsMap.get(op);
       if (hdfsVals != null) {
         if (hdfsVals.size() > 1) {
@@ -191,20 +186,20 @@ public class RawBMResultAggregator {
         }
 
         if (hdfsVals.size() == 1) {
-          msg += format(hdfsVals.get(0) + "");
+          msg += CompileResults.format(hdfsVals.get(0) + "");
         } else {
-          msg += format(RECORD_NOT_FOUND);
+          msg += CompileResults.format(RECORD_NOT_FOUND);
         }
       }
       
       for (int i = 0; i < hopsFsCr.nnCounts.size(); i++) {
-        msg += format(RECORD_NOT_FOUND);
+        msg += CompileResults.format(RECORD_NOT_FOUND);
       }
       msg+="\n";
       
       allData += msg;
       
-      writeToFile(outputFolder+"/"+op+".dat", msg, false);
+      CompileResults.writeToFile(outputFolder+"/"+op+".dat", msg, false);
       
       String plotCommand = "";
       if(isFirstRecord){
@@ -213,7 +208,7 @@ public class RawBMResultAggregator {
       
       plotCommand += " newhistogram \""+op.toString().replace("_", "\\n")+"\", ";
       plotCommand += "\'"+op+".dat\' ";
-      plotCommand += " using \"SingleNN\":xtic(1) not "+getColor(colorIndex++)+", "; 
+      plotCommand += " using \"SingleNN\":xtic(1) not  lc rgb '#1f78b4', "; 
       for(Integer i : hopsFsCr.nnCounts){
         plotCommand += "'' u \""+i+"-NN\" "+col+getColor(colorIndex++)+" , ";
       }
@@ -229,13 +224,16 @@ public class RawBMResultAggregator {
         
       
     }
-    writeToFile(outputFolder+"/histo-internal.gnuplot", plotCommands, false);
-    writeToFile(outputFolder+"/histogram-all-data.dat", allData, false);
+    CompileResults.writeToFile(outputFolder+"/histo-internal.gnuplot", plotCommands, false);
+    CompileResults.writeToFile(outputFolder+"/histogram-all-data.dat", allData, false);
   }
   
   private static String getColor(int index){
     //String[] colorMap = {"#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9" };
-    String[] colorMap = {"#a6cee3", "#1f78b4", "#b2df8a", "#33a02c" , "#fb9a99", "#e31a1c", "#fdbf6f" , "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
+    //String[] colorMap = {"#a6cee3", "#b2df8a", "#33a02c" , "#fb9a99", "#e31a1c", "#fdbf6f" , "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
+    //String[] colorMap = {"#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a","#66bd63","#1a9850"};
+    String[] colorMap = {"#d73027","#f46d43","#fdae61","#fee08b"};
+    //String[] colorMap = {"#fef0d9","#fdd49e","#fdbb84","#fc8d59","#e34a33","#b30000"};
     return " lc rgb '"+ colorMap[index % colorMap.length]+"' ";
   }
   
@@ -245,9 +243,9 @@ public class RawBMResultAggregator {
     //  linear graph
     String outputFile = outputFolder+"/lines.txt";
     String allData = "";
-    String header = format("NameNodes:");
+    String header = CompileResults.format("NameNodes:");
     for(Integer i : hopsFsCr.nnCounts){
-      header+=format(i+"-NN");
+      header+=CompileResults.format(i+"-NN");
     }
     header+="\n";
     allData+=header;
@@ -257,12 +255,12 @@ public class RawBMResultAggregator {
     sorted.addAll(hopsFsCr.valsMap.keySet());
     for (BenchmarkOperations op : sorted) {
       List<Double> hopsVals = hopsFsCr.valsMap.get(op);
-      String msg = format("HopsFS_" + op.toString());
+      String msg = CompileResults.format("HopsFS_" + op.toString());
       for (Double val : hopsVals) {
-        msg += format(BenchmarkUtils.round(val) + "");
+        msg += CompileResults.format(BenchmarkUtils.round(val) + "");
       }
 
-      msg += "\n" + format("HDFS_" + op.toString());
+      msg += "\n" + CompileResults.format("HDFS_" + op.toString());
 
       List<Double> hdfsVals = hdfsCr.valsMap.get(op);
       int hdfsRecordSize = 0;
@@ -273,29 +271,24 @@ public class RawBMResultAggregator {
         }
 
         if (hdfsVals.size() == 1) {
-          msg += format(hdfsVals.get(0) + "");
+          msg += CompileResults.format(hdfsVals.get(0) + "");
         } else {
-          msg += format(RECORD_NOT_FOUND);
+          msg += CompileResults.format(RECORD_NOT_FOUND);
         }
         hdfsRecordSize = 1;
       }
       
       for (int i = 0; i < hopsFsCr.nnCounts.size() - hdfsRecordSize; i++) {
-        msg += format(RECORD_NOT_FOUND);
+        msg += CompileResults.format(RECORD_NOT_FOUND);
       }
 
       msg+="\n";
       allData+=msg;
     }
     
-    writeToFile(outputFile, allData, false);
+    CompileResults.writeToFile(outputFile, allData, false);
 
   }
 
-  private static void writeToFile(String file, String msg, boolean append) throws IOException {
-    System.out.println(msg);
-    FileWriter out = new FileWriter(file, append);
-    out.write(msg);
-    out.close();
-  }
+  
 }
