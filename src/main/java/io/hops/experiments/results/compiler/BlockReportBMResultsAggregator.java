@@ -17,6 +17,9 @@
 package io.hops.experiments.results.compiler;
 
 import io.hops.experiments.results.BlockReportBMResults;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -24,12 +27,65 @@ import io.hops.experiments.results.BlockReportBMResults;
  */
 public class BlockReportBMResultsAggregator extends Aggregate{
   
+  private Map<Integer/*NN Count*/, BlockReportAggregate/*aggregates*/> allResults =
+          new HashMap<Integer, BlockReportAggregate>();
+
+  
   public void processRecord(BlockReportBMResults result){
     System.out.println(result);
+    
+    BlockReportAggregate agg = allResults.get(result.getNoOfNamenodes());
+
+    if (agg == null) {
+      agg = new BlockReportAggregate();
+      allResults.put(result.getNoOfNamenodes(), agg);
+    }
+
+    agg.addSpeed(result.getSpeed());
+    agg.addFailedOps(result.getFailedOps());
+    agg.addSucessfulOps(result.getSuccessfulOps());
+    agg.addRunDuration(-1);
+    agg.addAvgTimePerPreport(result.getAvgTimePerReport());
+    agg.addTimeToGetNameNodeToReport(result.getAvgTimeToGetNameNodeToReport());
+  }
+  
+  public Map<Integer, BlockReportAggregate> getResults(){
+    return allResults;
   }
 
-  void processAllRecords() {
-    System.out.println("Generating compiled results for BlockReport Benchmarks");
+  public static void combineResults(Map<Integer, BlockReportAggregate> hdfs, Map<Integer, BlockReportAggregate> hopsfs, String outpuFolder) throws IOException {
+    String data = "";
+    String plot = "set terminal postscript eps enhanced color font \"Helvetica,14\"  #monochrome\n";
+    plot += "set output '| ps2pdf - block-report.pdf'\n";
+    
+    if(hdfs.keySet().size() > 1 ){
+      System.out.println("NN count for HDFS cannot be greater than 1");
+      return;
+    }
+    
+    if(hopsfs.keySet().size() <= 0){
+      return;
+    }
+    
+        
+    double hdfsVal = 0; 
+    if(hdfs.keySet().size() == 1){
+      hdfsVal = ((BlockReportAggregate)hdfs.values().toArray()[0]).getSpeed();
+    }
+
+    plot+="plot 'block-report.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS\" with errorbars, "+hdfsVal+" title \"HDFS\" \n";;
+    
+    for(Integer nn: hopsfs.keySet()){
+      BlockReportAggregate agg = hopsfs.get(nn);
+      data+=CompileResults.format(nn+"-NN")+CompileResults.format(agg.getSpeed()+"")+
+              CompileResults.format(agg.getMinSpeed()+"")+CompileResults.format(agg.getMaxSpeed()+"")+
+              "\n";
+    }
+    
+    
+    CompileResults.writeToFile(outpuFolder+"/block-report.gnuplot", plot, false);
+    CompileResults.writeToFile(outpuFolder+"/block-report.dat", data, false);
+    
   }
   
 }

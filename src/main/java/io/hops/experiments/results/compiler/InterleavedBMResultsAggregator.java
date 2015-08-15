@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class InterleavedBMResultsAggregator {
 
-  Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
+  private Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
           new HashMap<Integer, InterleavedAggregate>();
 
   public void processRecord(InterleavedBMResults result) {
@@ -61,11 +61,15 @@ public class InterleavedBMResultsAggregator {
       return;
     }
     
+    if(hopsfs.keySet().size() <= 0){
+      return;
+    }
+    
     double hdfsVal = 0; 
     if(hdfs.keySet().size() == 1){
       hdfsVal = ((InterleavedAggregate)hdfs.values().toArray()[0]).getSpeed();
     }
-    //plot 'interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title "HopsFS" with errorbars, 23330.08 title "HDFS"
+
     plot+="plot 'interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS\" with errorbars, "+hdfsVal+" title \"HDFS\" \n";;
     
     for(Integer nn: hopsfs.keySet()){

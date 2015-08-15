@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-nohup java -Xmx10g -cp $DIR/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.Slave  $DIR/slave.properties &> output.txt &
+nohup java -Xmx10g -cp $DIR/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.Slave  $DIR/slave.properties &> hops-slave.log &
 PID=$!
 
 killer="$DIR/kill-slave.sh"

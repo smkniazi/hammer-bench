@@ -54,6 +54,7 @@ import io.hops.experiments.results.RawBMResults;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.net.SocketTimeoutException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -79,6 +80,7 @@ public class Master {
     MasterArgsReader args;
 
     public void start(String configFilePath) throws Exception {
+      try{
         System.out.println("*** Starting the master ***");
         args = new MasterArgsReader(configFilePath);
 
@@ -93,14 +95,15 @@ public class Master {
 
         //start the commander
         startCommander();
-
-        sendToAllSlaves(new KillSlave());
         
         printAllResults();
         
         generateBinaryFile();
 
+      }finally{
+        sendToAllSlaves(new KillSlave());
         System.exit(0);
+      }
     }
 
     private void startRemoteLogger() {
@@ -222,7 +225,7 @@ public class Master {
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);
 
-        Collection<Object> responses = receiveFromAllSlaves(Integer.MAX_VALUE);
+        Collection<Object> responses = receiveFromAllSlaves((int)args.getInterleavedBMDuration()+10000);
         DescriptiveStatistics successfulOps = new DescriptiveStatistics();
         DescriptiveStatistics failedOps = new DescriptiveStatistics();
         DescriptiveStatistics speed = new DescriptiveStatistics();
@@ -256,7 +259,7 @@ public class Master {
                 args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
                 args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
                 args.getNameNodeRefreshRate()));
-        Collection<Object> allResponses = receiveFromAllSlaves(2000);
+        Collection<Object> allResponses = receiveFromAllSlaves(5000);
 
         for (Object response : allResponses) {
             if (!(response instanceof Handshake.Response)) {
@@ -307,10 +310,8 @@ public class Master {
         prompt();
 
         sendToAllSlaves(request);
-        printMasterLogMessages(request.getPhase()+" command sent to all slaves. Test duration "+request.getDurationInMS()+" ms");
-        Thread.sleep(request.getDurationInMS());
-        printMasterLogMessages(request.getPhase()+" waiting to receive responses from the slaves ");
-        Collection<Object> responses = receiveFromAllSlaves(10000);
+        
+        Collection<Object> responses = receiveFromAllSlaves((int)request.getDurationInMS()+10000);
 
         DescriptiveStatistics successfulOps = new DescriptiveStatistics();
         DescriptiveStatistics failedOps = new DescriptiveStatistics();
@@ -368,10 +369,13 @@ public class Master {
         }
     }
 
-    private Collection<Object> receiveFromAllSlaves(int timeout) throws IOException, ClassNotFoundException {
+    private Collection<Object> receiveFromAllSlaves(int timeout) throws  ClassNotFoundException, UnknownHostException, IOException {
         List<Object> responses = new ArrayList<Object>();
         // count responses
         int ack_counter = 0;
+        List<InetAddress> rcvdFrom = new ArrayList<InetAddress>();
+        
+        try{
         masterSocket.setSoTimeout(timeout);
         while (true) {
             byte[] recvData = new byte[ConfigKeys.BUFFER_SIZE];
@@ -385,6 +389,8 @@ public class Master {
 
             ack_counter++;
             
+            rcvdFrom.add(recvPacket.getAddress());
+            
             printMasterLogMessages("Received Response Message from "+recvPacket.getAddress().getHostName());
             
             if (ack_counter == args.getListOfSlaves().size()) {
@@ -392,6 +398,18 @@ public class Master {
                 return responses;
             }
         }
+        } catch(SocketTimeoutException e){
+          //print who missed the response
+          printMasterLogMessages("SocketTimeout Exception Received while expecting responses from the slaves ");
+          List<InetAddress> allSlaves = args.getListOfSlaves();
+          for(InetAddress add : allSlaves){
+           if(!rcvdFrom.contains(add)){
+             printMasterLogMessages("*** ERROR: "+ add.getCanonicalHostName()+" has not yet responded ");
+           }
+          }
+          throw e;
+        }
+        
     }
 
     private void prompt() throws IOException {

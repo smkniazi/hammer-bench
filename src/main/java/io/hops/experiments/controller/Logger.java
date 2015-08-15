@@ -48,7 +48,7 @@ public class Logger {
         writer.close();
     }
     
-    public static void printMsg(String msg) throws IOException {
+    public static synchronized void printMsg(String msg) throws IOException {
         if (enableRemoteLogging) {
             
             if(socket == null){
@@ -67,7 +67,7 @@ public class Logger {
         System.out.println(msg);
     }
 
-    public static boolean canILog() {
+    public static synchronized boolean canILog() {
         if ((System.currentTimeMillis() - lastmsg.get()) > 5000) {
             lastmsg.set(System.currentTimeMillis());
             return true;
