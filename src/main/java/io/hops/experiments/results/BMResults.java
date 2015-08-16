@@ -27,10 +27,12 @@ import java.io.Serializable;
 public abstract class BMResults implements Serializable{
   private final BenchmarkType benchMarkType;
   private final int noOfNameNodes;
+  private final int noOfNDBDataNodes;
 
-  public BMResults(int noOfNameNodes, BenchmarkType benchMarkType) {
+  public BMResults(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkType benchMarkType) {
     this.benchMarkType = benchMarkType;
     this.noOfNameNodes = noOfNameNodes;
+    this.noOfNDBDataNodes = noOfNDBDataNodes;
   }
   
   public BenchmarkType getBenchMarkType(){
@@ -39,5 +41,9 @@ public abstract class BMResults implements Serializable{
   
   public int getNoOfNamenodes(){
     return noOfNameNodes;
+  }
+  
+  public int getNoOfNDBDataNodes(){
+    return noOfNDBDataNodes;
   }
 }

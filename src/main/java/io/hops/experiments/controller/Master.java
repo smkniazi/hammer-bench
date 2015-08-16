@@ -206,7 +206,8 @@ public class Master {
             }
         }
        
-        BlockReportBMResults result  = new BlockReportBMResults(args.getNamenodeCount(), 
+        BlockReportBMResults result  = new BlockReportBMResults(args.getNamenodeCount(),
+                args.getNoOfNDBDataNodes(),
                 speed.getSum(), successfulOps.getSum(), 
                 failedOps.getSum(), avgTimePerReport.getMean(), avgTimeTogetANewNameNode.getMean());
         
@@ -242,9 +243,10 @@ public class Master {
             }
         }
         
-        InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount()
-                ,(speed.getSum()),  (duration.getMean() / 1000)
-                , (successfulOps.getSum()), (failedOps.getSum()));
+        InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
+                args.getNoOfNDBDataNodes(),
+                (speed.getSum()),  (duration.getMean() / 1000),
+                (successfulOps.getSum()), (failedOps.getSum()));
         printMasterResultMessages(result);
     }
 
@@ -331,7 +333,9 @@ public class Master {
             }
         }
         
-        RawBMResults result = new RawBMResults(args.getNamenodeCount(),request.getPhase(),
+        RawBMResults result = new RawBMResults(args.getNamenodeCount(),
+                args.getNoOfNDBDataNodes(),
+                request.getPhase(),
                 (speed.getSum()),  (duration.getMean() / 1000), 
                 (successfulOps.getSum()), (failedOps.getSum()) );
         printMasterResultMessages(result);

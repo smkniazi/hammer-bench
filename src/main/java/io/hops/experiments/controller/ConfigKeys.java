@@ -25,8 +25,11 @@ public class ConfigKeys {
   
     public static final int BUFFER_SIZE = 4096;
     
-    public static String NO_OF_NAMENODES_KEY = "no.of.namenodes";
+    public static String NO_OF_NAMENODES_KEY = "no.of.namenodes";   // only for logging
     public static int NO_OF_NAMENODES_DEFAULT = 1;
+    
+    public static String NO_OF_NDB_DATANODES_KEY = "no.of.ndb.datanodes";   // only for logging
+    public static int NO_OF_NDB_DATANODES_DEFAULT = 0;
     
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
     public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED."

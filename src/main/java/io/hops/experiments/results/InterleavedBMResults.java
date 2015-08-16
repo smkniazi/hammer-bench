@@ -31,8 +31,8 @@ public class InterleavedBMResults extends BMResults {
   private final double successfulOps;
   private final double failedOps;
 
-  public InterleavedBMResults(int noOfNameNodes, double speed, double duration, double successfulOps, double failedOps) {
-    super(noOfNameNodes, BenchmarkType.INTERLEAVED);
+  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double duration, double successfulOps, double failedOps) {
+    super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;

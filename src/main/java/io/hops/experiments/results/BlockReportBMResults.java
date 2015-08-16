@@ -33,9 +33,9 @@ public class BlockReportBMResults extends BMResults {
   private final double avgTimeToGetNameNodeToReport;
 
 
-  public BlockReportBMResults(int noOfNameNodes, double speed, double successfulOps, double failedOps,
+  public BlockReportBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double successfulOps, double failedOps,
           double avgTimePerReport, double avgTimeToGetNameNodeToReport) {
-    super(noOfNameNodes, BenchmarkType.INTERLEAVED);
+    super(noOfNameNodes,noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.successfulOps = successfulOps;
     this.failedOps = failedOps;

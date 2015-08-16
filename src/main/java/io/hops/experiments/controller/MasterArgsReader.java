@@ -113,9 +113,13 @@ public class MasterArgsReader {
     }
     
     public int getNamenodeCount() {
-        return getInt(ConfigKeys.NO_OF_NAMENODES_KEY, ConfigKeys.NUM_SLAVE_THREADS_DEFAULT);
+        return getInt(ConfigKeys.NO_OF_NAMENODES_KEY, ConfigKeys.NO_OF_NAMENODES_DEFAULT);
     }
 
+    public int getNoOfNDBDataNodes() {
+        return getInt(ConfigKeys.NO_OF_NDB_DATANODES_KEY, ConfigKeys.NO_OF_NDB_DATANODES_DEFAULT);
+    }
+    
     public long getRawCreateFilesPhaseDuration() {
         return getLong(ConfigKeys.RAW_CREATE_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_CREATE_FILES_PHASE_DURATION_DEFAULT);
     }

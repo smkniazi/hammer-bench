@@ -33,8 +33,8 @@ public class RawBMResults extends BMResults {
   private final double failedOps;
   private final BenchmarkOperations operationType;
 
-  public RawBMResults(int noOfNameNodes, BenchmarkOperations operationType, double speed, double duration, double successfulOps, double failedOps) {
-    super(noOfNameNodes, BenchmarkType.RAW);
+  public RawBMResults(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkOperations operationType, double speed, double duration, double successfulOps, double failedOps) {
+    super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.RAW);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
