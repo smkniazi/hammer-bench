@@ -187,9 +187,9 @@ public class RawBMResultAggregator {
 
         if (hdfsVals.size() == 1) {
           msg += CompileResults.format(hdfsVals.get(0) + "");
-        } else {
-          msg += CompileResults.format(RECORD_NOT_FOUND);
-        }
+        } 
+      }else {
+          msg += CompileResults.format(0+"");
       }
       
       for (int i = 0; i < hopsFsCr.nnCounts.size(); i++) {
