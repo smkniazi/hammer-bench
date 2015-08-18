@@ -34,19 +34,21 @@ public class MultiFaceCoin {
     private int delete;
     private int statFile;
     private int statDir;
-    private int chmod;
+    private int chmodFiles;
+    private int chmodDirs;
     private int mkdirs;
     private Random rand;
     private int expansion = 10;
     //1000 face dice
     ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
-    public MultiFaceCoin(int create, int read, int rename, int delete, int statFile, int statDir, int chmod, int mkdirs) {
+    public MultiFaceCoin(int create, int read, int rename, int delete, int statFile, int statDir, int chmodFiles, int chmodDirs, int mkdirs) {
         this.create = create;
         this.read = read;
         this.rename = rename;
         this.delete = delete;
-        this.chmod = chmod;
+        this.chmodFiles = chmodFiles;
+        this.chmodDirs = chmodDirs;
         this.mkdirs = mkdirs;
         this.statFile = statFile;
         this.statDir = statDir;
@@ -57,8 +59,10 @@ public class MultiFaceCoin {
 
     private void createCoin(){
         
-       System.out.println("Percentages create: "+create+" read: "+read+" mdir: "+mkdirs+" rename: "+rename+" delete: "+delete+" stat File: "+statFile+" statDir: "+statDir+" chmod: "+chmod);
-       int total = create+read+rename+delete+statFile+statDir+chmod+mkdirs;
+       System.out.println("Percentages create: "+create+" read: "+read+" mdir: "
+               +mkdirs+" rename: "+rename+" delete: "+delete+" stat File: "
+               +statFile+" statDir: "+statDir+" chmod files: "+chmodFiles+" chmod dirs: "+chmodDirs);
+       int total = create+read+rename+delete+statFile+statDir+chmodFiles+chmodDirs+mkdirs;
        if(total != 100){
            throw new IllegalArgumentException("All probabilities should add to 100. Got: "+total);
        }
@@ -87,8 +91,12 @@ public class MultiFaceCoin {
            dice.add(BenchmarkOperations.STAT_DIR);
        }
        
-       for(int i = 0 ; i < chmod * expansion ; i++){
+       for(int i = 0 ; i < chmodFiles * expansion ; i++){
            dice.add(BenchmarkOperations.CHMOD_FILE);
+       }
+       
+       for(int i = 0 ; i < chmodDirs * expansion ; i++){
+           dice.add(BenchmarkOperations.CHMOD_DIR);
        }
        
        for(int i = 0 ; i < mkdirs * expansion ; i++){

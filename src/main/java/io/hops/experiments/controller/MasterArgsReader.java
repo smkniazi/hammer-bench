@@ -79,9 +79,11 @@ public class MasterArgsReader {
         switch (getBenchMarkType()){
             case INTERLEAVED:
             //create a coin to check the percentages
-            new MultiFaceCoin(getInterleavedCreateFilesPercentage(), getInterleavedReadFilesPercentage(), getInterleavedRenameFilesPercentage(),
+            new MultiFaceCoin(getInterleavedCreateFilesPercentage(), getInterleavedReadFilesPercentage(), 
+                getInterleavedRenameFilesPercentage(),
                 getInterleavedDeleteFilesPercentage(), getInterleavedStatFilePercentage(),
-                getInterleavedStatDirPercentage(), getInterleavedChmodFilesPercentage(), getInterleavedMkdirPercentage());
+                getInterleavedStatDirPercentage(), getInterleavedChmodFilesPercentage(), 
+                    getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage());
                 break;
         }
     }
@@ -160,8 +162,16 @@ public class MasterArgsReader {
         return getLong(ConfigKeys.RAW_CHMOD_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_CHMOD_FILES_PHASE_DURATION_DEFAULT);
     }
 
+    public long getRawChmodDirsPhaseDuration() {
+        return getLong(ConfigKeys.RAW_CHMOD_DIRS_PHASE_DURATION_KEY, ConfigKeys.RAW_CHMOD_DIRS_PHASE_DURATION_DEFAULT);
+    }
+    
     public int getInterleavedChmodFilesPercentage() {
         return getInt(ConfigKeys.INTLVD_CHMOD_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_CHMOD_FILES_PERCENTAGE_DEFAULT);
+    }
+    
+    public int getInterleavedChmodDirsPercentage() {
+        return getInt(ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_KEY, ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT);
     }
 
     public long getRawStatFilePhaseDuration() {

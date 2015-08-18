@@ -155,13 +155,26 @@ public class TreeFileGenerator implements FilePool {
     }
 
     @Override
-    public String getPathToChangePermissions() {
+    public String getFilePathToChangePermissions() {
         if (allThreadFiles.isEmpty()) {
             return null;
         }
         int index = rand.nextInt(allThreadFiles.size());
         String path = allThreadFiles.get(index);
         //System.out.println("Chmod Path "+path);
+        return path;
+    }
+    
+    @Override
+    public String getDirPathToChangePermissions() {
+        if (allThreadFiles.isEmpty()) {
+            return null;
+        }
+        int index = rand.nextInt(allThreadFiles.size());
+        String path = allThreadFiles.get(index);
+        int dirIndex = path.lastIndexOf("/");
+        path = path.substring(0, dirIndex);
+        //System.out.println("Chmod Dir Path "+path);
         return path;
     }
 }

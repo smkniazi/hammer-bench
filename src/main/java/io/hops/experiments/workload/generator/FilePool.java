@@ -35,7 +35,9 @@ public interface FilePool {
   
   public String getDirToStat();
   
-  public String getPathToChangePermissions();
+  public String getFilePathToChangePermissions();
+  
+  public String getDirPathToChangePermissions();
   
   public String getFileToRename();
   

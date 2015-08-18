@@ -79,8 +79,14 @@ public class ConfigKeys {
     public static String RAW_CHMOD_FILES_PHASE_DURATION_KEY = "raw.chmod.files.phase.duration"; 
     public static long   RAW_CHMOD_FILES_PHASE_DURATION_DEFAULT = 0;
     
+    public static String RAW_CHMOD_DIRS_PHASE_DURATION_KEY = "raw.chmod.dirs.phase.duration"; 
+    public static long   RAW_CHMOD_DIRS_PHASE_DURATION_DEFAULT = 0;
+    
     public static String INTLVD_CHMOD_FILES_PERCENTAGE_KEY = "interleaved.chmod.files.percentage";
     public static int    INTLVD_CHMOD_FILES_PERCENTAGE_DEFAULT = 0; 
+    
+    public static String INTLVD_CHMOD_DIRS_PERCENTAGE_KEY = "interleaved.chmod.dirs.percentage";
+    public static int    INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_MKDIR_PHASE_DURATION_KEY = "raw.mkdir.phase.duration"; 
     public static long   RAW_MKDIR_PHASE_DURATION_DEFAULT = 0;

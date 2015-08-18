@@ -34,7 +34,8 @@ public class InterleavedBenchmarkCommand {
         private int deletePercent;
         private int fileStatPercent;
         private int dirStatPercent;
-        private int chmodPercent;
+        private int chmodFilesPercent;
+        private int chmodDirsPercent;
         private int mkdirPercent;
         private long duration;
         private long fileSize;
@@ -42,14 +43,15 @@ public class InterleavedBenchmarkCommand {
         private String baseDir;
 
         public Request(int createPercent, int readPercent, int renamePercent, int deletePercent, int fileStatPercent,int dirStatPercent,
-                int chmodPercent, int mkdirPercent, long duration, long fileSize, short replicationFactor, String baseDir) {
+                int chmodFilesPercent, int chmodDirsPercent, int mkdirPercent, long duration, long fileSize, short replicationFactor, String baseDir) {
             this.createPercent = createPercent;
             this.readPercent = readPercent;
             this.renamePercent = renamePercent;
             this.deletePercent = deletePercent;
             this.fileStatPercent = fileStatPercent;
             this.dirStatPercent = dirStatPercent;
-            this.chmodPercent = chmodPercent;
+            this.chmodFilesPercent = chmodFilesPercent;
+            this.chmodDirsPercent = chmodDirsPercent;
             this.mkdirPercent = mkdirPercent;
             this.duration = duration;
             this.fileSize = fileSize;
@@ -81,8 +83,12 @@ public class InterleavedBenchmarkCommand {
             return dirStatPercent;
         }
 
-        public int getChmodPercent() {
-            return chmodPercent;
+        public int getChmodFilePercent() {
+            return chmodFilesPercent;
+        }
+        
+        public int getChmodDirsPercent() {
+            return chmodDirsPercent;
         }
 
         public long getDuration() {

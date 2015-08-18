@@ -54,7 +54,8 @@ public class InterleavedBenchmark extends Benchmark {
     AtomicLong dirStatOperations = new AtomicLong(0);
     AtomicLong renameOperations = new AtomicLong(0);
     AtomicLong deleteOperations = new AtomicLong(0);
-    AtomicLong chmodOperations = new AtomicLong(0);
+    AtomicLong chmodFileOperations = new AtomicLong(0);
+    AtomicLong chmodDirOperations = new AtomicLong(0);
     AtomicLong mkdirOperations = new AtomicLong(0);
 
     private ExecutorService executor;
@@ -158,7 +159,8 @@ public class InterleavedBenchmark extends Benchmark {
             dfs = BenchmarkUtils.getDFSClient(conf);
             filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir());
             coin = new MultiFaceCoin(req.getCreatePercent(), req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(), 
-                    req.getFileStatPercent(),req.getDirStatPercent(), req.getChmodPercent(),req.getMkdirPercent());
+                    req.getFileStatPercent(),req.getDirStatPercent(), 
+                    req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent());
             String filePath = null;
 
             while (true) {
@@ -189,7 +191,8 @@ public class InterleavedBenchmark extends Benchmark {
                             deleteFile();
                             break;
                         case CHMOD_FILE:
-                            chmodFile();
+                        case CHMOD_DIR:
+                            chmod(op == BenchmarkOperations.CHMOD_DIR);
                             break;
                         case MKDIRS:
                             mkdir();
@@ -209,7 +212,8 @@ public class InterleavedBenchmark extends Benchmark {
                                 " file Stat: "+fileStatOperations+" ["+BenchmarkUtils.round(((double)fileStatOperations.get()/operationsCompleted.get())*100)+"%] "+
                                 " dir Stat: "+dirStatOperations+" ["+BenchmarkUtils.round(((double)dirStatOperations.get()/operationsCompleted.get())*100)+"%] "+
                                 " Rename: "+renameOperations+" ["+BenchmarkUtils.round(((double)renameOperations.get()/operationsCompleted.get())*100)+"%] "+
-                                " Chmod: "+chmodOperations+" ["+BenchmarkUtils.round(((double)chmodOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Chmod (File): "+chmodFileOperations+" ["+BenchmarkUtils.round(((double)chmodFileOperations.get()/operationsCompleted.get())*100)+"%] "+
+                                " Chmod (Dir): "+chmodDirOperations+" ["+BenchmarkUtils.round(((double)chmodDirOperations.get()/operationsCompleted.get())*100)+"%] "+
                                 " Delete: "+deleteOperations+" ["+BenchmarkUtils.round(((double)deleteOperations.get()/operationsCompleted.get())*100)+"%] "
                                 ;
                         
@@ -324,13 +328,24 @@ public class InterleavedBenchmark extends Benchmark {
         }
         
         
-        private void chmodFile() throws IOException {
-            String file = filePool.getPathToChangePermissions();
-            if (file != null) {
+        private void chmod(boolean isDirOp) throws IOException {
+            String path = null;
+            if(isDirOp){
+              path = filePool.getDirPathToChangePermissions();
+            }else{
+              path = filePool.getFilePathToChangePermissions();
+            }
+            if (path != null) {
                 try {
-                    BenchmarkUtils.chmodPath(dfs, new Path(file));
+                    BenchmarkUtils.chmodPath(dfs, new Path(path));
                     operationsCompleted.incrementAndGet();
-                    chmodOperations.incrementAndGet();
+                    
+                    if(isDirOp){
+                      chmodDirOperations.incrementAndGet();
+                    }else{
+                      chmodFileOperations.incrementAndGet();
+                    }
+                    
                 } catch (Exception e) {
                     Logger.error(e);
                     operationsFailed.incrementAndGet();

@@ -159,6 +159,12 @@ public class Master {
                 BenchmarkOperations.CHMOD_FILE,
                 args.getRawChmodFilesPhaseDuration()));
         }
+        
+        if (args.getRawChmodDirsPhaseDuration() > 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.CHMOD_DIR,
+                args.getRawChmodDirsPhaseDuration()));
+        }
 
         if (args.getRawRenameFilesPhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
@@ -221,7 +227,7 @@ public class Master {
             new InterleavedBenchmarkCommand.Request(args.getInterleavedCreateFilesPercentage(),
                 args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
                 args.getInterleavedStatFilePercentage(), args.getInterleavedStatDirPercentage(),
-                args.getInterleavedChmodFilesPercentage(),
+                args.getInterleavedChmodFilesPercentage(), args.getInterleavedChmodDirsPercentage(),
                 args.getInterleavedMkdirPercentage(),args.getInterleavedBMDuration(), args.getFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);

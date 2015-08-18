@@ -144,8 +144,9 @@ public class RawBenchmark extends Benchmark {
             response =
                 startStatPhase(request.getDurationInMS(), baseDir, request
                     .getPhase());
-        } else if (request.getPhase() == BenchmarkOperations.CHMOD_FILE) {
-            response = startChmodPhase(request.getDurationInMS(), baseDir);
+        } else if (request.getPhase() == BenchmarkOperations.CHMOD_FILE || 
+                request.getPhase() == BenchmarkOperations.CHMOD_DIR) {
+            response = startChmodPhase(request.getPhase(), request.getDurationInMS(), baseDir);
         } else {
             throw new IllegalStateException();
         }
@@ -510,11 +511,11 @@ public class RawBenchmark extends Benchmark {
     }
 
     
-    private RawBenchmarkCommand.Response startChmodPhase(long duration, String
+    private RawBenchmarkCommand.Response startChmodPhase(BenchmarkOperations opType,long duration, String
         baseDir) throws InterruptedException, UnknownHostException, IOException {
         List workers = new LinkedList<Chmod>();
         for (int i = 0; i < numThreads; i++) {
-            Callable worker = new Chmod(baseDir);
+            Callable worker = new Chmod(baseDir, opType == BenchmarkOperations.CHMOD_DIR);
             workers.add(worker);
         }
         setMeasurementVariables(duration);
@@ -524,7 +525,7 @@ public class RawBenchmark extends Benchmark {
         speed = speed * 1000;
 
         RawBenchmarkCommand.Response response =
-                new RawBenchmarkCommand.Response(BenchmarkOperations.CHMOD_FILE,
+                new RawBenchmarkCommand.Response(opType,
                 phaseDurationInMS, successfulOps.get(), failedOps.get(), speed);
         return response;
     }
@@ -534,9 +535,11 @@ public class RawBenchmark extends Benchmark {
         private DistributedFileSystem dfs;
         private FilePool filePool;
         private String baseDir;
+        private boolean isDirOp;
 
-        public Chmod(String baseDir) throws IOException {
+        public Chmod(String baseDir,boolean isDirOp) throws IOException {
             this.baseDir = baseDir;
+            this.isDirOp = isDirOp;
         }
 
         @Override
@@ -546,15 +549,22 @@ public class RawBenchmark extends Benchmark {
             String path;
             while (true) {
                 try {
-                    path = filePool.getPathToChangePermissions();
+                    if(isDirOp){
+                      path = filePool.getDirPathToChangePermissions();
+                    }else{
+                      path = filePool.getFilePathToChangePermissions();
+                    }
+                                        
                     if (path == null || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))) {
                         return null;
                     }
+
                     BenchmarkUtils.chmodPath(dfs, new Path(path));
+                    
                     successfulOps.incrementAndGet();
 
                     if (Logger.canILog()) {
-                        Logger.printMsg("Successful chmod ops " + successfulOps.get() + " Failed chmod ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
+                        Logger.printMsg("Successful Chmod ("+(isDirOp?"Dir":"File")+") ops " + successfulOps.get() + " Failed chmod ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
                     }
                 } catch (Exception e) {
                     failedOps.incrementAndGet();
