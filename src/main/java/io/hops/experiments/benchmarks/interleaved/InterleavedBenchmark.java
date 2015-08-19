@@ -108,6 +108,7 @@ public class InterleavedBenchmark extends Benchmark {
                     BenchmarkUtils
                         .createFile(dfs, new Path(filePath), replicationFactor,
                             fileSize);
+                    BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
                 } catch (Exception e) {
                     e.printStackTrace();
                     if (filePath != null) {
