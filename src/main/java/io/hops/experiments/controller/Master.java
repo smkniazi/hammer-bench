@@ -165,6 +165,24 @@ public class Master {
                 BenchmarkOperations.CHMOD_DIR,
                 args.getRawChmodDirsPhaseDuration()));
         }
+        
+        if (args.getRawSetReplicationPhaseDuration() > 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.SET_REPLICATION,
+                args.getRawSetReplicationPhaseDuration()));
+        }
+        
+        if (args.getRawGetFileInfoPhaseDuration()> 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.FILE_INFO,
+                args.getRawGetFileInfoPhaseDuration()));
+        }
+        
+        if (args.getRawGetDirInfoPhaseDuration()> 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.DIR_INFO,
+                args.getRawGetDirInfoPhaseDuration()));
+        }
 
         if (args.getRawRenameFilesPhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(

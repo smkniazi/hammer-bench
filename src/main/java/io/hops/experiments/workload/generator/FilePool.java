@@ -35,6 +35,12 @@ public interface FilePool {
   
   public String getDirToStat();
   
+  public String getFileToInfo();
+  
+  public String getDirToInfo();
+  
+  public String getFileToSetReplication();
+  
   public String getFilePathToChangePermissions();
   
   public String getDirPathToChangePermissions();

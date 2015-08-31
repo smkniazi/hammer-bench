@@ -100,8 +100,12 @@ public class BenchmarkUtils {
         return dfs.delete(file, true);
     }
     
-    public static void stat(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void ls(DistributedFileSystem dfs, Path path) throws IOException {
        dfs.listStatus(path);
+    }
+    
+    public static void getInfo(DistributedFileSystem dfs, Path path) throws IOException {
+       dfs.getFileStatus(path);
     }
     
     public static void chmodPath(DistributedFileSystem dfs, Path path) throws IOException {
@@ -110,6 +114,10 @@ public class BenchmarkUtils {
     
     public static void mkdirs(DistributedFileSystem dfs, Path path) throws IOException {
         dfs.mkdirs(path);
+    }
+    
+    public static void setReplication(DistributedFileSystem dfs, Path path) throws IOException {
+        dfs.setReplication(path, (short)3);
     }
     
     public static double round(double val){

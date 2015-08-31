@@ -248,7 +248,7 @@ public class InterleavedBenchmark extends Benchmark {
             String file = filePool.getDirToStat();
             if (file != null) {
                 try {
-                    BenchmarkUtils.stat(dfs, new Path(file));
+                    BenchmarkUtils.ls(dfs, new Path(file));
                     operationsCompleted.incrementAndGet();
                     dirStatOperations.incrementAndGet();
                 } catch (Exception e) {
@@ -264,7 +264,7 @@ public class InterleavedBenchmark extends Benchmark {
             String file = filePool.getFileToStat();
             if (file != null) {
                 try {
-                    BenchmarkUtils.stat(dfs, new Path(file));
+                    BenchmarkUtils.ls(dfs, new Path(file));
                     operationsCompleted.incrementAndGet();
                     fileStatOperations.incrementAndGet();
                 } catch (Exception e) {

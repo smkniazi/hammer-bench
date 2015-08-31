@@ -30,6 +30,9 @@ public enum BenchmarkOperations {
     STAT_FILE   ("STAT_FILE"),
     CHMOD_FILE  ("CHMOD_FILE"),
     CHMOD_DIR   ("CHMOD_DIR"),
+    FILE_INFO   ("FILE_INFO"),
+    DIR_INFO    ("DIR_INFO"),
+    SET_REPLICATION ("SET_REPLICATION"),
     RENAME_FILE ("RENAME_FILE"),
     DELETE_FILE ("DELETE_FILE");
 

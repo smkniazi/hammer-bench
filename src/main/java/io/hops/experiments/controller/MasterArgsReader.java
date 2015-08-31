@@ -189,7 +189,6 @@ public class MasterArgsReader {
     public int getInterleavedStatDirPercentage() {
         return getInt(ConfigKeys.INTLVD_STAT_DIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_STAT_DIR_PERCENTAGE_DEFAULT);
     }
-    
 
     public long getRawMkdirPhaseDuration() {
         return getLong(ConfigKeys.RAW_MKDIR_PHASE_DURATION_KEY, ConfigKeys.RAW_MKDIR_PHASE_DURATION_DEFAULT);
@@ -197,6 +196,30 @@ public class MasterArgsReader {
 
     public int getInterleavedMkdirPercentage() {
         return getInt(ConfigKeys.INTLVD_MKDIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_MKDIR_PERCENTAGE_DEFAULT);
+    }     
+    
+    public long getRawSetReplicationPhaseDuration(){
+      return getLong(ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_KEY,ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_DEFAULT);
+    }
+    
+    public long getInterleavedSetReplicationPhasePercentage(){
+      return getInt(ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_KEY,ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT);
+    }
+    
+    public long getRawGetFileInfoPhaseDuration(){
+      return getLong(ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_KEY,ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT);
+    }
+    
+    public long getInterleavedGetFileInfoPhasePercentage(){
+      return getInt(ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_KEY,ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT);
+    }
+    
+    public long getRawGetDirInfoPhaseDuration(){
+      return getLong(ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT);
+    }
+    
+    public long getInterleavedGetDirInfoPhasePercentage(){
+      return getInt(ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT);
     }
 
     public int getBLockReportingNumOfReports(){

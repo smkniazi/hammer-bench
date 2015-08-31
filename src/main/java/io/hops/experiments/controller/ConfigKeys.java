@@ -94,6 +94,24 @@ public class ConfigKeys {
     public static String INTLVD_MKDIR_PERCENTAGE_KEY = "interleaved.mkdir.percentage";
     public static int    INTLVD_MKDIR_PERCENTAGE_DEFAULT = 0; 
 
+    public static String RAW_SETREPLICATION_PHASE_DURATION_KEY = "raw.file.setReplication.phase"; 
+    public static long   RAW_SETREPLICATION_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_SETREPLICATION_PERCENTAGE_KEY = "interleaved.file.setReplication.percentage";
+    public static int    INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT = 0;     
+    
+    public static String RAW_GET_FILE_INFO_PHASE_DURATION_KEY = "raw.file.getInfo.phase"; 
+    public static long   RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_GET_FILE_INFO_PERCENTAGE_KEY = "interleaved.file.getInfo.percentage";
+    public static int    INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT = 0;     
+    
+    public static String RAW_GET_DIR_INFO_PHASE_DURATION_KEY = "raw.dir.getInfo.phase"; 
+    public static long   RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_GET_DIR_INFO_PERCENTAGE_KEY = "interleaved.dir.getInfo.percentage";
+    public static int    INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT = 0;     
+    
     public static String BR_NUM_REPORTS = "br.numofreports";
     public static int BR_NUM_REPORTS_DEFAULT = 10;
 
