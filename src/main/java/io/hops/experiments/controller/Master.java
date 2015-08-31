@@ -41,11 +41,11 @@ import io.hops.experiments.benchmarks.blockreporting.BlockReportingWarmUp;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.controller.commands.Handshake;
-import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.KillSlave;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.results.BMResults;
 import io.hops.experiments.results.BlockReportBMResults;
@@ -101,7 +101,7 @@ public class Master {
         generateBinaryFile();
 
       }catch(Exception e){
-        System.err.print(e);
+        System.err.println(e);
         e.printStackTrace();
       }
       finally{ 

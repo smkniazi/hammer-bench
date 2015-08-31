@@ -19,6 +19,7 @@ package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
+import java.math.BigDecimal;
 
 
 /**
@@ -28,26 +29,26 @@ import io.hops.experiments.benchmarks.common.BenchmarkType;
 public class InterleavedBenchmarkCommand {
      public static class Request implements BenchmarkCommand.Request{
 
-        private int createPercent;
-        private int readPercent;
-        private int renamePercent;
-        private int deletePercent;
-        private int lsFilePercent;
-        private int lsDirPercent;
-        private int chmodFilesPercent;
-        private int chmodDirsPercent;
-        private int mkdirPercent;
-        private int setReplicationPercent;
-        private int fileInfoPercent;
-        private int dirInfoPercent;
+        private BigDecimal createPercent;
+        private BigDecimal readPercent;
+        private BigDecimal renamePercent;
+        private BigDecimal deletePercent;
+        private BigDecimal lsFilePercent;
+        private BigDecimal lsDirPercent;
+        private BigDecimal chmodFilesPercent;
+        private BigDecimal chmodDirsPercent;
+        private BigDecimal mkdirPercent;
+        private BigDecimal setReplicationPercent;
+        private BigDecimal fileInfoPercent;
+        private BigDecimal dirInfoPercent;
         private long duration;
         private long fileSize;
         private short replicationFactor;
         private String baseDir;
 
-        public Request(int createPercent, int readPercent, int renamePercent, int deletePercent, int lsFilePercent,int lsDirPercent,
-                int chmodFilesPercent, int chmodDirsPercent, int mkdirPercent, 
-                int setReplicationPercent, int fileInfoPercent, int dirInfoPercent,
+        public Request(BigDecimal createPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent,BigDecimal lsDirPercent,
+                BigDecimal chmodFilesPercent, BigDecimal chmodDirsPercent, BigDecimal mkdirPercent, 
+                BigDecimal setReplicationPercent, BigDecimal fileInfoPercent, BigDecimal dirInfoPercent,
                 long duration, long fileSize, short replicationFactor, String baseDir) {
             this.createPercent = createPercent;
             this.readPercent = readPercent;
@@ -67,35 +68,35 @@ public class InterleavedBenchmarkCommand {
             this.baseDir = baseDir;
         }
 
-        public int getCreatePercent() {
+        public BigDecimal getCreatePercent() {
             return createPercent;
         }
 
-        public int getReadPercent() {
+        public BigDecimal getReadPercent() {
             return readPercent;
         }
 
-        public int getRenamePercent() {
+        public BigDecimal getRenamePercent() {
             return renamePercent;
         }
 
-        public int getDeletePercent() {
+        public BigDecimal getDeletePercent() {
             return deletePercent;
         }
 
-        public int getLsFilePercent() {
+        public BigDecimal getLsFilePercent() {
             return lsFilePercent;
         }
         
-        public int getLsDirPercent() {
+        public BigDecimal getLsDirPercent() {
             return lsDirPercent;
         }
 
-        public int getChmodFilePercent() {
+        public BigDecimal getChmodFilePercent() {
             return chmodFilesPercent;
         }
         
-        public int getChmodDirsPercent() {
+        public BigDecimal getChmodDirsPercent() {
             return chmodDirsPercent;
         }
 
@@ -115,19 +116,19 @@ public class InterleavedBenchmarkCommand {
             return baseDir;
         }
 
-        public int getMkdirPercent() {
+        public BigDecimal getMkdirPercent() {
             return mkdirPercent;
         }
 
-       public int getSetReplicationPercent() {
+       public BigDecimal getSetReplicationPercent() {
          return setReplicationPercent;
        }
 
-       public int getFileInfoPercent() {
+       public BigDecimal getFileInfoPercent() {
          return fileInfoPercent;
        }
 
-       public int getDirInfoPercent() {
+       public BigDecimal getDirInfoPercent() {
          return dirInfoPercent;
        }
        

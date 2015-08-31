@@ -44,37 +44,37 @@ public class ConfigKeys {
     public static long    RAW_CREATE_FILES_PHASE_DURATION_DEFAULT = 0; 
     
     public static String INTLVD_CREATE_FILES_PERCENTAGE_KEY = "interleaved.create.files.percentage";
-    public static int    INTLVD_CREATE_FILES_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_CREATE_FILES_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_READ_FILES_PHASE_DURATION_KEY = "raw.read.files.phase.duration"; 
     public static long   RAW_READ_FILES_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_READ_FILES_PERCENTAGE_KEY = "interleaved.read.files.percentage";
-    public static int    INTLVD_READ_FILES_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_READ_FILES_PERCENTAGE_DEFAULT = 0; 
      
     public static String RAW_RENAME_FILES_PHASE_DURATION_KEY = "raw.rename.files.phase.duration"; 
     public static long   RAW_RENAME_FILES_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_RENAME_FILES_PERCENTAGE_KEY = "interleaved.rename.files.percentage";
-    public static int    INTLVD_RENAME_FILES_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_RENAME_FILES_PERCENTAGE_DEFAULT = 0; 
      
     public static String RAW_LS_FILE_PHASE_DURATION_KEY = "raw.ls.files.phase.duration"; 
     public static long   RAW_LS_FILE_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_LS_FILE_PERCENTAGE_KEY = "interleaved.ls.files.percentage";
-    public static int    INTLVD_LS_FILE_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_LS_FILE_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_LS_DIR_PHASE_DURATION_KEY = "raw.ls.dirs.phase.duration"; 
     public static long   RAW_LS_DIR_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_LS_DIR_PERCENTAGE_KEY = "interleaved.ls.dirs.percentage";
-    public static int    INTLVD_LS_DIR_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_LS_DIR_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_DElETE_FILES_PHASE_DURATION_KEY = "raw.delete.files.phase.duration"; 
     public static long   RAW_DELETE_FILES_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_DELETE_FILES_PERCENTAGE_KEY = "interleaved.delete.files.percentage";
-    public static int    INTLVD_DELETE_FILES_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_DELETE_FILES_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_CHMOD_FILES_PHASE_DURATION_KEY = "raw.chmod.files.phase.duration"; 
     public static long   RAW_CHMOD_FILES_PHASE_DURATION_DEFAULT = 0;
@@ -83,34 +83,34 @@ public class ConfigKeys {
     public static long   RAW_CHMOD_DIRS_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_CHMOD_FILES_PERCENTAGE_KEY = "interleaved.chmod.files.percentage";
-    public static int    INTLVD_CHMOD_FILES_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_CHMOD_FILES_PERCENTAGE_DEFAULT = 0; 
     
     public static String INTLVD_CHMOD_DIRS_PERCENTAGE_KEY = "interleaved.chmod.dirs.percentage";
-    public static int    INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_MKDIR_PHASE_DURATION_KEY = "raw.mkdir.phase.duration"; 
     public static long   RAW_MKDIR_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_MKDIR_PERCENTAGE_KEY = "interleaved.mkdir.percentage";
-    public static int    INTLVD_MKDIR_PERCENTAGE_DEFAULT = 0; 
+    public static double    INTLVD_MKDIR_PERCENTAGE_DEFAULT = 0; 
 
     public static String RAW_SETREPLICATION_PHASE_DURATION_KEY = "raw.file.setReplication.phase"; 
     public static long   RAW_SETREPLICATION_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_SETREPLICATION_PERCENTAGE_KEY = "interleaved.file.setReplication.percentage";
-    public static int    INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT = 0;     
+    public static double    INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT = 0;     
     
     public static String RAW_GET_FILE_INFO_PHASE_DURATION_KEY = "raw.file.getInfo.phase"; 
     public static long   RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_GET_FILE_INFO_PERCENTAGE_KEY = "interleaved.file.getInfo.percentage";
-    public static int    INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT = 0;     
+    public static double    INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT = 0;     
     
     public static String RAW_GET_DIR_INFO_PHASE_DURATION_KEY = "raw.dir.getInfo.phase"; 
     public static long   RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_GET_DIR_INFO_PERCENTAGE_KEY = "interleaved.dir.getInfo.percentage";
-    public static int    INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT = 0;     
+    public static double    INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT = 0;     
     
     public static String BR_NUM_REPORTS = "br.numofreports";
     public static int BR_NUM_REPORTS_DEFAULT = 10;

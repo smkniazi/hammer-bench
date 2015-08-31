@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
+import java.math.BigDecimal;
 
 /**
  *
@@ -28,27 +29,27 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
  */
 public class MultiFaceCoin {
     
-    private int create;
-    private int read;
-    private int rename;
-    private int delete;
-    private int lsFile;
-    private int lsDir;
-    private int chmodFiles;
-    private int chmodDirs;
-    private int mkdirs;
-    private int setReplication;
-    private int fileInfo;
-    private int dirInfo;
-    //private int 
+    private BigDecimal create;
+    private BigDecimal read;
+    private BigDecimal rename;
+    private BigDecimal delete;
+    private BigDecimal lsFile;
+    private BigDecimal lsDir;
+    private BigDecimal chmodFiles;
+    private BigDecimal chmodDirs;
+    private BigDecimal mkdirs;
+    private BigDecimal setReplication;
+    private BigDecimal fileInfo;
+    private BigDecimal dirInfo;
+    //private BigDecimal 
     private Random rand;
     private int expansion = 10;
     //1000 face dice
     ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
-    public MultiFaceCoin(int create, int read, int rename, int delete, int lsFile, 
-            int lsDir, int chmodFiles, int chmodDirs, int mkdirs,
-            int setReplication, int fileInfo, int dirInfo) {
+    public MultiFaceCoin(BigDecimal create, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile, 
+            BigDecimal lsDir, BigDecimal chmodFiles, BigDecimal chmodDirs, BigDecimal mkdirs,
+            BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo) {
         this.create = create;
         this.read = read;
         this.rename = rename;
@@ -73,56 +74,58 @@ public class MultiFaceCoin {
                +mkdirs+" rename: "+rename+" delete: "+delete+" lsFile: "
                +lsFile+" lsDir: "+lsDir+" chmod files: "+chmodFiles+" chmod dirs: "+chmodDirs
                +" setReplication: "+setReplication+" fileInfo: "+fileInfo+" dirInfo: "+dirInfo);
-       int total = create+read+rename+delete+lsFile+lsDir+chmodFiles+chmodDirs+mkdirs+setReplication+fileInfo+dirInfo;
+       double total = create.doubleValue()+read.doubleValue()+rename.doubleValue()+
+               delete.doubleValue()+lsFile.doubleValue()+lsDir.doubleValue()
+               +chmodFiles.doubleValue()+chmodDirs.doubleValue()+mkdirs.doubleValue()+setReplication.doubleValue()+fileInfo.doubleValue()+dirInfo.doubleValue();
        if(total != 100){
            throw new IllegalArgumentException("All probabilities should add to 100. Got: "+total);
        }
 
-       for(int i = 0 ; i < create * expansion ; i++){
+       for(int i = 0 ; i < create.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.CREATE_FILE);
        }
        
-       for(int i = 0 ; i < read * expansion ; i++){
+       for(int i = 0 ; i < read.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.READ_FILE);
        }
        
-       for(int i = 0 ; i < rename * expansion ; i++){
+       for(int i = 0 ; i < rename.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.RENAME_FILE);
        }
        
-       for(int i = 0 ; i < delete * expansion ; i++){
+       for(int i = 0 ; i < delete.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.DELETE_FILE);
        }
        
-       for(int i = 0 ; i < lsFile * expansion ; i++){
+       for(int i = 0 ; i < lsFile.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.LS_FILE);
        }
        
-       for(int i = 0 ; i < lsDir * expansion ; i++){
+       for(int i = 0 ; i < lsDir.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.LS_DIR);
        }
        
-       for(int i = 0 ; i < chmodFiles * expansion ; i++){
+       for(int i = 0 ; i < chmodFiles.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.CHMOD_FILE);
        }
        
-       for(int i = 0 ; i < chmodDirs * expansion ; i++){
+       for(int i = 0 ; i < chmodDirs.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.CHMOD_DIR);
        }
        
-       for(int i = 0 ; i < mkdirs * expansion ; i++){
+       for(int i = 0 ; i < mkdirs.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.MKDIRS);
        }
        
-       for(int i = 0 ; i < setReplication * expansion ; i++){
+       for(int i = 0 ; i < setReplication.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.SET_REPLICATION);
        }
        
-       for(int i = 0 ; i < fileInfo * expansion ; i++){
+       for(int i = 0 ; i < fileInfo.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.FILE_INFO);
        }
        
-       for(int i = 0 ; i < dirInfo * expansion ; i++){
+       for(int i = 0 ; i < dirInfo.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.DIR_INFO);
        }
        

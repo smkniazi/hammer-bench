@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
+import io.hops.experiments.utils.BenchmarkUtils;
+import java.math.BigDecimal;
 
 /**
  *
@@ -29,7 +31,22 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
  */
 public class CoinTest {
     public static void main(String [] argv) throws FileNotFoundException, IOException{
-        MultiFaceCoin coin = new MultiFaceCoin(20,20,16,20,15,5,0,4,0,0,0,0);
+      
+      
+        MultiFaceCoin coin = new MultiFaceCoin(
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(10),
+                new BigDecimal(5),
+                new BigDecimal(5),
+                new BigDecimal(5),
+                new BigDecimal(5)
+                );
         HashMap<BenchmarkOperations,Integer> map  = new HashMap<BenchmarkOperations,Integer>();
         
         int times = 100000;
@@ -48,7 +65,7 @@ public class CoinTest {
         
         
         for(BenchmarkOperations op:map.keySet()){
-            System.out.println("Operation "+op+" Count "+map.get(op)+" = "+Math.ceil(((map.get(op)/(double)times)*100))+"%");
+            System.out.println("Operation "+op+" Count "+map.get(op)+" = "+BenchmarkUtils.round(((map.get(op)/(double)times)*100))+"%");
         }
         
 
