@@ -84,11 +84,11 @@ public class MultiFaceCoin {
        }
        
        for(int i = 0 ; i < statFile * expansion ; i++){
-           dice.add(BenchmarkOperations.STAT_FILE);
+           dice.add(BenchmarkOperations.LS_FILE);
        }
        
        for(int i = 0 ; i < statDir * expansion ; i++){
-           dice.add(BenchmarkOperations.STAT_DIR);
+           dice.add(BenchmarkOperations.LS_DIR);
        }
        
        for(int i = 0 ; i < chmodFiles * expansion ; i++){

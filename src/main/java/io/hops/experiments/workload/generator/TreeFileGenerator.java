@@ -76,13 +76,12 @@ public class TreeFileGenerator implements FilePool {
   @Override
   public String getFileToCreate() {
     String path = nameSpaceGenerator.getFileToCreate();
-    allThreadFiles.add(path);
     return path;
   }
 
   @Override
-  public void fileCreationFailed(String file) {
-    allThreadFiles.remove(file);
+  public void fileCreationSucceeded(String file) {
+    allThreadFiles.add(file);
   }
 
   @Override

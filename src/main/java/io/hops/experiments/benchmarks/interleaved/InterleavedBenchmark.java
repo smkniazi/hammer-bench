@@ -108,12 +108,10 @@ public class InterleavedBenchmark extends Benchmark {
                     BenchmarkUtils
                         .createFile(dfs, new Path(filePath), replicationFactor,
                             fileSize);
+                    filePool.fileCreationSucceeded(filePath);
                     BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if (filePath != null) {
-                        filePool.fileCreationFailed(filePath);
-                    }
                     Logger.error(e);
                 }
             }
@@ -179,10 +177,10 @@ public class InterleavedBenchmark extends Benchmark {
                         case READ_FILE:
                             readFile();
                             break;
-                        case STAT_FILE:
+                        case LS_FILE:
                             statFile();
                             break;
-                            case STAT_DIR:
+                            case LS_DIR:
                             statDir();
                             break;
                         case RENAME_FILE:
@@ -232,12 +230,12 @@ public class InterleavedBenchmark extends Benchmark {
                 try {
                     BenchmarkUtils.createFile(dfs, new Path(file),
                         req.getReplicationFactor(), req.getFileSize());
+                    filePool.fileCreationSucceeded(file);
                     operationsCompleted.incrementAndGet();
                     createOperations.incrementAndGet();
                 } catch (Exception e) {
                     Logger.error(e);
                     operationsFailed.incrementAndGet();
-                    filePool.fileCreationFailed(file);
                 }
             } else {
                 Logger.printMsg("Could not Create File. Got Null from the file pool");

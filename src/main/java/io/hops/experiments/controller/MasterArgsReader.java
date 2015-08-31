@@ -81,8 +81,8 @@ public class MasterArgsReader {
             //create a coin to check the percentages
             new MultiFaceCoin(getInterleavedCreateFilesPercentage(), getInterleavedReadFilesPercentage(), 
                 getInterleavedRenameFilesPercentage(),
-                getInterleavedDeleteFilesPercentage(), getInterleavedStatFilePercentage(),
-                getInterleavedStatDirPercentage(), getInterleavedChmodFilesPercentage(), 
+                getInterleavedDeleteFilesPercentage(), getInterleavedLsFilePercentage(),
+                getInterleavedLsDirPercentage(), getInterleavedChmodFilesPercentage(), 
                     getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage());
                 break;
         }
@@ -174,20 +174,20 @@ public class MasterArgsReader {
         return getInt(ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_KEY, ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT);
     }
 
-    public long getRawStatFilePhaseDuration() {
-        return getLong(ConfigKeys.RAW_STAT_FILE_PHASE_DURATION_KEY, ConfigKeys.RAW_STAT_FILE_PHASE_DURATION_DEFAULT);
+    public long getRawLsFilePhaseDuration() {
+        return getLong(ConfigKeys.RAW_LS_FILE_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_FILE_PHASE_DURATION_DEFAULT);
     }
 
-    public int getInterleavedStatFilePercentage() {
-        return getInt(ConfigKeys.INTLVD_STAT_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_STAT_FILE_PERCENTAGE_DEFAULT);
+    public int getInterleavedLsFilePercentage() {
+        return getInt(ConfigKeys.INTLVD_LS_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_LS_FILE_PERCENTAGE_DEFAULT);
     }
     
-    public long getRawStatDirPhaseDuration() {
-        return getLong(ConfigKeys.RAW_STAT_DIR_PHASE_DURATION_KEY, ConfigKeys.RAW_STAT_DIR_PHASE_DURATION_DEFAULT);
+    public long getRawLsDirPhaseDuration() {
+        return getLong(ConfigKeys.RAW_LS_DIR_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_DIR_PHASE_DURATION_DEFAULT);
     }
 
-    public int getInterleavedStatDirPercentage() {
-        return getInt(ConfigKeys.INTLVD_STAT_DIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_STAT_DIR_PERCENTAGE_DEFAULT);
+    public int getInterleavedLsDirPercentage() {
+        return getInt(ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_DEFAULT);
     }
 
     public long getRawMkdirPhaseDuration() {

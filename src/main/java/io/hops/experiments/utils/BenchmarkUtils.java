@@ -23,7 +23,6 @@ import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -31,7 +30,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.permission.FsPermission;
 import io.hops.experiments.workload.generator.FilePool;
 import io.hops.experiments.workload.generator.TreeFileGenerator;
-import java.text.DecimalFormat;
 
 public class BenchmarkUtils {
 
@@ -42,19 +40,14 @@ public class BenchmarkUtils {
     private static int dfsClientsCount = 0;
 
     public static DistributedFileSystem getDFSClient(Configuration conf) throws IOException {
-        System.out.println(Thread.currentThread().getName()  +
-            " get dfs ");
         DistributedFileSystem client = dfsClients.get();
-        System.out.println(Thread.currentThread().getName()  +
-            " dfs " + client);
         if (client == null) {
             System.out.println(Thread.currentThread().getName()  +
-                " create new" );
+                " Creating new client. Total: "+ ++dfsClientsCount);
             client = (DistributedFileSystem) FileSystem.newInstance(conf);
-            System.out.println("New DSFClient created. Total :"+ ++dfsClientsCount);
             dfsClients.set(client);
         }else{
-            //System.out.println("Reusing existing client");
+            System.out.println("Reusing Existing Client "+client);
         }
         return client;
     }

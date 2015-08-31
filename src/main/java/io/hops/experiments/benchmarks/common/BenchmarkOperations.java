@@ -23,18 +23,18 @@ package io.hops.experiments.benchmarks.common;
  */
 public enum BenchmarkOperations {
     
-    MKDIRS      ("MKDIR"),
-    CREATE_FILE ("CREATE_FILE"),
-    READ_FILE   ("READ_FILE"),
-    STAT_DIR    ("STAT_DIR"),
-    STAT_FILE   ("STAT_FILE"),
-    CHMOD_FILE  ("CHMOD_FILE"),
-    CHMOD_DIR   ("CHMOD_DIR"),
-    FILE_INFO   ("FILE_INFO"),
-    DIR_INFO    ("DIR_INFO"),
-    SET_REPLICATION ("SET_REPLICATION"),
-    RENAME_FILE ("RENAME_FILE"),
-    DELETE_FILE ("DELETE_FILE");
+    MKDIRS      ("mkdir"),
+    CREATE_FILE ("create_file"),
+    READ_FILE   ("cat_file"),
+    LS_DIR      ("ls_dir"),
+    LS_FILE     ("ls_file"),
+    CHMOD_FILE  ("chmod_file"),
+    CHMOD_DIR   ("chmod_dir"),
+    FILE_INFO   ("stat_file"),
+    DIR_INFO    ("stat_dir"),
+    SET_REPLICATION ("set_replication"),
+    RENAME_FILE ("rename_file"),
+    DELETE_FILE ("rm_file");
 
     private final String phase;
     private BenchmarkOperations(String phase){

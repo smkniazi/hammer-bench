@@ -142,16 +142,16 @@ public class Master {
                 args.getRawReadFilesPhaseDuration()));
         }
 
-        if (args.getRawStatFilePhaseDuration() > 0) {
+        if (args.getRawLsFilePhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-                BenchmarkOperations.STAT_FILE,
-                args.getRawStatFilePhaseDuration()));
+                BenchmarkOperations.LS_FILE,
+                args.getRawLsFilePhaseDuration()));
         }
         
-        if (args.getRawStatDirPhaseDuration() > 0) {
+        if (args.getRawLsDirPhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-                BenchmarkOperations.STAT_DIR,
-                args.getRawStatDirPhaseDuration()));
+                BenchmarkOperations.LS_DIR,
+                args.getRawLsDirPhaseDuration()));
         }
 
         if (args.getRawChmodFilesPhaseDuration() > 0) {
@@ -244,7 +244,7 @@ public class Master {
         InterleavedBenchmarkCommand.Request request =
             new InterleavedBenchmarkCommand.Request(args.getInterleavedCreateFilesPercentage(),
                 args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
-                args.getInterleavedStatFilePercentage(), args.getInterleavedStatDirPercentage(),
+                args.getInterleavedLsFilePercentage(), args.getInterleavedLsDirPercentage(),
                 args.getInterleavedChmodFilesPercentage(), args.getInterleavedChmodDirsPercentage(),
                 args.getInterleavedMkdirPercentage(),args.getInterleavedBMDuration(), args.getFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());

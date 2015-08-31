@@ -27,7 +27,7 @@ public interface FilePool {
   
   public String getFileToCreate();
   
-  public void fileCreationFailed(String file);
+  public void fileCreationSucceeded(String file);
 
   public String getFileToRead();
   
