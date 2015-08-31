@@ -29,7 +29,7 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
  */
 public class CoinTest {
     public static void main(String [] argv) throws FileNotFoundException, IOException{
-        MultiFaceCoin coin = new MultiFaceCoin(20,20,16,20,15,5,0,4,0);
+        MultiFaceCoin coin = new MultiFaceCoin(20,20,16,20,15,5,0,4,0,0,0,0);
         HashMap<BenchmarkOperations,Integer> map  = new HashMap<BenchmarkOperations,Integer>();
         
         int times = 100000;

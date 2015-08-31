@@ -49,6 +49,7 @@ public class MasterArgsReader {
 
     public MasterArgsReader(String file) throws FileNotFoundException, IOException {
         props = loadPropFile(file);
+        getListOfSlaves(); // generates the list of slaves
         validateArgs();
     }
 
@@ -83,7 +84,10 @@ public class MasterArgsReader {
                 getInterleavedRenameFilesPercentage(),
                 getInterleavedDeleteFilesPercentage(), getInterleavedLsFilePercentage(),
                 getInterleavedLsDirPercentage(), getInterleavedChmodFilesPercentage(), 
-                    getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage());
+                    getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage(),
+                    getInterleavedSetReplicationPhasePercentage(),
+                    getInterleavedGetFileInfoPhasePercentage(),
+                    getInterleavedGetDirInfoPhasePercentage());
                 break;
         }
     }
@@ -202,7 +206,7 @@ public class MasterArgsReader {
       return getLong(ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_KEY,ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_DEFAULT);
     }
     
-    public long getInterleavedSetReplicationPhasePercentage(){
+    public int getInterleavedSetReplicationPhasePercentage(){
       return getInt(ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_KEY,ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT);
     }
     
@@ -210,7 +214,7 @@ public class MasterArgsReader {
       return getLong(ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_KEY,ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT);
     }
     
-    public long getInterleavedGetFileInfoPhasePercentage(){
+    public int getInterleavedGetFileInfoPhasePercentage(){
       return getInt(ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_KEY,ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT);
     }
     
@@ -218,7 +222,7 @@ public class MasterArgsReader {
       return getLong(ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT);
     }
     
-    public long getInterleavedGetDirInfoPhasePercentage(){
+    public int getInterleavedGetDirInfoPhasePercentage(){
       return getInt(ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT);
     }
 

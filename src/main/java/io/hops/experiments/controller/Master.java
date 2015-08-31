@@ -100,7 +100,11 @@ public class Master {
         
         generateBinaryFile();
 
-      }finally{
+      }catch(Exception e){
+        System.err.print(e);
+        e.printStackTrace();
+      }
+      finally{ 
         sendToAllSlaves(new KillSlave());
         System.exit(0);
       }
@@ -246,7 +250,11 @@ public class Master {
                 args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
                 args.getInterleavedLsFilePercentage(), args.getInterleavedLsDirPercentage(),
                 args.getInterleavedChmodFilesPercentage(), args.getInterleavedChmodDirsPercentage(),
-                args.getInterleavedMkdirPercentage(),args.getInterleavedBMDuration(), args.getFileSize(),
+                args.getInterleavedMkdirPercentage(),
+                args.getInterleavedSetReplicationPhasePercentage(),
+                args.getInterleavedGetFileInfoPhasePercentage(),
+                args.getInterleavedGetDirInfoPhasePercentage(),
+                args.getInterleavedBMDuration(), args.getFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);
 
@@ -390,10 +398,15 @@ public class Master {
         os.writeObject(obj);
         byte[] data = outputStream.toByteArray();
 
-        for (InetAddress slave : args.getListOfSlaves()) {
+        if(args != null){
+          List<InetAddress> slaves = args.getListOfSlaves();
+          if(slaves != null && slaves.size() > 0){
+            for (InetAddress slave : slaves) {
             DatagramPacket packet = new DatagramPacket(data, data.length, slave, args.getSlaveListeningPort());
             masterSocket.send(packet);
             //printMasterMessages("Sent "+obj+" To "+slave);
+            }
+          }
         }
     }
 

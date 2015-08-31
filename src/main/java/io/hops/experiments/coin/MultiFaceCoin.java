@@ -32,17 +32,23 @@ public class MultiFaceCoin {
     private int read;
     private int rename;
     private int delete;
-    private int statFile;
-    private int statDir;
+    private int lsFile;
+    private int lsDir;
     private int chmodFiles;
     private int chmodDirs;
     private int mkdirs;
+    private int setReplication;
+    private int fileInfo;
+    private int dirInfo;
+    //private int 
     private Random rand;
     private int expansion = 10;
     //1000 face dice
     ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
-    public MultiFaceCoin(int create, int read, int rename, int delete, int statFile, int statDir, int chmodFiles, int chmodDirs, int mkdirs) {
+    public MultiFaceCoin(int create, int read, int rename, int delete, int lsFile, 
+            int lsDir, int chmodFiles, int chmodDirs, int mkdirs,
+            int setReplication, int fileInfo, int dirInfo) {
         this.create = create;
         this.read = read;
         this.rename = rename;
@@ -50,8 +56,12 @@ public class MultiFaceCoin {
         this.chmodFiles = chmodFiles;
         this.chmodDirs = chmodDirs;
         this.mkdirs = mkdirs;
-        this.statFile = statFile;
-        this.statDir = statDir;
+        this.lsFile = lsFile;
+        this.lsDir = lsDir;
+        this.setReplication = setReplication;
+        this.fileInfo = fileInfo;
+        this.dirInfo = dirInfo;
+        
         this.rand = new Random(System.currentTimeMillis());
         
         createCoin();
@@ -59,10 +69,11 @@ public class MultiFaceCoin {
 
     private void createCoin(){
         
-       System.out.println("Percentages create: "+create+" read: "+read+" mdir: "
-               +mkdirs+" rename: "+rename+" delete: "+delete+" stat File: "
-               +statFile+" statDir: "+statDir+" chmod files: "+chmodFiles+" chmod dirs: "+chmodDirs);
-       int total = create+read+rename+delete+statFile+statDir+chmodFiles+chmodDirs+mkdirs;
+       System.out.println("Percentages create: "+create+" read: "+read+" mkdir: "
+               +mkdirs+" rename: "+rename+" delete: "+delete+" lsFile: "
+               +lsFile+" lsDir: "+lsDir+" chmod files: "+chmodFiles+" chmod dirs: "+chmodDirs
+               +" setReplication: "+setReplication+" fileInfo: "+fileInfo+" dirInfo: "+dirInfo);
+       int total = create+read+rename+delete+lsFile+lsDir+chmodFiles+chmodDirs+mkdirs+setReplication+fileInfo+dirInfo;
        if(total != 100){
            throw new IllegalArgumentException("All probabilities should add to 100. Got: "+total);
        }
@@ -83,11 +94,11 @@ public class MultiFaceCoin {
            dice.add(BenchmarkOperations.DELETE_FILE);
        }
        
-       for(int i = 0 ; i < statFile * expansion ; i++){
+       for(int i = 0 ; i < lsFile * expansion ; i++){
            dice.add(BenchmarkOperations.LS_FILE);
        }
        
-       for(int i = 0 ; i < statDir * expansion ; i++){
+       for(int i = 0 ; i < lsDir * expansion ; i++){
            dice.add(BenchmarkOperations.LS_DIR);
        }
        
@@ -101,6 +112,18 @@ public class MultiFaceCoin {
        
        for(int i = 0 ; i < mkdirs * expansion ; i++){
            dice.add(BenchmarkOperations.MKDIRS);
+       }
+       
+       for(int i = 0 ; i < setReplication * expansion ; i++){
+           dice.add(BenchmarkOperations.SET_REPLICATION);
+       }
+       
+       for(int i = 0 ; i < fileInfo * expansion ; i++){
+           dice.add(BenchmarkOperations.FILE_INFO);
+       }
+       
+       for(int i = 0 ; i < dirInfo * expansion ; i++){
+           dice.add(BenchmarkOperations.DIR_INFO);
        }
        
        if (dice.size() != expansion * 100){

@@ -32,27 +32,35 @@ public class InterleavedBenchmarkCommand {
         private int readPercent;
         private int renamePercent;
         private int deletePercent;
-        private int fileStatPercent;
-        private int dirStatPercent;
+        private int lsFilePercent;
+        private int lsDirPercent;
         private int chmodFilesPercent;
         private int chmodDirsPercent;
         private int mkdirPercent;
+        private int setReplicationPercent;
+        private int fileInfoPercent;
+        private int dirInfoPercent;
         private long duration;
         private long fileSize;
         private short replicationFactor;
         private String baseDir;
 
-        public Request(int createPercent, int readPercent, int renamePercent, int deletePercent, int fileStatPercent,int dirStatPercent,
-                int chmodFilesPercent, int chmodDirsPercent, int mkdirPercent, long duration, long fileSize, short replicationFactor, String baseDir) {
+        public Request(int createPercent, int readPercent, int renamePercent, int deletePercent, int lsFilePercent,int lsDirPercent,
+                int chmodFilesPercent, int chmodDirsPercent, int mkdirPercent, 
+                int setReplicationPercent, int fileInfoPercent, int dirInfoPercent,
+                long duration, long fileSize, short replicationFactor, String baseDir) {
             this.createPercent = createPercent;
             this.readPercent = readPercent;
             this.renamePercent = renamePercent;
             this.deletePercent = deletePercent;
-            this.fileStatPercent = fileStatPercent;
-            this.dirStatPercent = dirStatPercent;
+            this.lsFilePercent = lsFilePercent;
+            this.lsDirPercent = lsDirPercent;
             this.chmodFilesPercent = chmodFilesPercent;
             this.chmodDirsPercent = chmodDirsPercent;
             this.mkdirPercent = mkdirPercent;
+            this.setReplicationPercent = setReplicationPercent;
+            this.fileInfoPercent = fileInfoPercent;
+            this.dirInfoPercent = dirInfoPercent;
             this.duration = duration;
             this.fileSize = fileSize;
             this.replicationFactor = replicationFactor;
@@ -75,12 +83,12 @@ public class InterleavedBenchmarkCommand {
             return deletePercent;
         }
 
-        public int getFileStatPercent() {
-            return fileStatPercent;
+        public int getLsFilePercent() {
+            return lsFilePercent;
         }
         
-        public int getDirStatPercent() {
-            return dirStatPercent;
+        public int getLsDirPercent() {
+            return lsDirPercent;
         }
 
         public int getChmodFilePercent() {
@@ -110,11 +118,23 @@ public class InterleavedBenchmarkCommand {
         public int getMkdirPercent() {
             return mkdirPercent;
         }
-        
-        @Override
-        public BenchmarkType getBenchMarkType() {
-            return BenchmarkType.INTERLEAVED;
-        }
+
+       public int getSetReplicationPercent() {
+         return setReplicationPercent;
+       }
+
+       public int getFileInfoPercent() {
+         return fileInfoPercent;
+       }
+
+       public int getDirInfoPercent() {
+         return dirInfoPercent;
+       }
+       
+       @Override
+       public BenchmarkType getBenchMarkType() {
+         return BenchmarkType.INTERLEAVED;
+       }
     }
 
     public static class Response implements BenchmarkCommand.Response{

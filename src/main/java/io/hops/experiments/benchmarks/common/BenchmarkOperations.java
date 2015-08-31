@@ -30,8 +30,8 @@ public enum BenchmarkOperations {
     LS_FILE     ("ls_file"),
     CHMOD_FILE  ("chmod_file"),
     CHMOD_DIR   ("chmod_dir"),
-    FILE_INFO   ("stat_file"),
-    DIR_INFO    ("stat_dir"),
+    FILE_INFO   ("info_file"),
+    DIR_INFO    ("info_dir"),
     SET_REPLICATION ("set_replication"),
     RENAME_FILE ("rename_file"),
     DELETE_FILE ("rm_file");

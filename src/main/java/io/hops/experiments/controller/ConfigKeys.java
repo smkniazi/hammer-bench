@@ -58,16 +58,16 @@ public class ConfigKeys {
     public static String INTLVD_RENAME_FILES_PERCENTAGE_KEY = "interleaved.rename.files.percentage";
     public static int    INTLVD_RENAME_FILES_PERCENTAGE_DEFAULT = 0; 
      
-    public static String RAW_LS_FILE_PHASE_DURATION_KEY = "raw.stat.files.phase.duration"; 
+    public static String RAW_LS_FILE_PHASE_DURATION_KEY = "raw.ls.files.phase.duration"; 
     public static long   RAW_LS_FILE_PHASE_DURATION_DEFAULT = 0;
     
-    public static String INTLVD_LS_FILE_PERCENTAGE_KEY = "interleaved.stat.files.percentage";
+    public static String INTLVD_LS_FILE_PERCENTAGE_KEY = "interleaved.ls.files.percentage";
     public static int    INTLVD_LS_FILE_PERCENTAGE_DEFAULT = 0; 
     
-    public static String RAW_LS_DIR_PHASE_DURATION_KEY = "raw.stat.dirs.phase.duration"; 
+    public static String RAW_LS_DIR_PHASE_DURATION_KEY = "raw.ls.dirs.phase.duration"; 
     public static long   RAW_LS_DIR_PHASE_DURATION_DEFAULT = 0;
     
-    public static String INTLVD_LS_DIR_PERCENTAGE_KEY = "interleaved.stat.dirs.percentage";
+    public static String INTLVD_LS_DIR_PERCENTAGE_KEY = "interleaved.ls.dirs.percentage";
     public static int    INTLVD_LS_DIR_PERCENTAGE_DEFAULT = 0; 
     
     public static String RAW_DElETE_FILES_PHASE_DURATION_KEY = "raw.delete.files.phase.duration"; 
