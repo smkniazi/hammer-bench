@@ -284,7 +284,7 @@ public class Master {
         
         InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
                 args.getNoOfNDBDataNodes(),
-                (successfulOps.getSum()/duration.getMean()),  (duration.getMean() / 1000),
+                (successfulOps.getSum()/((duration.getMean() / 1000))),  (duration.getMean() / 1000),
                 (successfulOps.getSum()), (failedOps.getSum()));
         printMasterResultMessages(result);
     }
@@ -376,7 +376,7 @@ public class Master {
         RawBMResults result = new RawBMResults(args.getNamenodeCount(),
                 args.getNoOfNDBDataNodes(),
                 request.getPhase(),
-                (successfulOps.getSum()/duration.getMean()), 
+                (successfulOps.getSum()/((duration.getMean() / 1000))), 
                 (duration.getMean() / 1000), 
                 (successfulOps.getSum()), (failedOps.getSum()) );
         printMasterResultMessages(result);
