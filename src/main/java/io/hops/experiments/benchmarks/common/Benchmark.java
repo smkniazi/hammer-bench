@@ -53,11 +53,11 @@ public abstract class Benchmark {
   }
 
   public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-      Configuration conf, int slaveId){
+      Configuration conf, int slaveId, int inodesPerDir){
     if(type == BenchmarkType.RAW){
-      return new RawBenchmark(conf, numThreads);
+      return new RawBenchmark(conf, numThreads, inodesPerDir);
     }else if(type == BenchmarkType.INTERLEAVED){
-      return new InterleavedBenchmark(conf, numThreads);
+      return new InterleavedBenchmark(conf, numThreads, inodesPerDir);
     }else if(type == BenchmarkType.BR){
       return new BlockReportingBenchmark(conf, numThreads, slaveId);
     }else {

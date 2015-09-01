@@ -53,20 +53,13 @@ public class InterleavedBenchmark extends Benchmark {
   AtomicLong operationsCompleted = new AtomicLong(0);
   AtomicLong operationsFailed = new AtomicLong(0);
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
-//  AtomicLong createOperations = new AtomicLong(0);
-//  AtomicLong readOperations = new AtomicLong(0);
-//  AtomicLong fileStatOperations = new AtomicLong(0);
-//  AtomicLong dirStatOperations = new AtomicLong(0);
-//  AtomicLong renameOperations = new AtomicLong(0);
-//  AtomicLong deleteOperations = new AtomicLong(0);
-//  AtomicLong chmodFileOperations = new AtomicLong(0);
-//  AtomicLong chmodDirOperations = new AtomicLong(0);
-//  AtomicLong mkdirOperations = new AtomicLong(0);
+  private final int inodesPerDir;
   private ExecutorService executor;
 
-  public InterleavedBenchmark(Configuration conf, int numThreads) {
+  public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir) {
     super(conf, numThreads);
     this.executor = Executors.newFixedThreadPool(numThreads);
+    this.inodesPerDir = inodesPerDir;
   }
 
   @Override
@@ -103,7 +96,7 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, inodesPerDir);
 
       String filePath = null;
 
@@ -159,7 +152,7 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir());
+      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(), inodesPerDir);
       coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
               req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
               req.getLsFilePercent(), req.getLsDirPercent(),

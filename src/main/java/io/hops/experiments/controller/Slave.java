@@ -73,7 +73,8 @@ public class Slave {
             handShake = (Handshake.Request) obj;
             createHdfsConf(handShake);
             benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
-                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId());
+                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId(),
+                handShake.getInodesPerDir());
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);

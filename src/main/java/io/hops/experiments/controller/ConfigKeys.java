@@ -156,6 +156,9 @@ public class ConfigKeys {
     
     public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
+    
+    public static String INODES_PER_DIR_KEY= "inodes.per.dir";
+    public static int    INODES_PER_DIR_DEFAULT = 0;
 
     public static String NUM_SLAVE_THREADS_KEY = "num.slave.threads";
     public static int    NUM_SLAVE_THREADS_DEFAULT = 1;

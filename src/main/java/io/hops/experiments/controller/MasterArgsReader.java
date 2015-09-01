@@ -331,7 +331,11 @@ public class MasterArgsReader {
   public long getNameNodeRefreshRate() {
     return getLong(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT);
   }
-
+  
+  public int getInodesPerDir() {
+    return getInt(ConfigKeys.INODES_PER_DIR_KEY, ConfigKeys.INODES_PER_DIR_DEFAULT);
+  }          
+            
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
     return Integer.parseInt(val);

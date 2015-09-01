@@ -299,7 +299,7 @@ public class Master {
                 args.getBaseDir(),
                 args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
                 args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
-                args.getNameNodeRefreshRate()));
+                args.getNameNodeRefreshRate(), args.getInodesPerDir()));
         Collection<Object> allResponses = receiveFromAllSlaves(5000);
 
         for (Object response : allResponses) {

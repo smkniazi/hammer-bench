@@ -52,10 +52,12 @@ public class BenchmarkUtils {
         return client;
     }
 
-    public static FilePool getFilePool(Configuration conf, String baseDir) {
+    public static FilePool getFilePool(Configuration conf, String baseDir, int inodesPerDir) {
+        int dirs = inodesPerDir/2;
+        int files = inodesPerDir - dirs;
         FilePool filePool = filePools.get();
         if (filePool == null) {
-            filePool = new TreeFileGenerator(baseDir,16,16,0);
+            filePool = new TreeFileGenerator(baseDir,files,dirs,0);
             filePools.set(filePool);
             System.out.println("New FilePool created. Total :"+ ++filePoolCount);
         }else{
