@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 public class MultiFaceCoin {
     
     private BigDecimal create;
+    private BigDecimal append;
     private BigDecimal read;
     private BigDecimal rename;
     private BigDecimal delete;
@@ -47,10 +48,11 @@ public class MultiFaceCoin {
     //1000 face dice
     ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
-    public MultiFaceCoin(BigDecimal create, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile, 
+    public MultiFaceCoin(BigDecimal create, BigDecimal append, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile, 
             BigDecimal lsDir, BigDecimal chmodFiles, BigDecimal chmodDirs, BigDecimal mkdirs,
             BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo) {
         this.create = create;
+        this.append = append;
         this.read = read;
         this.rename = rename;
         this.delete = delete;
@@ -70,11 +72,11 @@ public class MultiFaceCoin {
 
     private void createCoin(){
         
-       System.out.println("Percentages create: "+create+" read: "+read+" mkdir: "
+       System.out.println("Percentages create: "+create+" append: "+append+" read: "+read+" mkdir: "
                +mkdirs+" rename: "+rename+" delete: "+delete+" lsFile: "
                +lsFile+" lsDir: "+lsDir+" chmod files: "+chmodFiles+" chmod dirs: "+chmodDirs
                +" setReplication: "+setReplication+" fileInfo: "+fileInfo+" dirInfo: "+dirInfo);
-       double total = create.doubleValue()+read.doubleValue()+rename.doubleValue()+
+       double total = create.doubleValue()+append.doubleValue()+read.doubleValue()+rename.doubleValue()+
                delete.doubleValue()+lsFile.doubleValue()+lsDir.doubleValue()
                +chmodFiles.doubleValue()+chmodDirs.doubleValue()+mkdirs.doubleValue()+setReplication.doubleValue()+fileInfo.doubleValue()+dirInfo.doubleValue();
        if(total != 100){
@@ -83,6 +85,10 @@ public class MultiFaceCoin {
 
        for(int i = 0 ; i < create.doubleValue() * expansion ; i++){
            dice.add(BenchmarkOperations.CREATE_FILE);
+       }
+       
+       for(int i = 0 ; i < append.doubleValue() * expansion ; i++){
+           dice.add(BenchmarkOperations.APPEND_FILE);
        }
        
        for(int i = 0 ; i < read.doubleValue() * expansion ; i++){

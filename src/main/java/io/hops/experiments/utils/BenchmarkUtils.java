@@ -118,4 +118,14 @@ public class BenchmarkUtils {
       round = Math.ceil(round);
       return round / 100;
     }
+
+  public static void appendFile(DistributedFileSystem dfs, Path path, long size) throws IOException {
+    FSDataOutputStream out = dfs.append(path);
+        if (size != 0) {
+            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
+                out.writeInt(1);
+            }
+        }
+        out.close();
+  }
 }

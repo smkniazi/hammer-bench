@@ -139,6 +139,12 @@ public class Master {
                 BenchmarkOperations.CREATE_FILE,
                 args.getRawCreateFilesPhaseDuration()));
         }
+        
+        if (args.getAppendFilePhaseDuration()> 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.APPEND_FILE,
+                args.getAppendFilePhaseDuration()));
+        }
 
         if (args.getRawReadFilesPhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
@@ -247,14 +253,15 @@ public class Master {
         prompt();
         InterleavedBenchmarkCommand.Request request =
             new InterleavedBenchmarkCommand.Request(args.getInterleavedCreateFilesPercentage(),
+                args.getInterleavedAppendFilePercentage(),
                 args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
                 args.getInterleavedLsFilePercentage(), args.getInterleavedLsDirPercentage(),
                 args.getInterleavedChmodFilesPercentage(), args.getInterleavedChmodDirsPercentage(),
                 args.getInterleavedMkdirPercentage(),
-                args.getInterleavedSetReplicationPhasePercentage(),
-                args.getInterleavedGetFileInfoPhasePercentage(),
-                args.getInterleavedGetDirInfoPhasePercentage(),
-                args.getInterleavedBMDuration(), args.getFileSize(),
+                args.getInterleavedSetReplicationPercentage(),
+                args.getInterleavedGetFileInfoPercentage(),
+                args.getInterleavedGetDirInfoPercentage(),
+                args.getInterleavedBMDuration(), args.getFileSize(), args.getAppendFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);
 
@@ -287,7 +294,7 @@ public class Master {
         printMasterLogMessages("Starting Hand Shake Protocol");
         prompt();
         sendHandshakeToAllSlaves(
-            new Handshake.Request(args.getSlaveNumThreads(), args.getFileSize(),
+            new Handshake.Request(args.getSlaveNumThreads(), args.getFileSize(), args.getAppendFileSize(),
                 args.getReplicationFactor(), args.getBenchMarkType(),
                 args.getBaseDir(),
                 args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
@@ -311,7 +318,8 @@ public class Master {
         if(args.getBenchMarkType() == BenchmarkType.INTERLEAVED || args
             .getBenchMarkType() == BenchmarkType.RAW){
             warmUpCommand = new NamespaceWarmUp.Request(args.getBenchMarkType(), args.getFilesToCreateInWarmUpPhase(), args.getReplicationFactor(),
-                args.getFileSize(), args.getBaseDir());
+                args.getFileSize(), args.getAppendFileSize(),
+                    args.getBaseDir());
         }else if(args.getBenchMarkType() == BenchmarkType.BR){
             warmUpCommand= new BlockReportingWarmUp.Request(args.getBaseDir()
                 , args.getBlockReportingNumOfBlocksPerReport(), args

@@ -29,6 +29,8 @@ public interface FilePool {
   
   public void fileCreationSucceeded(String file);
 
+  public String getFileToAppend();
+  
   public String getFileToRead();
   
   public String getFileToStat();

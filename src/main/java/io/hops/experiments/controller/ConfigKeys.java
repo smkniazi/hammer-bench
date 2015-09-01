@@ -94,23 +94,29 @@ public class ConfigKeys {
     public static String INTLVD_MKDIR_PERCENTAGE_KEY = "interleaved.mkdir.percentage";
     public static double    INTLVD_MKDIR_PERCENTAGE_DEFAULT = 0; 
 
-    public static String RAW_SETREPLICATION_PHASE_DURATION_KEY = "raw.file.setReplication.phase"; 
+    public static String RAW_SETREPLICATION_PHASE_DURATION_KEY = "raw.file.setReplication.phase.duration"; 
     public static long   RAW_SETREPLICATION_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_SETREPLICATION_PERCENTAGE_KEY = "interleaved.file.setReplication.percentage";
     public static double    INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT = 0;     
     
-    public static String RAW_GET_FILE_INFO_PHASE_DURATION_KEY = "raw.file.getInfo.phase"; 
+    public static String RAW_GET_FILE_INFO_PHASE_DURATION_KEY = "raw.file.getInfo.phase.duration"; 
     public static long   RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_GET_FILE_INFO_PERCENTAGE_KEY = "interleaved.file.getInfo.percentage";
     public static double    INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT = 0;     
     
-    public static String RAW_GET_DIR_INFO_PHASE_DURATION_KEY = "raw.dir.getInfo.phase"; 
+    public static String RAW_GET_DIR_INFO_PHASE_DURATION_KEY = "raw.dir.getInfo.phase.duration"; 
     public static long   RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT = 0;
     
     public static String INTLVD_GET_DIR_INFO_PERCENTAGE_KEY = "interleaved.dir.getInfo.percentage";
     public static double    INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT = 0;     
+    
+    public static String RAW_FILE_APPEND_PHASE_DURATION_KEY = "raw.file.append.phase.duration"; 
+    public static long   RAW_FILE_APPEND_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_APPEND_FILE_PERCENTAGE_KEY = "interleaved.file.append.percentage";
+    public static double INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT = 0;     
     
     public static String BR_NUM_REPORTS = "br.numofreports";
     public static int BR_NUM_REPORTS_DEFAULT = 10;
@@ -147,6 +153,9 @@ public class ConfigKeys {
     
     public static String FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   FILE_SIZE_IN_Bytes_DEFAULT = 0;
+    
+    public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "file.size";
+    public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
 
     public static String NUM_SLAVE_THREADS_KEY = "num.slave.threads";
     public static int    NUM_SLAVE_THREADS_DEFAULT = 1;

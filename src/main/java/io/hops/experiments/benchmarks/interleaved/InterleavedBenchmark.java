@@ -160,7 +160,8 @@ public class InterleavedBenchmark extends Benchmark {
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
       filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir());
-      coin = new MultiFaceCoin(req.getCreatePercent(), req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
+      coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
+              req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
               req.getLsFilePercent(), req.getLsDirPercent(),
               req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent(),
               req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent());
@@ -214,7 +215,7 @@ public class InterleavedBenchmark extends Benchmark {
       if (path != null) {
         boolean retVal = false;
         try {
-          OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize());
+          OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
           retVal = true;
         } catch (Exception e) {
           Logger.error(e);

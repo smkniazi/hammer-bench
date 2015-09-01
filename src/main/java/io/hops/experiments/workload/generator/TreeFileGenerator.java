@@ -152,6 +152,11 @@ public class TreeFileGenerator implements FilePool {
   public String getFileToSetReplication() {
     return getRandomFile();
   }
+  
+  @Override
+  public String getFileToAppend(){
+    return getRandomFile();
+  }
 
   private String getRandomFile() {
     if (allThreadFiles.isEmpty()) {
@@ -169,7 +174,9 @@ public class TreeFileGenerator implements FilePool {
     }
     int index = rand.nextInt(allThreadFiles.size());
     String path = allThreadFiles.get(index);
-    //System.out.println("Chmod Path "+path);
+    int dirIndex = path.lastIndexOf("/");
+    path = path.substring(0, dirIndex);
+    //System.out.println("List Path "+path);
     return path;
   }
 }

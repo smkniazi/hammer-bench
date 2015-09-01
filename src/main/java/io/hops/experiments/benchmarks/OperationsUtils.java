@@ -42,7 +42,10 @@ public class OperationsUtils {
         path = filePool.getFileToDelete();
       } else if (opType == BenchmarkOperations.RENAME_FILE) {
         path = filePool.getFileToRename();
-      } else{
+      } else if (opType == BenchmarkOperations.APPEND_FILE) {
+        path = filePool.getFileToAppend();
+      }
+      else{
         throw new IllegalStateException("Fucked");
       }
       
@@ -52,7 +55,7 @@ public class OperationsUtils {
 
     public static boolean performOp(DistributedFileSystem dfs, BenchmarkOperations opType, 
             FilePool filePool, String pathStr, short replicationFactor,
-            long fileSize) throws IOException {
+            long fileSize, long appendSize) throws IOException {
       Path path = new Path(pathStr);
       if (opType == BenchmarkOperations.SET_REPLICATION) {
         BenchmarkUtils.setReplication(dfs, path);
@@ -80,7 +83,9 @@ public class OperationsUtils {
         if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }
-      } else {
+      }else if (opType == BenchmarkOperations.APPEND_FILE) {
+        BenchmarkUtils.appendFile(dfs, path,appendSize);
+      }else {
         throw new IllegalStateException("Fucked");
       }
       return true;

@@ -53,6 +53,7 @@ public class RawBenchmark extends Benchmark {
   private String baseDir;
   private short replicationFactor;
   private long fileSize;
+  private long appendSize;
   //-- other
   private ExecutorService executor;
 
@@ -67,6 +68,7 @@ public class RawBenchmark extends Benchmark {
     NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
     this.replicationFactor = namespaceWarmUp.getReplicationFactor();
     this.fileSize = namespaceWarmUp.getFileSize();
+    this.appendSize = namespaceWarmUp.getAppendSize();
     this.baseDir = namespaceWarmUp.getBaseDir();
     List workers = new ArrayList<WarmUp>();
     for (int i = 0; i < numThreads; i++) {
@@ -173,7 +175,7 @@ public class RawBenchmark extends Benchmark {
             return null;
           }
           
-          OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize);
+          OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
 
           successfulOps.incrementAndGet();
 

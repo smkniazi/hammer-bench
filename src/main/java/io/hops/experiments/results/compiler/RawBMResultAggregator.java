@@ -189,7 +189,7 @@ public class RawBMResultAggregator {
           msg += CompileResults.format(hdfsVals.get(0) + "");
         } 
       }else {
-          msg += CompileResults.format(0+"");
+          msg += CompileResults.format(50000+"");
       }
       
       for (int i = 0; i < hopsFsCr.nnCounts.size(); i++) {

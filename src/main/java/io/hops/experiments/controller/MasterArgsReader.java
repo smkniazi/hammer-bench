@@ -80,14 +80,16 @@ public class MasterArgsReader {
     switch (getBenchMarkType()) {
       case INTERLEAVED:
         //create a coin to check the percentages
-        new MultiFaceCoin(getInterleavedCreateFilesPercentage(), getInterleavedReadFilesPercentage(),
+        new MultiFaceCoin(getInterleavedCreateFilesPercentage(), 
+                getInterleavedAppendFilePercentage(),
+                getInterleavedReadFilesPercentage(),
                 getInterleavedRenameFilesPercentage(),
                 getInterleavedDeleteFilesPercentage(), getInterleavedLsFilePercentage(),
                 getInterleavedLsDirPercentage(), getInterleavedChmodFilesPercentage(),
                 getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage(),
-                getInterleavedSetReplicationPhasePercentage(),
-                getInterleavedGetFileInfoPhasePercentage(),
-                getInterleavedGetDirInfoPhasePercentage());
+                getInterleavedSetReplicationPercentage(),
+                getInterleavedGetFileInfoPercentage(),
+                getInterleavedGetDirInfoPercentage());
         break;
     }
   }
@@ -206,7 +208,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_KEY, ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedSetReplicationPhasePercentage() {
+  public BigDecimal getInterleavedSetReplicationPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_KEY, ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT);
   }
 
@@ -214,7 +216,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedGetFileInfoPhasePercentage() {
+  public BigDecimal getInterleavedGetFileInfoPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT);
   }
 
@@ -222,8 +224,16 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedGetDirInfoPhasePercentage() {
+  public BigDecimal getInterleavedGetDirInfoPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT);
+  }
+    
+  public long getAppendFilePhaseDuration() {
+    return getLong(ConfigKeys.RAW_FILE_APPEND_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_APPEND_PHASE_DURATION_DEFAULT);
+  }
+
+  public BigDecimal getInterleavedAppendFilePercentage() {
+    return getBigDecimal(ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT);
   }
 
   public int getBLockReportingNumOfReports() {
@@ -268,6 +278,10 @@ public class MasterArgsReader {
 
   public long getFileSize() {
     return getLong(ConfigKeys.FILE_SIZE_IN_Bytes_KEY, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
+  }
+  
+  public long getAppendFileSize() {
+    return getLong(ConfigKeys.APPEND_FILE_SIZE_IN_Bytes_KEY, ConfigKeys.APPEND_FILE_SIZE_IN_Bytes_DEFAULT);
   }
 
   public int getSlaveNumThreads() {

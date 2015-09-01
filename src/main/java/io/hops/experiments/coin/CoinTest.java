@@ -34,7 +34,8 @@ public class CoinTest {
       
       
         MultiFaceCoin coin = new MultiFaceCoin(
-                new BigDecimal(10),
+                new BigDecimal(5),
+                new BigDecimal(5),
                 new BigDecimal(10),
                 new BigDecimal(10),
                 new BigDecimal(10),
