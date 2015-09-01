@@ -353,7 +353,7 @@ public class Master {
 
         sendToAllSlaves(request);
         
-        Collection<Object> responses = receiveFromAllSlaves((int)request.getDurationInMS()+10000);
+        Collection<Object> responses = receiveFromAllSlaves((int)request.getDurationInMS()+20000);
 
         DescriptiveStatistics successfulOps = new DescriptiveStatistics();
         DescriptiveStatistics failedOps = new DescriptiveStatistics();
