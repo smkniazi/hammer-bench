@@ -29,6 +29,8 @@ import java.util.StringTokenizer;
 import io.hops.experiments.coin.MultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  *
@@ -365,38 +367,32 @@ public class MasterArgsReader {
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
-    if (!isOneDecimalPlace(defaultVal)) {
+    if (!isTwoDecimalPlace(defaultVal)) {
       throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported. Value " + defaultVal + " key: " + key);
     }
 
     double userVal = Double.parseDouble(props.getProperty(key, Double.toString(defaultVal)));
-    if (!isOneDecimalPlace(userVal)) {
+    if (!isTwoDecimalPlace(userVal)) {
       throw new IllegalArgumentException("Wrong user value. Only one decimal place is supported. Value " + userVal + " key: " + key);
     }
 
-
-    return new BigDecimal(userVal);
+    //System.out.println(key+" value "+userVal);
+    return new BigDecimal(userVal,new MathContext(4,RoundingMode.HALF_UP));
   }
 
-  private boolean isOneDecimalPlace(double val) {
+  private boolean isTwoDecimalPlace(double val) {
     if (val == 0 || val == ((int)val)) {
       return true;
     } else {
       String valStr = Double.toString(val);
       int i = valStr.lastIndexOf('.');
-      if (i != -1 && valStr.substring(i + 1).length() == 1) {
+      if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
         return true;
       }else{
         return false;
       }
     }
   }
-  
-//  public static  void main(String[] argv){
-//    
-//   MasterArgsReader reader =  new MasterArgsReader();
-//   System.out.println(reader.checkDecimalPlaces(0.32));
-//  }
   
   
 }

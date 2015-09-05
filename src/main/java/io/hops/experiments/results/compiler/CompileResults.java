@@ -41,7 +41,7 @@ public class CompileResults {
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
     argv = new String[3];
     argv[0] = "/home/salman/Dropbox/bm-results/2Sep-HDFS-32thds-10000-clients";
-    argv[1] = "/tmp/hops-bm/";///home/salman/bm_wit_cache";    
+    argv[1] = "/home/salman/Dropbox/hops-bm/";///home/salman/bm_wit_cache";    
     argv[2] = "/home/salman/code/hopg/hops-papers/hopsfs-2015/imgs";
 
 
