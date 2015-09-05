@@ -25,6 +25,9 @@ public class ConfigKeys {
   
     public static final int BUFFER_SIZE = 4096;
     
+    public static String MAX_SLAVE_FAILURE_THREASHOLD_KEY = "max.slave.failure.threshold";   // only for logging
+    public static int MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT = 0;
+    
     public static String NO_OF_NAMENODES_KEY = "no.of.namenodes";   // only for logging
     public static int NO_OF_NAMENODES_DEFAULT = 1;
     

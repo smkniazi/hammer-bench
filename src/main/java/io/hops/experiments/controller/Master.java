@@ -55,6 +55,8 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.SocketTimeoutException;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -63,6 +65,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class Master {
 
+    Set<InetAddress> missbehavingSlaves = new HashSet<InetAddress>();
     List<BMResults> results = new ArrayList<BMResults>();
     public static void main(String[] argv) throws Exception {
         String configFilePath = "master.properties";
@@ -353,7 +356,7 @@ public class Master {
 
         sendToAllSlaves(request);
         
-        Collection<Object> responses = receiveFromAllSlaves((int)request.getDurationInMS()+20000);
+        Collection<Object> responses = receiveFromAllSlaves((int)request.getDurationInMS()+5000);
 
         DescriptiveStatistics successfulOps = new DescriptiveStatistics();
         DescriptiveStatistics failedOps = new DescriptiveStatistics();
@@ -411,6 +414,10 @@ public class Master {
           List<InetAddress> slaves = args.getListOfSlaves();
           if(slaves != null && slaves.size() > 0){
             for (InetAddress slave : slaves) {
+              if(missbehavingSlaves.contains(slave)){
+                printMasterLogMessages("*** ERROR ignoring "+slave+" as it misbehaving");
+                continue;
+              }
             DatagramPacket packet = new DatagramPacket(data, data.length, slave, args.getSlaveListeningPort());
             masterSocket.send(packet);
             //printMasterMessages("Sent "+obj+" To "+slave);
@@ -443,7 +450,7 @@ public class Master {
             
             printMasterLogMessages("Received Response Message from "+recvPacket.getAddress().getHostName());
             
-            if (ack_counter == args.getListOfSlaves().size()) {
+            if (ack_counter == (args.getListOfSlaves().size() - missbehavingSlaves.size())) {
                 masterSocket.setSoTimeout(Integer.MAX_VALUE);
                 return responses;
             }
@@ -455,11 +462,19 @@ public class Master {
           for(InetAddress add : allSlaves){
            if(!rcvdFrom.contains(add)){
              printMasterLogMessages("*** ERROR: "+ add.getCanonicalHostName()+" has not yet responded ");
+             missbehavingSlaves.add(add);
            }
           }
-          throw e;
+          
+          // if few slaves have not responded then continue working and add the
+          // slaves in the missbehavingSlaves list
+          if(missbehavingSlaves.size() <= args.getMaxSlavesFailureThreshold()){
+            printMasterLogMessages("*** ERROR. Some slaves have failed. They are ignored in future test phases");
+            return responses;
+          }else{
+            throw e; //this is abort the benchmark
+          }
         }
-        
     }
 
     private void prompt() throws IOException {

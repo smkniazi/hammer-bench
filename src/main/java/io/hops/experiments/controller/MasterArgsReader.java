@@ -335,6 +335,10 @@ public class MasterArgsReader {
   public int getInodesPerDir() {
     return getInt(ConfigKeys.INODES_PER_DIR_KEY, ConfigKeys.INODES_PER_DIR_DEFAULT);
   }          
+  
+  public int getMaxSlavesFailureThreshold(){
+    return getInt(ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_KEY, ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT);
+  }
             
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
