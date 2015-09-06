@@ -109,6 +109,10 @@ public class BenchmarkUtils {
         dfs.mkdirs(path);
     }
     
+    public static void chown(DistributedFileSystem dfs, Path path) throws IOException {     
+        dfs.setOwner(path, System.getProperty("user.name"), System.getProperty("user.name"));
+    }
+    
     public static void setReplication(DistributedFileSystem dfs, Path path) throws IOException {
         dfs.setReplication(path, (short)3);
     }

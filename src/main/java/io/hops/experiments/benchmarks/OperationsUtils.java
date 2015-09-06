@@ -89,8 +89,13 @@ public class OperationsUtils {
         }
       }else if (opType == BenchmarkOperations.APPEND_FILE) {
         BenchmarkUtils.appendFile(dfs, path,appendSize);
-      }else {
-        throw new IllegalStateException("Fucked");
+      } else if (opType == BenchmarkOperations.CHOWN_DIR ||
+              opType == BenchmarkOperations.CHOWN_FILE) {
+        BenchmarkUtils.chown(dfs, path);
+      }
+      
+      else {
+        throw new IllegalStateException("Fucked. "+opType);
       }
       return true;
     }
