@@ -196,6 +196,21 @@ public class Master {
                 BenchmarkOperations.DIR_INFO,
                 args.getRawGetDirInfoPhaseDuration()));
         }
+        
+        
+        if (args.getRawFileChangeUserPhaseDuration()> 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.CHOWN_FILE,
+                args.getRawFileChangeUserPhaseDuration()));
+        }
+        
+        
+        if (args.getRawDirChangeUserPhaseDuration()> 0) {
+            startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
+                BenchmarkOperations.CHOWN_DIR,
+                args.getRawDirChangeUserPhaseDuration()));
+        }
+        
 
         if (args.getRawRenameFilesPhaseDuration() > 0) {
             startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
@@ -264,6 +279,8 @@ public class Master {
                 args.getInterleavedSetReplicationPercentage(),
                 args.getInterleavedGetFileInfoPercentage(),
                 args.getInterleavedGetDirInfoPercentage(),
+                args.getInterleavedFileChangeUserPercentage(),
+                args.getInterleavedDirChangeUserPercentage(),
                 args.getInterleavedBMDuration(), args.getFileSize(), args.getAppendFileSize(),
                 args.getReplicationFactor(), args.getBaseDir());
         sendToAllSlaves(request);
@@ -302,7 +319,7 @@ public class Master {
                 args.getBaseDir(),
                 args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
                 args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
-                args.getNameNodeRefreshRate(), args.getInodesPerDir()));
+                args.getNameNodeRefreshRate(), args.getDirPerDir(), args.getFilesPerDir()));
         Collection<Object> allResponses = receiveFromAllSlaves(5000);
 
         for (Object response : allResponses) {

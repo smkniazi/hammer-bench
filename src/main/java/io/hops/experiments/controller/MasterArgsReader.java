@@ -91,7 +91,10 @@ public class MasterArgsReader {
                 getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage(),
                 getInterleavedSetReplicationPercentage(),
                 getInterleavedGetFileInfoPercentage(),
-                getInterleavedGetDirInfoPercentage());
+                getInterleavedGetDirInfoPercentage(),
+                getInterleavedFileChangeUserPercentage(),
+                getInterleavedDirChangeUserPercentage()
+                );
         break;
     }
   }
@@ -334,9 +337,29 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT);
   }
   
-  public int getInodesPerDir() {
-    return getInt(ConfigKeys.INODES_PER_DIR_KEY, ConfigKeys.INODES_PER_DIR_DEFAULT);
+  public int getDirPerDir() {
+    return getInt(ConfigKeys.DIR_PER_DIR_KEY, ConfigKeys.DIR_PER_DIR_DEFAULT);
   }          
+  
+  public int getFilesPerDir() {
+    return getInt(ConfigKeys.FILES_PER_DIR_KEY, ConfigKeys.FILES_PER_DIR_DEFAULT);
+  }
+
+  public long getRawFileChangeUserPhaseDuration() {
+    return getLong(ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT);
+  }
+
+  public BigDecimal getInterleavedFileChangeUserPercentage() {
+    return getBigDecimal(ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_DEFAULT);
+  }
+
+  public long getRawDirChangeUserPhaseDuration() {
+    return getLong(ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_DEFAULT);
+  }
+
+  public BigDecimal getInterleavedDirChangeUserPercentage() {
+    return getBigDecimal(ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT);
+  }
   
   public int getMaxSlavesFailureThreshold(){
     return getInt(ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_KEY, ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT);

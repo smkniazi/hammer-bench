@@ -35,7 +35,9 @@ public enum BenchmarkOperations {
     DIR_INFO    ("INFO_DIR"),
     SET_REPLICATION ("SET_REPL"),
     RENAME_FILE ("RENAME_FILE"),
-    DELETE_FILE ("DEL_FILE");
+    DELETE_FILE ("DEL_FILE"),
+    CHOWN_FILE  ("CHOWN_FILE"),
+    CHOWN_DIR   ("CHOWN_DIR");
 
     private final String phase;
     private BenchmarkOperations(String phase){

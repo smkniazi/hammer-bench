@@ -231,8 +231,8 @@ public class RawBMResultAggregator {
   private static String getColor(int index){
     //String[] colorMap = {"#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9" };
     //String[] colorMap = {"#a6cee3", "#b2df8a", "#33a02c" , "#fb9a99", "#e31a1c", "#fdbf6f" , "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
-    String[] colorMap = {"#d73027","#f46d43","#fdae61","#1a9850", "#66bd63", "#a6d96a"};
-    //String[] colorMap = {"#d73027","#f46d43","#fdae61","#fee08b"};
+   // String[] colorMap = {"#d73027","#f46d43","#fdae61","#1a9850", "#66bd63", "#a6d96a"};
+    String[] colorMap = {"#d73027","#f46d43","#fdae61","#fee08b"};
     //String[] colorMap = {"#fef0d9","#fdd49e","#fdbb84","#fc8d59","#e34a33","#b30000"};
     return " lc rgb '"+ colorMap[index % colorMap.length]+"' ";
   }

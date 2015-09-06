@@ -53,13 +53,16 @@ public class InterleavedBenchmark extends Benchmark {
   AtomicLong operationsCompleted = new AtomicLong(0);
   AtomicLong operationsFailed = new AtomicLong(0);
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
-  private final int inodesPerDir;
+  private final int dirsPerDir;
+  private final int filesPerDir;
   private ExecutorService executor;
+  
 
-  public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir) {
+  public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir, int filesPerDir) {
     super(conf, numThreads);
     this.executor = Executors.newFixedThreadPool(numThreads);
-    this.inodesPerDir = inodesPerDir;
+    this.dirsPerDir = inodesPerDir;
+    this.filesPerDir = filesPerDir;
   }
 
   @Override
@@ -96,7 +99,7 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, inodesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
 
       String filePath = null;
 
@@ -152,12 +155,13 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(), inodesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(), dirsPerDir, filesPerDir);
       coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
               req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
               req.getLsFilePercent(), req.getLsDirPercent(),
               req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent(),
-              req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent());
+              req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent(),
+              req.getFileChownPercent(), req.getDirChownPercent());
       String filePath = null;
 
       while (true) {

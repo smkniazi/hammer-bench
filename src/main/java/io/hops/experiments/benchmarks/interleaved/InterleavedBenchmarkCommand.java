@@ -41,6 +41,8 @@ public class InterleavedBenchmarkCommand {
     private BigDecimal setReplicationPercent;
     private BigDecimal fileInfoPercent;
     private BigDecimal dirInfoPercent;
+    private BigDecimal fileChownPercent;
+    private BigDecimal dirChownPercent;
     private long duration;
     private long fileSize;
     private long appendSize;
@@ -50,6 +52,7 @@ public class InterleavedBenchmarkCommand {
     public Request(BigDecimal createPercent, BigDecimal appendPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent, BigDecimal lsDirPercent,
             BigDecimal chmodFilesPercent, BigDecimal chmodDirsPercent, BigDecimal mkdirPercent,
             BigDecimal setReplicationPercent, BigDecimal fileInfoPercent, BigDecimal dirInfoPercent,
+            BigDecimal fileChownPercent, BigDecimal dirChownPercent,
             long duration, long fileSize, long appendSize, short replicationFactor, String baseDir) {
       this.createPercent = createPercent;
       this.appendPercent = appendPercent;
@@ -64,6 +67,8 @@ public class InterleavedBenchmarkCommand {
       this.setReplicationPercent = setReplicationPercent;
       this.fileInfoPercent = fileInfoPercent;
       this.dirInfoPercent = dirInfoPercent;
+      this.fileChownPercent = fileChownPercent;
+      this.dirChownPercent = dirChownPercent;
       this.duration = duration;
       this.fileSize = fileSize;
       this.appendSize = appendSize;
@@ -143,6 +148,15 @@ public class InterleavedBenchmarkCommand {
       return appendSize;
     }
 
+    public BigDecimal getFileChownPercent() {
+      return fileChownPercent;
+    }
+
+    public BigDecimal getDirChownPercent() {
+      return dirChownPercent;
+    }
+
+    
     @Override
     public BenchmarkType getBenchMarkType() {
       return BenchmarkType.INTERLEAVED;

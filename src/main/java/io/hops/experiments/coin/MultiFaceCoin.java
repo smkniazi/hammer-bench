@@ -46,6 +46,8 @@ public class MultiFaceCoin {
   private BigDecimal setReplication;
   private BigDecimal fileInfo;
   private BigDecimal dirInfo;
+  private BigDecimal fileChown;
+  private BigDecimal dirChown;
   //private BigDecimal 
   private Random rand;
   private BigDecimal expansion = new BigDecimal(100.00,new MathContext(4,RoundingMode.HALF_UP));
@@ -54,7 +56,8 @@ public class MultiFaceCoin {
 
   public MultiFaceCoin(BigDecimal create, BigDecimal append, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile,
           BigDecimal lsDir, BigDecimal chmodFiles, BigDecimal chmodDirs, BigDecimal mkdirs,
-          BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo) {
+          BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo,
+          BigDecimal fileChown, BigDecimal dirChown) {
     this.create = create;
     this.append = append;
     this.read = read;
@@ -68,6 +71,8 @@ public class MultiFaceCoin {
     this.setReplication = setReplication;
     this.fileInfo = fileInfo;
     this.dirInfo = dirInfo;
+    this.fileChown = fileChown;
+    this.dirChown = dirChown;
 
     this.rand = new Random(System.currentTimeMillis());
 
@@ -79,11 +84,12 @@ public class MultiFaceCoin {
     System.out.println("Percentages create: " + create + " append: " + append + " read: " + read + " mkdir: "
             + mkdirs + " rename: " + rename + " delete: " + delete + " lsFile: "
             + lsFile + " lsDir: " + lsDir + " chmod files: " + chmodFiles + " chmod dirs: " + chmodDirs
-            + " setReplication: " + setReplication + " fileInfo: " + fileInfo + " dirInfo: " + dirInfo);
+            + " setReplication: " + setReplication + " fileInfo: " + fileInfo + " dirInfo: " + dirInfo
+            + " fileChown: "+fileChown+" dirChown: "+dirChown);
 
     BigDecimal total = create.add(append).add(read).add(rename).add(delete).add(lsFile).add(lsDir)
             .add(chmodFiles).add(chmodDirs).add(mkdirs).add(setReplication).add(fileInfo).
-            add(dirInfo);
+            add(dirInfo).add(fileChown).add(dirChown);
 
     if (total.equals(new BigDecimal(100))) {
       throw new IllegalArgumentException("All probabilities should add to 100. Got: " + total);
@@ -141,6 +147,14 @@ public class MultiFaceCoin {
 
     for (int i = 0; i < dirInfo.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.DIR_INFO);
+    }
+    
+    for (int i = 0; i < fileChown.multiply(expansion).intValueExact(); i++) {
+      dice.add(BenchmarkOperations.CHOWN_FILE);
+    }
+    
+    for (int i = 0; i < dirChown.multiply(expansion).intValueExact(); i++) {
+      dice.add(BenchmarkOperations.CHOWN_DIR);
     }
 
     double expectedSize = expansion.multiply(new BigDecimal(100)).intValueExact();

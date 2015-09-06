@@ -46,7 +46,9 @@ public class CoinTest {
                 new BigDecimal(5),
                 new BigDecimal(5),
                 new BigDecimal(5),
-                new BigDecimal(5)
+                new BigDecimal(5),
+                new BigDecimal(0),
+                new BigDecimal(0)
                 );
         HashMap<BenchmarkOperations,Integer> map  = new HashMap<BenchmarkOperations,Integer>();
         

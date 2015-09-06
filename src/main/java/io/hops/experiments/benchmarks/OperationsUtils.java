@@ -44,6 +44,10 @@ public class OperationsUtils {
         path = filePool.getFileToRename();
       } else if (opType == BenchmarkOperations.APPEND_FILE) {
         path = filePool.getFileToAppend();
+      } else if (opType == BenchmarkOperations.CHOWN_FILE) {
+        path = filePool.getFileToChown();
+      } else if (opType == BenchmarkOperations.CHOWN_DIR) {
+        path = filePool.getDirToChown();
       }
       else{
         throw new IllegalStateException("Fucked");

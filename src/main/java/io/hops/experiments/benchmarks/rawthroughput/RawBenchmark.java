@@ -54,14 +54,16 @@ public class RawBenchmark extends Benchmark {
   private short replicationFactor;
   private long fileSize;
   private long appendSize;
-  private final int inodesPerDir;
+  private final int dirsPerDir;
+  private final int filesPerDir;
   //-- other
   private ExecutorService executor;
 
-  public RawBenchmark(Configuration conf, int numThreads, int inodesPerDir) {
+  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, int filesPerDir) {
     super(conf, numThreads);
     executor = Executors.newFixedThreadPool(numThreads);
-    this.inodesPerDir = inodesPerDir;
+    this.dirsPerDir = dirsPerDir;
+    this.filesPerDir = filesPerDir;
   }
 
   @Override
@@ -101,7 +103,7 @@ public class RawBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, inodesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
@@ -166,7 +168,7 @@ public class RawBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, inodesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
 
       while (true) {
         try {

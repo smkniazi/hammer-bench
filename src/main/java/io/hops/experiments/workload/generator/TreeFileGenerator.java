@@ -157,6 +157,16 @@ public class TreeFileGenerator implements FilePool {
   public String getFileToAppend(){
     return getRandomFile();
   }
+  
+   @Override
+  public String getFileToChown() {
+    return getRandomFile();
+   }
+
+  @Override
+  public String getDirToChown() {
+    return getRandomDir();
+  }
 
   private String getRandomFile() {
     if (allThreadFiles.isEmpty()) {

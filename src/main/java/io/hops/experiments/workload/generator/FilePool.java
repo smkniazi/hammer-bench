@@ -52,4 +52,8 @@ public interface FilePool {
   public void fileRenamed(String from, String to);
   
   public String getFileToDelete();
+  
+  public String getFileToChown();
+  
+  public String getDirToChown();
 }

@@ -35,7 +35,7 @@ public class ConfigKeys {
     public static int NO_OF_NDB_DATANODES_DEFAULT = 0;
     
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
-    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED."
+    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM."
     
     public static String INTERLEAVED_BM_DURATION_KEY = "interleaved.bm.duration";
     public static long   INTERLEAVED_BM_DURATION_DEFAULT = 60*1000;
@@ -121,6 +121,19 @@ public class ConfigKeys {
     public static String INTLVD_APPEND_FILE_PERCENTAGE_KEY = "interleaved.file.append.percentage";
     public static double INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT = 0;     
     
+    public static String RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY = "raw.file.change.user.phase.duration"; 
+    public static long   RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_FILE_CHANGE_USER_PERCENTAGE_KEY = "interleaved.file.change.user.percentage";
+    public static double INTLVD_FILE_CHANGE_USER_PERCENTAGE_DEFAULT = 0;     
+    
+    public static String RAW_DIR_CHANGE_USER_PHASE_DURATION_KEY = "raw.dir.change.user.phase.duration"; 
+    public static long   RAW_DIR_CHANGE_USER_PHASE_DURATION_DEFAULT = 0;
+    
+    public static String INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY = "interleaved.dir.change.user.percentage";
+    public static double INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT = 0;     
+    
+    
     public static String BR_NUM_REPORTS = "br.numofreports";
     public static int BR_NUM_REPORTS_DEFAULT = 10;
 
@@ -148,8 +161,7 @@ public class ConfigKeys {
     public static int BR_MIN_TIME_BEFORE_NEXT_REPORT_DEFAULT = 1000;
 
     public static String BR_PERSIST_DATABASE = "br.persist.database";
-    public static String BR_PERSIST_DATABASE_DEFAULT = "cloud1.sics" +
-        ".se:3307:hop_mahmoud_test";
+    public static String BR_PERSIST_DATABASE_DEFAULT = "example.com:3306";
 
     public static String REPLICATION_FACTOR_KEY = "replication.factor";
     public static short  REPLICATION_FACTOR_DEFAULT = 3;
@@ -160,8 +172,11 @@ public class ConfigKeys {
     public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
     
-    public static String INODES_PER_DIR_KEY= "inodes.per.dir";
-    public static int    INODES_PER_DIR_DEFAULT = 0;
+    public static String DIR_PER_DIR_KEY= "dir.per.dir";
+    public static int    DIR_PER_DIR_DEFAULT = 2;
+    
+    public static String FILES_PER_DIR_KEY= "files.per.dir";
+    public static int    FILES_PER_DIR_DEFAULT = 16;
 
     public static String NUM_SLAVE_THREADS_KEY = "num.slave.threads";
     public static int    NUM_SLAVE_THREADS_DEFAULT = 1;
@@ -196,9 +211,6 @@ public class ConfigKeys {
     
     public static String LIST_OF_SLAVES_KEY = "list.of.slaves";
     public static String LIST_OF_SLAVES_DEFAULT = "localhost";
-    
-//    public static String NAME_NODE_LIST_KEY = "namenode.list";
-//    public static String NAME_NODE_LIST_DEFAULT = "";
     
     public static String FS_DEFAULTFS_KEY = "fs.defaultFS";
     public static String FS_DEFAULTFS_DEFAULT = "";

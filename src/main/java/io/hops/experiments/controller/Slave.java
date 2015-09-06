@@ -74,7 +74,7 @@ public class Slave {
             createHdfsConf(handShake);
             benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
                 handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId(),
-                handShake.getInodesPerDir());
+                handShake.getDirPerDir(), handShake.getFilesPerDir());
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);

@@ -53,8 +53,12 @@ public class InterleavedBMResultsAggregator {
   public static void combineResults(Map<Integer, InterleavedAggregate> hdfs, Map<Integer, InterleavedAggregate> hopsfs, String outpuFolder) throws IOException {
     
     String data = "";
-    String plot = "set terminal postscript eps enhanced color font \"Helvetica,14\"  #monochrome\n";
+    String plot = "set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n";
     plot += "set output '| ps2pdf - interleaved.pdf'\n";
+    plot +=" set size 1,0.75 \n ";
+    plot += "set ylabel \"ops/sec\" \n";
+    plot += "set xlabel \"Number of Namenodes\" \n";
+    plot += "set format y \"%.0s%c\"\n";
     
     if(hdfs.keySet().size() > 1 ){
       System.out.println("NN count for HDFS cannot be greater than 1");
@@ -74,7 +78,7 @@ public class InterleavedBMResultsAggregator {
     
     for(Integer nn: hopsfs.keySet()){
       InterleavedAggregate agg = hopsfs.get(nn);
-      data+=CompileResults.format(nn+"-NN")+CompileResults.format(agg.getSpeed()+"")+
+      data+=CompileResults.format(nn+"")+CompileResults.format(agg.getSpeed()+"")+
               CompileResults.format(agg.getMinSpeed()+"")+CompileResults.format(agg.getMaxSpeed()+"")+
               "\n";
     }
