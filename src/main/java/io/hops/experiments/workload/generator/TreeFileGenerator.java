@@ -174,7 +174,7 @@ public class TreeFileGenerator implements FilePool {
     }
     int index = rand.nextInt(allThreadFiles.size());
     String path = allThreadFiles.get(index);
-    System.out.println("Path "+path);
+   // System.out.println("Path "+path);
     return path;
   }
 
@@ -186,7 +186,7 @@ public class TreeFileGenerator implements FilePool {
     String path = allThreadFiles.get(index);
     int dirIndex = path.lastIndexOf("/");
     path = path.substring(0, dirIndex);
-    System.out.println("Path "+path);
+    //System.out.println("Path "+path);
     return path;
   }
 }
