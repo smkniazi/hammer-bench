@@ -17,20 +17,13 @@
 #
 # Author: Salman Niazi 2015
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-
-
-HopsFS_User=nzo
 
 #Experiments
-HopsFS_Src_Folder=$DIR/..
+HopsFS_Src_Folder=../
 HopsFS_Experiments_Remote_Dist_Folder=/tmp/hops_benchmarks
 HopsFS_Rebuild_Exp_Src=false
 HopsFS_Upload_Exp=true
-
-
-
 
 #Machines
 BM_Machines_FullList=(`cat experiment-nodes`)
@@ -47,7 +40,8 @@ Benchmark_Types=(
             ) #space is delimeter
 
 
-#commands
+#HopsFS Distribution Parameters
+HopsFS_User=nzo
 NameNodeRpcPort=26801
 HopsFS_Remote_Dist_Folder=/tmp/nzo/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data

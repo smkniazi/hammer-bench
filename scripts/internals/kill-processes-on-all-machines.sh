@@ -10,7 +10,7 @@ if [ -z $1 ]; then
 fi
 
 
-if [ -z $DIR ]; then
+if [ -z $NNS_FullList ]; then
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   echo "Loading params "
   source $DIR/../experiment-env.sh
