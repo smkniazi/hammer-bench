@@ -20,19 +20,15 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
-#load config parameters
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/exp-deployment.properties
 
-
-        echo "Going to kill Master/Slave process on all experiment machines ${HOP_Experiments_Machine_List[*]}"
+  echo "Going to kill Master/Slave process on all experiment machines ${BM_Machines_FullList[*]}"
 	#All Unique Hosts
-	All_Hosts=${HOP_Experiments_Machine_List[*]}
+	All_Hosts=${BM_Machines_FullList[*]}
 	All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 	for i in ${All_Unique_Hosts[@]}
 	do
-        	connectStr="$HOP_User@$i"
+        	connectStr="$HopsFS_User@$i"
         	echo "Killing  Master and Slave processes on $i"
         	ssh $connectStr  pkill -f Slave
         	ssh $connectStr  pkill -f Master  

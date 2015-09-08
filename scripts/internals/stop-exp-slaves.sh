@@ -19,21 +19,18 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-
-#load config parameters
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/exp-deployment.properties
-
 #All Unique Hosts
-All_Hosts=${HOP_Experiments_Machine_List[*]}
+All_Hosts=${BM_Machines_FullList[*]}
 All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
+echo "*** Going to kill slaves on ${BM_Machines_FullList[*]}"
+
 for i in ${All_Unique_Hosts[@]}
 do
-	connectStr="$HOP_User@$i"
+	connectStr="$HopsFS_User@$i"
 	echo "Stopping slave on $i"
-	ssh $connectStr $HOP_Experiments_Dist_Folder/kill-slave.sh 
+	ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh 
 done
 
 

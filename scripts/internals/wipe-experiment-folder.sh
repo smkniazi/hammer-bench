@@ -20,23 +20,18 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
-#load config parameters
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/../exp-deployment.properties
-
-if test -z "$1"
-then
-	echo "Provide host name where master will be started"
-	exit 0
-fi
+#All Unique Hosts
+All_Hosts=${BM_Machines_FullList[*]}
+All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
-connectStr="$HOP_User@$1"
-echo "loading new master properties files on $1"
-scp $DIR/hop_exp_scripts/master.properties $connectStr:$HOP_Experiments_Dist_Folder
-echo "Starting Experiment Master on $1"
-ssh $connectStr $HOP_Experiments_Dist_Folder/start-master.sh 
+for i in ${All_Unique_Hosts[@]}
+do
+	connectStr="$HopsFS_User@$i"
 
+	echo "Deleting Experiment Folder $Folder on $i"
+	ssh $connectStr rm -rf  $HopsFS_Experiments_Remote_Dist_Folder
+done
 
 
 

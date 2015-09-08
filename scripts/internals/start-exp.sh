@@ -20,23 +20,34 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
-#check for installation of parallel-rsync
-if [ ! -e /usr/bin/parallel-rsync ] ; then
-echo "You do not appear to have installed: parallel-rsync"
-echo "sudo aptitude install pssh"
-exit
+
+if test -z "$1"
+then
+	echo "Provide host name where master will be started"
+	exit 0
 fi
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-#load config paramete
-source $DIR/exp-deployment.properties
 
-source $DIR/internals/build_experiments.sh 
+echo "*** Going to start Slaves on ${BM_Machines_FullList[*]}"
+for i in ${BM_Machines_FullList[*]}
+do
+	connectStr="$HopsFS_User@$i"
+	echo "Starting Experiment Slave on $i"
+	ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/start-slave.sh 
+done
 
-# deploy the Experiments
-if [ $HOP_Upload_Experiments = true ]; then
-    source $DIR/internals/upload_experiments.sh
-fi
+echo "sleeping for a while to make sure that the slaves have initialized"
+sleep 5
+
+
+connectStr="$HopsFS_User@$1"
+echo "loading new master properties files on $1"
+scp ./internals/HopsFS_Exp_Remote_Scripts/master.properties $connectStr:$HopsFS_Experiments_Remote_Dist_Folder
+echo "Starting Experiment Master on $1"
+ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/start-master.sh 
+
+
+
 
 
 

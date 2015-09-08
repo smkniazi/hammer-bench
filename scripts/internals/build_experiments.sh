@@ -18,12 +18,9 @@
 # Author: Salman Niazi 2014
 
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/../exp-deployment.properties
-
     #Build Experiments
     CMD="mvn "	    
-    if [ $HOP_Rebuild_Experiments = true -a $HOP_Upload_Experiments = true ]; then
-    	CMD="$CMD clean assembly:assembly -f $HOP_Experiments_Folder/pom.xml"  
+    if [ $HopsFS_Rebuild_Exp_Src = true -a $HopsFS_Upload_Exp = true ]; then
+    	CMD="$CMD clean assembly:assembly -f $HopsFS_Src_Folder/pom.xml"  
         $CMD
     fi

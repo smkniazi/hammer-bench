@@ -15,28 +15,51 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-# Author: Salman Niazi 2014
-# This script broadcasts all files required for running a HOP instance.
-# A password-less sign-on should be setup prior to calling this script
+# Author: Salman Niazi 2015
 
-
-#load config parameters
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/../exp-deployment.properties
-
-#All Unique Hosts
-All_Hosts=${HOP_Experiments_Machine_List[*]}
-All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
-for i in ${All_Unique_Hosts[@]}
-do
-	connectStr="$HOP_User@$i"
-	echo "Starting Experiment Slave on $i"
-	ssh $connectStr $HOP_Experiments_Dist_Folder/start-slave.sh 
-done
+
+HopsFS_User=nzo
+
+#Experiments
+HopsFS_Src_Folder=$DIR/..
+HopsFS_Experiments_Remote_Dist_Folder=/tmp/hops_benchmarks
+HopsFS_Rebuild_Exp_Src=false
+HopsFS_Upload_Exp=true
 
 
 
 
+#Machines
+BM_Machines_FullList=(`cat experiment-nodes`)
+DNS_FullList=(`cat datanodes`) 
+NNS_FullList=(`cat namenodes`)
+
+
+
+#experiments to run
+Benchmark_Types=(
+            #RAW
+            INTERLEAVED
+            #BR
+            ) #space is delimeter
+
+
+#commands
+NameNodeRpcPort=26801
+HopsFS_Remote_Dist_Folder=/tmp/nzo/hopsfs
+Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
+
+
+
+
+
+
+
+
+
+
+                             
 

@@ -20,22 +20,19 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
-#load config parameters
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $DIR/exp-deployment.properties
-
-if test -z "$1"
-then
-	echo "Provide host name where master will be started"
-	exit 0
+#check for installation of parallel-rsync
+if [ ! -e /usr/bin/parallel-rsync ] ; then
+echo "You do not appear to have installed: parallel-rsync"
+echo "sudo aptitude install pssh"
+exit
 fi
 
+source ./internals/build_experiments.sh 
 
-
-$DIR/internals/start-exp-slaves.sh 
-echo "sleeping for a while to make sure that the slaves have initialized"
-sleep 5
-$DIR/internals/start-exp-master.sh $1
+# deploy the Experiments
+if [ $HopsFS_Upload_Exp = true ]; then
+    source ./internals/upload_experiments.sh
+fi
 
 
 
