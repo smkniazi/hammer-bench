@@ -21,19 +21,12 @@
 
 #All Unique Hosts
 All_Hosts=${BM_Machines_FullList[*]}
-All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
 echo "*** Going to kill slaves on ${BM_Machines_FullList[*]}"
 
-for i in ${All_Unique_Hosts[@]}
-do
-	connectStr="$HopsFS_User@$i"
-	echo "Stopping slave on $i"
-	ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh 
-done
-
-
+echo "Stopping Slaves on ${BM_Machines_FullList[*]}"
+parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh 
 
 
 

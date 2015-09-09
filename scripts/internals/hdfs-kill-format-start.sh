@@ -3,7 +3,7 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-        source ./internals/kill-processes-on-all-machines.sh .*java        
+        source ./internals/kill-all-java-processes-on-all-machines.sh .*java        
 	
         source ./internals/formatNN.sh
 

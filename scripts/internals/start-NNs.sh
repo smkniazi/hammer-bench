@@ -10,15 +10,8 @@
 All_Hosts=${All_NNs_In_Current_Exp[*]}
 All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
-
-for i in ${All_Unique_Hosts[@]}
-do
-	connectStr="$HopsFS_User@$i"
-	echo "Starting NN on $i"
-	ssh $connectStr $HopsFS_Remote_Dist_Folder/sbin/hadoop-daemon.sh --script hdfs start namenode
-done
-
-
+echo "Starting NN on ${All_Unique_Hosts[*]}"
+parallel-ssh -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/sbin/hadoop-daemon.sh --script hdfs start namenode
 
 
 

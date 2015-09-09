@@ -4,12 +4,6 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
-if [ -z $1 ]; then
-	echo "please, specify the process name i.e. .*java"
-	exit
-fi
-
-
 if [ -z $NNS_FullList ]; then
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   echo "Loading params "
@@ -23,21 +17,7 @@ All_Hosts_To_Kill=${NNS_FullList[*]}" "${DNS_FullList[*]}" "${BM_Machines_FullLi
 All_Unique_Hosts_To_Kill=$(echo "${All_Hosts_To_Kill[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
-echo "*** Going to kill $1 on ${All_Unique_Hosts_To_Kill[@]}"
 
-for i in ${All_Unique_Hosts_To_Kill[@]}
-do
-	      connectStr="$HopsFS_User@$i"
-
-        pids=""
-        pids=`ssh $connectStr pgrep -u $HopsFS_User $1`
-	
-	if [ -z "${pids}" ]; then
-		echo "There is no process named $1 running on $i" 
-	else
-        	echo "Killing $1 on $i. PIDS to kill "$pids
-		ssh $connectStr  kill -9 $pids
-	fi
-
-done
+echo "Killing java on ${All_Unique_Hosts_To_Kill[*]}"
+parallel-ssh -H "${All_Unique_Hosts_To_Kill[*]}"  -l $HopsFS_User -i  pkill -f .*java
 

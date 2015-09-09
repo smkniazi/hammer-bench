@@ -22,7 +22,7 @@ exp_start_script="$DIR/internals/start-exp.sh"
 exp_stop_script="$DIR/internals/kill-exp.sh"
 Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
-kill_java_everywhere="$DIR/internals/kill-processes-on-all-machines.sh .*java"
+kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
 
 #############################################################################################################################

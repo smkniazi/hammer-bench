@@ -28,17 +28,11 @@ then
 fi
 
 
-echo "*** Going to start Slaves on ${BM_Machines_FullList[*]}"
-for i in ${BM_Machines_FullList[*]}
-do
-	connectStr="$HopsFS_User@$i"
-	echo "Starting Experiment Slave on $i"
-	ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/start-slave.sh 
-done
+echo "Starting Slaves on ${BM_Machines_FullList[*]}"
+parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/start-slave.sh 
 
 echo "sleeping for a while to make sure that the slaves have initialized"
 sleep 5
-
 
 connectStr="$HopsFS_User@$1"
 echo "loading new master properties files on $1"
