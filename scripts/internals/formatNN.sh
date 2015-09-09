@@ -8,8 +8,12 @@
 
 
 connectStr="$HopsFS_User@$Current_Leader_NN"
-echo "Formating NN on $Current_Leader_NN"
+echo "Formatting ... "
+echo "Drop Schema and Recreate  ...  on $Current_Leader_NN"
+ssh $connectStr $HopsFS_Remote_Dist_Folder/bin/hdfs namenode -dropAndCreateDB
+echo "Formatting ...  on $Current_Leader_NN"
 ssh $connectStr $HopsFS_Remote_Dist_Folder/bin/hdfs namenode -format 
+
 
 echo "Deleting datanode data dirs"
 source ./internals/wipe-datanode-data-dir.sh
