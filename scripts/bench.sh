@@ -6,16 +6,6 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $DIR/experiment-env.sh
 
-NN_INCREMENT=1
-EXP_START_INDEX=1
-REPEAT_EXP_TIMES=1
-
-#Following parameters usually do not need any changes as long as all the projects are in the same folder
-All_Results_Folder="/tmp/hops-bm" #This is where the results are saved
-exp_remote_bench_mark_result_file="/tmp/bm.log"
-no_of_ndb_data_nodes=4 #added to the results of the benchmarks. helps in data aggregation. for HDFS set it to 0 
-
-
 exp_master_prop_file="$DIR/internals/HopsFS_Exp_Remote_Scripts/master.properties"
 exp_deploy_script="$DIR/internals/deploy-experiments.sh"
 exp_start_script="$DIR/internals/start-exp.sh"
@@ -47,7 +37,7 @@ run() {
   sed -i 's|results.file.*|results.file='$exp_remote_bench_mark_result_file'|g'     $exp_master_prop_file      
   sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
-  sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$no_of_ndb_data_nodes'|g'   $exp_master_prop_file
+  sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'   $exp_master_prop_file
   sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file
  
   date1=$(date +"%s") 

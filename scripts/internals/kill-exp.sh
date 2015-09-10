@@ -28,4 +28,4 @@
 
 
   echo "Stopping Slaves on ${BM_Machines_FullList[*]}"
-  parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/stop-slave.sh 
+  parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh
