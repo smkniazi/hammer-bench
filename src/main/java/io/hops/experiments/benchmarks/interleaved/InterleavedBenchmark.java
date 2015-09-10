@@ -37,6 +37,7 @@ import org.apache.hadoop.hdfs.DistributedFileSystem;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
+import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -88,12 +89,14 @@ public class InterleavedBenchmark extends Benchmark {
     private short replicationFactor;
     private long fileSize;
     private String baseDir;
+    private DatagramSocket socket = null;
 
     public WarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir) throws IOException {
       this.filesToCreate = filesToCreate;
       this.replicationFactor = replicationFactor;
       this.fileSize = fileSize;
       this.baseDir = baseDir;
+      this.socket = new DatagramSocket();
     }
 
     @Override
@@ -113,7 +116,7 @@ public class InterleavedBenchmark extends Benchmark {
           BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
         } catch (Exception e) {
           e.printStackTrace();
-          Logger.error(e);
+          Logger.error(socket, e);
         }
       }
       return null;
@@ -147,9 +150,11 @@ public class InterleavedBenchmark extends Benchmark {
     private FilePool filePool;
     private InterleavedBenchmarkCommand.Request req;
     private MultiFaceCoin coin;
+    private DatagramSocket socket = null;
 
     public Worker(InterleavedBenchmarkCommand.Request req) throws IOException {
       this.req = req;
+      socket = new DatagramSocket();
     }
 
     @Override
@@ -177,7 +182,7 @@ public class InterleavedBenchmark extends Benchmark {
           log();
 
         } catch (Exception e) {
-          Logger.error(e);
+          Logger.error(socket,e);
         }
       }
     }
@@ -203,7 +208,7 @@ public class InterleavedBenchmark extends Benchmark {
             message += format(op.toString().length()+10,msg);
           }
         }
-        Logger.printMsg(message);
+        Logger.printMsg(socket,message);
       }
     }
 
@@ -215,11 +220,11 @@ public class InterleavedBenchmark extends Benchmark {
           OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
           retVal = true;
         } catch (Exception e) {
-          Logger.error(e);
+          Logger.error(socket,e);
         }
         updateStats(opType, retVal);
       } else {
-        Logger.printMsg("Could not perform operation " + opType + ". Got Null from the file pool");
+        Logger.printMsg(socket,"Could not perform operation " + opType + ". Got Null from the file pool");
       }
     }
 

@@ -38,16 +38,16 @@ public class Logger {
   private static InetAddress loggerIp = null;
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
-  private static DatagramSocket socket = null;
+  //private static 
 
-  public static void error(Exception e) throws IOException {
+  public static void error(DatagramSocket socket, Exception e) throws IOException {
     StringWriter writer = new StringWriter();
     e.printStackTrace(new PrintWriter(writer));
-    printMsg("Exception -> " + writer.toString());
+    printMsg(socket, "Exception -> " + writer.toString());
     writer.close();
   }
 
-  public static synchronized void printMsg(String msg) throws IOException {
+  public static void printMsg(DatagramSocket socket, String msg) throws IOException {
     if (enableRemoteLogging) {
 
       if (socket == null) {
@@ -88,7 +88,7 @@ public class Logger {
   }
 
   public static class LogListener implements Runnable {
-
+    private DatagramSocket socket = null;
     private int port;
     private boolean running = true;
 

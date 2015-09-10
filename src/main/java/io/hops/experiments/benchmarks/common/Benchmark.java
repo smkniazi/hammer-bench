@@ -25,6 +25,7 @@ import io.hops.experiments.controller.commands.WarmUpCommand;
 import org.apache.hadoop.conf.Configuration;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 public abstract class Benchmark {
 
@@ -53,7 +54,7 @@ public abstract class Benchmark {
   }
 
   public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-      Configuration conf, int slaveId, int dirsPerDir, int filesPerDir){
+      Configuration conf, int slaveId, int dirsPerDir, int filesPerDir) throws SocketException{
     if(type == BenchmarkType.RAW){
       return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
     }else if(type == BenchmarkType.INTERLEAVED){
