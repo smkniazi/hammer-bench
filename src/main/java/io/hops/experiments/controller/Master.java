@@ -320,7 +320,7 @@ public class Master {
                 args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
                 args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
                 args.getNameNodeRefreshRate(), args.getDirPerDir(), args.getFilesPerDir()));
-        Collection<Object> allResponses = receiveFromAllSlaves(5000);
+        Collection<Object> allResponses = receiveFromAllSlaves(10000);
 
         for (Object response : allResponses) {
             if (!(response instanceof Handshake.Response)) {
@@ -417,6 +417,7 @@ public class Master {
             byte[] data = outputStream.toByteArray();
             DatagramPacket packet = new DatagramPacket(data, data.length, slave, args.getSlaveListeningPort());
             masterSocket.send(packet);
+            printMasterLogMessages("Sent handshake message to "+slave);
         }
     }
 
@@ -437,7 +438,7 @@ public class Master {
               }
             DatagramPacket packet = new DatagramPacket(data, data.length, slave, args.getSlaveListeningPort());
             masterSocket.send(packet);
-            //printMasterMessages("Sent "+obj+" To "+slave);
+            printMasterLogMessages("Sent "+obj+" To "+slave);
             }
           }
         }
