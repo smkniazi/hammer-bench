@@ -48,7 +48,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
-import java.net.DatagramSocket;
 
 public class TinyDatanodes {
 
@@ -64,7 +63,7 @@ public class TinyDatanodes {
   private final TinyDatanode[] datanodes;
   private final String machineName;
   private final TinyDatanodesHelper helper;
-  private final DatagramSocket socket;
+
   public TinyDatanodes(Configuration conf, String baseDir, int
       numOfDataNodes, int blocksPerReport, int blocksPerFile, int
       filesPerDirectory, int replication, int blockSize, int slaveId, String
@@ -83,7 +82,6 @@ public class TinyDatanodes {
         .getDefaultUri(conf));
     machineName = InetAddress.getLocalHost().getHostName();
     this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);
-    this.socket = new DatagramSocket();
   }
 
   public void generateInput(boolean skipCreation, ExecutorService executor) throws
@@ -124,7 +122,7 @@ public class TinyDatanodes {
   private void createFiles(int nrFiles, ExecutorService executor) throws
       Exception {
 
-    Logger.printMsg(socket, " Creating " + nrFiles + " with " +
+    Logger.printMsg( " Creating " + nrFiles + " with " +
         blocksPerFile + " blocks each.");
 
     List writers = Lists.newArrayList();
@@ -161,7 +159,7 @@ public class TinyDatanodes {
     @Override
     public Object call() throws Exception {
       // create files
-      Logger.printMsg(socket, " Creating ["  + id + "] "+ nrFiles + " with " +
+      Logger.printMsg( " Creating ["  + id + "] "+ nrFiles + " with " +
           blocksPerFile + " blocks each.");
       FileNameGenerator nameGenerator = new FileNameGenerator(baseDir + File
           .separator + machineName + File.separator + id, filesPerDirectory);
@@ -218,6 +216,6 @@ public class TinyDatanodes {
   }
 
   void printStats() throws IOException {
-    Logger.printMsg(socket, "Reports " + nameNodeSelector.getReportsStats().toString());
+    Logger.printMsg("Reports " + nameNodeSelector.getReportsStats().toString());
   }
 }

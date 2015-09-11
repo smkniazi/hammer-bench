@@ -38,7 +38,6 @@ import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.workload.generator.FilePool;
-import java.net.DatagramSocket;
 
 /**
  *
@@ -93,14 +92,12 @@ public class RawBenchmark extends Benchmark {
     private short replicationFactor;
     private long fileSize;
     private String baseDir;
-    private DatagramSocket socket = null;
 
     public WarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSize = fileSize;
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
-      this.socket = new DatagramSocket();
     }
 
     @Override
@@ -118,7 +115,7 @@ public class RawBenchmark extends Benchmark {
           filePool.fileCreationSucceeded(filePath);
           BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
         } catch (Exception e) {
-          Logger.error(socket, e);
+          Logger.error(e);
 
         }
       }
@@ -139,7 +136,7 @@ public class RawBenchmark extends Benchmark {
   private RawBenchmarkCommand.Response startTestPhase(BenchmarkOperations opType, long duration, String baseDir) throws InterruptedException, UnknownHostException, IOException {
     List workers = new LinkedList<Callable>();
     for (int i = 0; i < numThreads; i++) {
-      Callable worker = new Runner(baseDir, opType);
+      Callable worker = new Generic(baseDir, opType);
       workers.add(worker);
     }
     setMeasurementVariables(duration);
@@ -156,18 +153,16 @@ public class RawBenchmark extends Benchmark {
     return response;
   }
 
-  public class Runner implements Callable {
+  public class Generic implements Callable {
 
     private BenchmarkOperations opType;
     private DistributedFileSystem dfs;
     private FilePool filePool;
     private String baseDir;
-    private DatagramSocket socket = null;
 
-    public Runner(String baseDir, BenchmarkOperations opType) throws IOException {
+    public Generic(String baseDir, BenchmarkOperations opType) throws IOException {
       this.baseDir = baseDir;
       this.opType = opType;
-      this.socket = new DatagramSocket();
     }
 
     @Override
@@ -189,11 +184,11 @@ public class RawBenchmark extends Benchmark {
           successfulOps.incrementAndGet();
 
           if (Logger.canILog()) {
-            Logger.printMsg(socket,"Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
+            Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
           }
         } catch (Exception e) {
           failedOps.incrementAndGet();
-          Logger.error(socket,e);
+          Logger.error(e);
         }
       }
     }

@@ -39,12 +39,13 @@ public class Logger {
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
   //private static 
+  private static DatagramSocket socket = null;
 
-  public static void error(DatagramSocket socket, Exception e) throws IOException {
-     printMsg(socket, e.getClass().getName()+" "+e.getMessage());
+  public static void error(Exception e) throws IOException {
+     printMsg(e.getClass().getName()+" "+e.getMessage());
   }
 
-  public static void printMsg(DatagramSocket socket, String msg) throws IOException {
+  public static void printMsg(String msg) throws IOException {
     if (enableRemoteLogging) {
 
       if (socket == null) {
@@ -85,7 +86,6 @@ public class Logger {
   }
 
   public static class LogListener implements Runnable {
-    private DatagramSocket socket = null;
     private int port;
     private boolean running = true;
 

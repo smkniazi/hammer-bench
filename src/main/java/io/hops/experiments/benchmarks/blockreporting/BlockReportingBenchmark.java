@@ -28,8 +28,6 @@ import org.apache.hadoop.util.Time;
 
 
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
@@ -54,13 +52,11 @@ public class BlockReportingBenchmark extends Benchmark{
   private TinyDatanodes datanodes;
   private ExecutorService executor;
   private int slaveId;
-  private final DatagramSocket socket;
   public BlockReportingBenchmark(Configuration conf, int numThreads, int
-      slaveID) throws SocketException {
+      slaveID) {
     super(conf, numThreads);
     this.slaveId = slaveID;
     this.executor = Executors.newFixedThreadPool(numThreads);
-    this.socket = new DatagramSocket();
   }
 
   @Override
@@ -77,10 +73,10 @@ public class BlockReportingBenchmark extends Benchmark{
     try {
       long t = Time.now();
       datanodes.generateInput(request.isSkipCreations(), executor);
-      Logger.printMsg(socket, "WarmUp done in " + (Time.now() - t) /1000 + " seconds");
+      Logger.printMsg("WarmUp done in " + (Time.now() - t) /1000 + " seconds");
     }catch (Exception e){
       e.printStackTrace();
-      Logger.error(socket, e);
+      Logger.error(e);
     }
 
     return new BlockReportingWarmUp.Response();
@@ -116,15 +112,13 @@ public class BlockReportingBenchmark extends Benchmark{
     private final int numOfReports;
     private final int minTimeBeforeNextReport;
     private final int maxTimeBeforeNextReport;
-    private final DatagramSocket socket;
 
     public Reporter(int dnIdx, int numOfReports, int minTimeBeforeNextReport,
-        int maxTimeBeforeNextReport) throws SocketException {
+        int maxTimeBeforeNextReport) {
       this.dnIdx = dnIdx;
       this.numOfReports = numOfReports;
       this.minTimeBeforeNextReport = minTimeBeforeNextReport;
       this.maxTimeBeforeNextReport = maxTimeBeforeNextReport;
-      this.socket = new DatagramSocket();
     }
 
     @Override
@@ -144,7 +138,7 @@ public class BlockReportingBenchmark extends Benchmark{
           brElapsedTimes.addValue(ts[1]);
 
           if(Logger.canILog()){
-            Logger.printMsg(socket,"Successful BR ops " + successfulOps.get
+            Logger.printMsg("Successful BR ops " + successfulOps.get
                 () + " Failed BR ops " + failedOps.get() + " Speed " +
                 currentSpeed() + " " +
                 "ops/sec" + " BR details [nn=" + ts[0] + "(" +
@@ -154,7 +148,7 @@ public class BlockReportingBenchmark extends Benchmark{
 
         }catch (Exception e){
           failedOps.incrementAndGet();
-          Logger.error(socket, e);
+          Logger.error(e);
         }
       }
       return null;
