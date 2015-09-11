@@ -23,7 +23,7 @@ package io.hops.experiments.controller;
  */
 public class ConfigKeys {
   
-    public static final int BUFFER_SIZE = 4096;
+    public static final int BUFFER_SIZE = 10*1024;
     
     public static String MAX_SLAVE_FAILURE_THREASHOLD_KEY = "max.slave.failure.threshold";   // only for logging
     public static int MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT = 0;

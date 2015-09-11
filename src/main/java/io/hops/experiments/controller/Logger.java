@@ -41,10 +41,7 @@ public class Logger {
   //private static 
 
   public static void error(DatagramSocket socket, Exception e) throws IOException {
-    StringWriter writer = new StringWriter();
-    e.printStackTrace(new PrintWriter(writer));
-    printMsg(socket, "Exception -> " + writer.toString());
-    writer.close();
+     printMsg(socket, e.getClass().getName()+" "+e.getMessage());
   }
 
   public static void printMsg(DatagramSocket socket, String msg) throws IOException {
