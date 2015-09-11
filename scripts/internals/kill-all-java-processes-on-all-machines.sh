@@ -19,5 +19,5 @@ All_Unique_Hosts_To_Kill=$(echo "${All_Hosts_To_Kill[@]}" | tr ' ' '\n' | sort -
 
 
 echo "Killing java on ${All_Unique_Hosts_To_Kill[*]}"
-parallel-ssh -H "${All_Unique_Hosts_To_Kill[*]}"  -l $HopsFS_User -i  pkill -f .*java
+parallel-ssh -H "${All_Unique_Hosts_To_Kill[*]}"  -l $HopsFS_User -i  pkill .*java
 

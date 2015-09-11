@@ -42,7 +42,11 @@ public class Logger {
   private static DatagramSocket socket = null;
 
   public static void error(Exception e) throws IOException {
-     printMsg(e.getClass().getName()+" "+e.getMessage());
+     String message = e.getClass().getName()+" ";
+     if(e.getMessage().length() > 100){
+       message += e.getMessage().substring(0, 100);
+     }
+     printMsg(message);
   }
 
   public static void printMsg(String msg) throws IOException {
