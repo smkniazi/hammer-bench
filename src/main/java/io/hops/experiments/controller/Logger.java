@@ -18,11 +18,8 @@ package io.hops.experiments.controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -41,11 +38,17 @@ public class Logger {
   private static DatagramSocket socket = null;
 
   public static void error(Exception e) {
-    e.printStackTrace();
-    printMsg(e.getClass().getName() + " " + e.getMessage());
+    System.out.println(e);
+    final int MSG_SIZE = 100; //send small messages
+    String msg = e.getClass().getName() + " " ;
+    int consumed = msg.length();
+    if(e.getMessage().length() > (MSG_SIZE - consumed)){ 
+      msg += e.getMessage().substring(0, (MSG_SIZE - consumed));
+    }
+    printMsg(msg);
   }
 
-  public static void printMsg(String msg) {
+  public static synchronized void printMsg(String msg) {
     if (enableRemoteLogging && msg.length() > 0) {
       try {
         if (socket == null) {
@@ -120,7 +123,7 @@ public class Logger {
           String msg = (String) is.readObject();
 
           System.out.println(recvPacket.getAddress().getHostName() + " -> " + msg);
-        } catch (Exception e) {
+        } catch (Exception e) { // Logger should not crash the application
           e.printStackTrace();
         }
       }

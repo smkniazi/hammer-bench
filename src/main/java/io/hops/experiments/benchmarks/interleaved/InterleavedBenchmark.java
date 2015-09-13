@@ -55,12 +55,10 @@ public class InterleavedBenchmark extends Benchmark {
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
   private final int dirsPerDir;
   private final int filesPerDir;
-  private ExecutorService executor;
   
 
   public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir, int filesPerDir) {
     super(conf, numThreads);
-    this.executor = Executors.newFixedThreadPool(numThreads);
     this.dirsPerDir = inodesPerDir;
     this.filesPerDir = filesPerDir;
   }
@@ -69,56 +67,16 @@ public class InterleavedBenchmark extends Benchmark {
   protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpCommand)
           throws IOException, InterruptedException {
     NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
-    List workers = new ArrayList<WarmUp>();
+    List workers = new ArrayList<BaseWarmUp>();
     for (int i = 0; i < numThreads; i++) {
-      Callable worker = new WarmUp(namespaceWarmUp.getFilesToCreate(),
+      Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(),
               namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-              .getFileSize(), namespaceWarmUp.getBaseDir());
+              .getFileSize(), namespaceWarmUp.getBaseDir(), dirsPerDir, filesPerDir);
       workers.add(worker);
     }
     executor.invokeAll(workers); // blocking call
     return new NamespaceWarmUp.Response();
   }
-
-  public class WarmUp implements Callable {
-
-    private DistributedFileSystem dfs;
-    private FilePool filePool;
-    private int filesToCreate;
-    private short replicationFactor;
-    private long fileSize;
-    private String baseDir;
-
-    public WarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir) throws IOException {
-      this.filesToCreate = filesToCreate;
-      this.replicationFactor = replicationFactor;
-      this.fileSize = fileSize;
-      this.baseDir = baseDir;
-    }
-
-    @Override
-    public Object call() throws Exception {
-      dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
-
-      String filePath = null;
-
-      for (int i = 0; i < filesToCreate; i++) {
-        try {
-          filePath = filePool.getFileToCreate();
-          BenchmarkUtils
-                  .createFile(dfs, new Path(filePath), replicationFactor,
-                  fileSize);
-          filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
-        } catch (Exception e) {
-          e.printStackTrace();
-          Logger.error(e);
-        }
-      }
-      return null;
-    }
-  };
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {

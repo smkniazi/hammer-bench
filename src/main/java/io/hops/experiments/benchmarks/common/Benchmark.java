@@ -20,20 +20,31 @@ package io.hops.experiments.benchmarks.common;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
+import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
+import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.conf.Configuration;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 public abstract class Benchmark {
 
   protected final Configuration conf;
   protected final int numThreads;
+  protected final ExecutorService executor;
 
   public Benchmark(Configuration conf, int numThreads) {
     this.conf = conf;
     this.numThreads = numThreads;
+    this.executor = Executors.newFixedThreadPool(numThreads);
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
@@ -64,4 +75,55 @@ public abstract class Benchmark {
       throw new UnsupportedOperationException("Unsupported Benchmark " + type);
     }
   }
+  
+  private static AtomicLong totalFilesCrated = new AtomicLong(0);
+  protected class BaseWarmUp implements Callable {
+
+    private DistributedFileSystem dfs;
+    private FilePool filePool;
+    private int filesToCreate;
+    private short replicationFactor;
+    private long fileSize;
+    private String baseDir;
+    private int dirsPerDir;
+    private int filesPerDir;
+
+    public BaseWarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir, int dirsPerDir, int filesPerDir) throws IOException {
+      this.filesToCreate = filesToCreate;
+      this.fileSize = fileSize;
+      this.replicationFactor = replicationFactor;
+      this.baseDir = baseDir;
+      this.dirsPerDir = dirsPerDir;
+      this.filesPerDir = filesPerDir;
+    }
+
+    @Override
+    public Object call() throws Exception {
+      dfs = BenchmarkUtils.getDFSClient(conf);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
+      String filePath = null;
+
+      for (int i = 0; i < filesToCreate; i++) {
+        try {
+          filePath = filePool.getFileToCreate();
+          BenchmarkUtils
+                  .createFile(dfs, new Path(filePath), replicationFactor,
+                  fileSize);
+          filePool.fileCreationSucceeded(filePath);
+          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
+          totalFilesCrated.incrementAndGet();
+          if(Logger.canILog()){
+            long totalFilesThatWillBeCreated = filesToCreate* numThreads;
+            double percent = (totalFilesCrated.doubleValue()/totalFilesThatWillBeCreated)*100;
+            Logger.printMsg("Warmup "+BenchmarkUtils.round(percent)+"% completed");
+          }
+        } catch (Exception e) {
+          Logger.error(e);
+
+        }
+      }
+      return null;
+    }
+  };
+
 }

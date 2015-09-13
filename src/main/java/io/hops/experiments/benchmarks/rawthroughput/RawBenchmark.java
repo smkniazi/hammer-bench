@@ -56,12 +56,9 @@ public class RawBenchmark extends Benchmark {
   private long appendSize;
   private final int dirsPerDir;
   private final int filesPerDir;
-  //-- other
-  private ExecutorService executor;
-
+  
   public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, int filesPerDir) {
     super(conf, numThreads);
-    executor = Executors.newFixedThreadPool(numThreads);
     this.dirsPerDir = dirsPerDir;
     this.filesPerDir = filesPerDir;
   }
@@ -74,54 +71,15 @@ public class RawBenchmark extends Benchmark {
     this.fileSize = namespaceWarmUp.getFileSize();
     this.appendSize = namespaceWarmUp.getAppendSize();
     this.baseDir = namespaceWarmUp.getBaseDir();
-    List workers = new ArrayList<WarmUp>();
+    List workers = new ArrayList<BaseWarmUp>();
     for (int i = 0; i < numThreads; i++) {
-      Callable worker = new WarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
-              fileSize, baseDir);
+      Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
+              fileSize, baseDir, dirsPerDir, filesPerDir);
       workers.add(worker);
     }
     executor.invokeAll(workers); // blocking call
     return new NamespaceWarmUp.Response();
   }
-
-  public class WarmUp implements Callable {
-
-    private DistributedFileSystem dfs;
-    private FilePool filePool;
-    private int filesToCreate;
-    private short replicationFactor;
-    private long fileSize;
-    private String baseDir;
-
-    public WarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir) throws IOException {
-      this.filesToCreate = filesToCreate;
-      this.fileSize = fileSize;
-      this.replicationFactor = replicationFactor;
-      this.baseDir = baseDir;
-    }
-
-    @Override
-    public Object call() throws Exception {
-      dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
-      String filePath = null;
-
-      for (int i = 0; i < filesToCreate; i++) {
-        try {
-          filePath = filePool.getFileToCreate();
-          BenchmarkUtils
-                  .createFile(dfs, new Path(filePath), replicationFactor,
-                  fileSize);
-          filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
-        } catch (Exception e) {
-          Logger.error(e);
-
-        }
-      }
-      return null;
-    }
-  };
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command)

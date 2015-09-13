@@ -124,7 +124,10 @@ public class Master {
       startInterleavedCommander();
     } else if (args.getBenchMarkType() == BenchmarkType.BR) {
       startBlockReportingCommander();
+    } else if (args.getBenchMarkType() == BenchmarkType.E2ELatency) {
+      startE2ELatencyCommander();
     }
+
   }
 
   private void startRawCommander() throws IOException, InterruptedException, ClassNotFoundException {
@@ -297,12 +300,14 @@ public class Master {
         duration.addValue(response.getRunTime());
       }
     }
-
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
             args.getNoOfNDBDataNodes(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()));
     printMasterResultMessages(result);
+  }
+
+  private void startE2ELatencyCommander() {
   }
 
   private void handShakeWithSlaves() throws IOException, ClassNotFoundException {
@@ -533,7 +538,7 @@ public class Master {
 
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
-          printMasterLogMessages("Sent " + obj.getClass().getName() + " to " + socket.getInetAddress());
+          printMasterLogMessages("SENT " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
           ObjectOutputStream sendToSlave = new ObjectOutputStream(socket.getOutputStream());
           sendToSlave.writeObject(obj);
         } catch (Exception e) {
@@ -547,12 +552,10 @@ public class Master {
     public Object recvFromSlave(int timeout) {
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
-          System.out.println("Setting time out to "+timeout);
           socket.setSoTimeout(timeout);
           ObjectInputStream recvFromSlave = new ObjectInputStream(socket.getInputStream());
-          System.out.println("Goign to read obj "+timeout);
           Object obj = recvFromSlave.readObject();
-          printMasterLogMessages("Recv " + obj.getClass().getName() + " from " + socket.getInetAddress());
+          printMasterLogMessages("RECV " + obj.getClass().getCanonicalName() + " from " + socket.getInetAddress());
           socket.setSoTimeout(Integer.MAX_VALUE);
           return obj;
         } catch (Exception e) {
@@ -568,9 +571,9 @@ public class Master {
     private void handleMisBehavingSlave(InetAddress slave) {
       misbehavingSlaves.add(slave);
       printMasterLogMessages("*** Slaved Failed. " + slave);
-      if (misbehavingSlaves.size() >= args.getMaxSlavesFailureThreshold()) {
-        printMasterLogMessages("*** Too many slaves failed. Abort test.");
-        System.exit(0);
+      if (misbehavingSlaves.size() > args.getMaxSlavesFailureThreshold()) {
+        printMasterLogMessages("*** HARD ERROR. Too many slaves failed. ABORT Test.");
+        System.exit(-1);
       }
     }
 
