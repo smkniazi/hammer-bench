@@ -36,13 +36,14 @@ NNS_FullList=(`cat namenodes`)
 #NOTE all experiment related parameters are in master.properties file
 Benchmark_Types=(
             RAW                                          #Test raw throughput of individual operations
-            INTERLEAVED                                  #Test synthetic workload from spotify             
-            #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
+            INTERLEAVED                                  #Test synthetic workload from spotify 
+            E2ELatency            
+            BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
             ) #space is delimeter
 
 NN_INCREMENT=1            
-EXP_START_INDEX=1
-REPEAT_EXP_TIMES=1
+EXP_START_INDEX=2
+REPEAT_EXP_TIMES=2
 
 
 All_Results_Folder="/tmp/hops-bm"                         #This is where the results are saved
