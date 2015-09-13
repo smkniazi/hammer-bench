@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.results.compiler;
 
+import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.utils.BenchmarkUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -32,7 +33,7 @@ public abstract class Aggregate {
 
   public Aggregate() {
   }
-
+  
   public void addSpeed(double val) {
     speed.addValue(val);
   }

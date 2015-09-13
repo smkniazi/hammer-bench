@@ -16,7 +16,8 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.results.BlockReportBMResults;
+import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,28 +26,29 @@ import java.util.Map;
  *
  * @author salman
  */
-public class BlockReportBMResultsAggregator extends Aggregate{
+public class BlockReportBMResultsAggregator extends Aggregator{
   
   private Map<Integer/*NN Count*/, BlockReportAggregate/*aggregates*/> allResults =
           new HashMap<Integer, BlockReportAggregate>();
 
-  
-  public void processRecord(BlockReportBMResults result){
-    System.out.println(result);
+  @Override
+  public void processRecord(BMResult result){
+    BlockReportBMResults brResult = (BlockReportBMResults)result;
+    System.out.println(brResult);
     
     BlockReportAggregate agg = allResults.get(result.getNoOfNamenodes());
 
     if (agg == null) {
       agg = new BlockReportAggregate();
-      allResults.put(result.getNoOfNamenodes(), agg);
+      allResults.put(brResult.getNoOfNamenodes(), agg);
     }
 
-    agg.addSpeed(result.getSpeed());
-    agg.addFailedOps(result.getFailedOps());
-    agg.addSucessfulOps(result.getSuccessfulOps());
+    agg.addSpeed(brResult.getSpeed());
+    agg.addFailedOps(brResult.getFailedOps());
+    agg.addSucessfulOps(brResult.getSuccessfulOps());
     agg.addRunDuration(-1);
-    agg.addAvgTimePerPreport(result.getAvgTimePerReport());
-    agg.addTimeToGetNameNodeToReport(result.getAvgTimeToGetNameNodeToReport());
+    agg.addAvgTimePerPreport(brResult.getAvgTimePerReport());
+    agg.addTimeToGetNameNodeToReport(brResult.getAvgTimeToGetNameNodeToReport());
   }
   
   public Map<Integer, BlockReportAggregate> getResults(){

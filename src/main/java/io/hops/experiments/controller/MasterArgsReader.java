@@ -51,7 +51,6 @@ public class MasterArgsReader {
 
   public MasterArgsReader(String file) throws FileNotFoundException, IOException {
     props = loadPropFile(file);
-    getListOfSlaves(); // generates the list of slaves
     validateArgs();
   }
 
@@ -365,6 +364,9 @@ public class MasterArgsReader {
     return getInt(ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_KEY, ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT);
   }
             
+  public long getEnd2EndLatencyBMDuration(){
+    return getLong(ConfigKeys.E2E_LATENCY_BM_DURATION_KEY, ConfigKeys.E2E_LATENCY_BM_DURATION_DEFAULT);
+  }
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
     return Integer.parseInt(val);

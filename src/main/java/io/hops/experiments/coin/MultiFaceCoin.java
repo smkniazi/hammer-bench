@@ -91,7 +91,7 @@ public class MultiFaceCoin {
             .add(chmodFiles).add(chmodDirs).add(mkdirs).add(setReplication).add(fileInfo).
             add(dirInfo).add(fileChown).add(dirChown);
 
-    if (total.equals(new BigDecimal(100))) {
+    if (total.compareTo(new BigDecimal(100))!=0) {
       throw new IllegalArgumentException("All probabilities should add to 100. Got: " + total);
     }
 

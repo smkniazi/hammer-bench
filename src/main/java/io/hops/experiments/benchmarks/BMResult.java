@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.results;
+package io.hops.experiments.benchmarks;
 
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import java.io.Serializable;
@@ -24,12 +24,12 @@ import java.io.Serializable;
  *
  * @author salman
  */
-public abstract class BMResults implements Serializable{
+public abstract class BMResult implements Serializable{
   private final BenchmarkType benchMarkType;
   private final int noOfNameNodes;
   private final int noOfNDBDataNodes;
 
-  public BMResults(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkType benchMarkType) {
+  public BMResult(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkType benchMarkType) {
     this.benchMarkType = benchMarkType;
     this.noOfNameNodes = noOfNameNodes;
     this.noOfNDBDataNodes = noOfNDBDataNodes;

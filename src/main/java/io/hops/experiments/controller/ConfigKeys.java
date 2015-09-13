@@ -35,7 +35,10 @@ public class ConfigKeys {
     public static int NO_OF_NDB_DATANODES_DEFAULT = 0;
     
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
-    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM."
+    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM | E2ELatency."
+    
+    public static String E2E_LATENCY_BM_DURATION_KEY = "end2end.latency.bm.duration";
+    public static long   E2E_LATENCY_BM_DURATION_DEFAULT = 60*1000;
     
     public static String INTERLEAVED_BM_DURATION_KEY = "interleaved.bm.duration";
     public static long   INTERLEAVED_BM_DURATION_DEFAULT = 60*1000;

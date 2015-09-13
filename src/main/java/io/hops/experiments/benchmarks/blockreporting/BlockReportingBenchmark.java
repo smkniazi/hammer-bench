@@ -50,13 +50,12 @@ public class BlockReportingBenchmark extends Benchmark{
   private DescriptiveStatistics brElapsedTimes = new DescriptiveStatistics();
 
   private TinyDatanodes datanodes;
-  private ExecutorService executor;
+  
   private int slaveId;
   public BlockReportingBenchmark(Configuration conf, int numThreads, int
       slaveID) {
     super(conf, numThreads);
     this.slaveId = slaveID;
-    this.executor = Executors.newFixedThreadPool(numThreads);
   }
 
   @Override
