@@ -51,7 +51,6 @@ public class MasterArgsReader {
 
   public MasterArgsReader(String file) throws FileNotFoundException, IOException {
     props = loadPropFile(file);
-    getListOfSlaves(); // generates the list of slaves
     validateArgs();
   }
 

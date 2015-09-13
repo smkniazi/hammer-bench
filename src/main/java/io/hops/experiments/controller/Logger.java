@@ -38,7 +38,7 @@ public class Logger {
   private static InetAddress loggerIp = null;
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
-  //private static 
+  
   private static DatagramSocket socket = null;
 
   public static void error(Exception e) throws IOException {
