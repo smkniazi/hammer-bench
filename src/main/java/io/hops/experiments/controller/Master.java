@@ -38,12 +38,14 @@ import io.hops.experiments.controller.commands.KillSlave;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
+import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBenchmarkCommand;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.results.BMResults;
-import io.hops.experiments.results.BlockReportBMResults;
-import io.hops.experiments.results.InterleavedBMResults;
-import io.hops.experiments.results.RawBMResults;
+import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
+import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBMResult;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
+import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -62,7 +64,7 @@ public class Master {
 
   Set<InetAddress> misbehavingSlaves = new HashSet<InetAddress>();
   Map<InetAddress, SlaveConnection> slavesConnections = new HashMap<InetAddress, SlaveConnection>();
-  List<BMResults> results = new ArrayList<BMResults>();
+  List<BMResult> results = new ArrayList<BMResult>();
 
   public static void main(String[] argv) throws Exception {
     String configFilePath = "master.properties";
@@ -307,7 +309,25 @@ public class Master {
     printMasterResultMessages(result);
   }
 
-  private void startE2ELatencyCommander() {
+  private void startE2ELatencyCommander() throws IOException, InterruptedException, ClassNotFoundException {
+    System.out.println("Starting end to end latency benchmark ...");
+    prompt();
+    E2ELatencyBenchmarkCommand.Request request =
+            new E2ELatencyBenchmarkCommand.Request(args.getEnd2EndLatencyBMDuration());
+    sendToAllSlaves(request);
+
+    Thread.sleep(args.getEnd2EndLatencyBMDuration());
+    Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
+    for (Object obj : responses) {
+      if (!(obj instanceof E2ELatencyBenchmarkCommand.Response)) {
+        throw new IllegalStateException("Wrong response received from the client");
+      } else {
+        E2ELatencyBenchmarkCommand.Response response = (E2ELatencyBenchmarkCommand.Response) obj;
+        //TODO
+      }
+    }
+    E2ELatencyBMResult result = new E2ELatencyBMResult(args.getNamenodeCount(),args.getNoOfNDBDataNodes());
+    printMasterResultMessages(result);
   }
 
   private void handShakeWithSlaves() throws IOException, ClassNotFoundException {
@@ -336,8 +356,9 @@ public class Master {
     printMasterLogMessages("Warming Up ... ");
     prompt();
     WarmUpCommand.Request warmUpCommand = null;
-    if (args.getBenchMarkType() == BenchmarkType.INTERLEAVED || args
-            .getBenchMarkType() == BenchmarkType.RAW) {
+    if (args.getBenchMarkType() == BenchmarkType.INTERLEAVED ||
+            args.getBenchMarkType() == BenchmarkType.RAW || 
+            args.getBenchMarkType() == BenchmarkType.E2ELatency) {
       warmUpCommand = new NamespaceWarmUp.Request(args.getBenchMarkType(), args.getFilesToCreateInWarmUpPhase(), args.getReplicationFactor(),
               args.getFileSize(), args.getAppendFileSize(),
               args.getBaseDir());
@@ -467,7 +488,7 @@ public class Master {
     redColoredText(msg);
   }
 
-  private void printMasterResultMessages(BMResults result) throws FileNotFoundException, IOException {
+  private void printMasterResultMessages(BMResult result) throws FileNotFoundException, IOException {
     blueColoredText(result.toString());
     FileWriter out = new FileWriter(args.getResultFile(), true);
     out.write(result.toString() + "\n");
@@ -491,7 +512,7 @@ public class Master {
   private void generateBinaryFile() throws FileNotFoundException, IOException {
     FileOutputStream fout = new FileOutputStream(args.getResultFile() + ConfigKeys.BINARY_RESULT_FILE_EXT);
     ObjectOutputStream oos = new ObjectOutputStream(fout);
-    for (BMResults result : results) {
+    for (BMResult result : results) {
       oos.writeObject(result);
     }
     oos.close();

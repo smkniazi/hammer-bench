@@ -16,7 +16,8 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.results.InterleavedBMResults;
+import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,25 +26,27 @@ import java.util.Map;
  *
  * @author salman
  */
-public class InterleavedBMResultsAggregator {
+public class InterleavedBMResultsAggregator extends Aggregator{
 
   private Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
           new HashMap<Integer, InterleavedAggregate>();
 
-  public void processRecord(InterleavedBMResults result) {
+  @Override
+  public void processRecord(BMResult result) {
     //System.out.println(result);
+    InterleavedBMResults ilResult = (InterleavedBMResults)result;
 
-    InterleavedAggregate agg = allResults.get(result.getNoOfNamenodes());
+    InterleavedAggregate agg = allResults.get(ilResult.getNoOfNamenodes());
 
     if (agg == null) {
       agg = new InterleavedAggregate();
-      allResults.put(result.getNoOfNamenodes(), agg);
+      allResults.put(ilResult.getNoOfNamenodes(), agg);
     }
 
-    agg.addSpeed(result.getSpeed());
-    agg.addFailedOps(result.getFailedOps());
-    agg.addSucessfulOps(result.getSuccessfulOps());
-    agg.addRunDuration(result.getDuration());
+    agg.addSpeed(ilResult.getSpeed());
+    agg.addFailedOps(ilResult.getFailedOps());
+    agg.addSucessfulOps(ilResult.getSuccessfulOps());
+    agg.addRunDuration(ilResult.getDuration());
   }
   
   public Map<Integer, InterleavedAggregate> getResults(){

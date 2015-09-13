@@ -19,15 +19,19 @@ package io.hops.experiments.benchmarks.e2eLatency;
 
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
+import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
+import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.workload.generator.FilePool;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 /**
  *
@@ -69,7 +73,68 @@ public class E2ELatencyBenchmark extends Benchmark {
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+     E2ELatencyBenchmarkCommand.Request request = (E2ELatencyBenchmarkCommand.Request) command;
+    E2ELatencyBenchmarkCommand.Response response;
+    System.out.println("Starting the end to end latency test. Duration " + request.getDurationInMS());
+    response = startTestPhase(request.getDurationInMS(), baseDir);
+    return response;
   }
   
+  private E2ELatencyBenchmarkCommand.Response startTestPhase(long duration, String baseDir) throws InterruptedException, UnknownHostException, IOException {
+    List workers = new LinkedList<Callable>();
+    this.duration = duration;
+    for (int i = 0; i < numThreads; i++) {
+      Callable worker = new E2EWorker(baseDir);
+      workers.add(worker);
+    }
+    startTime = System.currentTimeMillis();
+    executor.invokeAll(workers);// blocking call
+    long finishTime = System.currentTimeMillis();
+    long actualExecutionTime = (finishTime - startTime);
+    
+//    double speed = ((double) successfulOps.get() / (double) actualExecutionTime); // p / ms
+//    speed = speed * 1000;
+
+    E2ELatencyBenchmarkCommand.Response response =
+            new E2ELatencyBenchmarkCommand.Response(actualExecutionTime);
+    return response;
+  }
+  
+  public class E2EWorker implements Callable {
+    private DistributedFileSystem dfs;
+    private FilePool filePool;
+    private String baseDir;
+
+    public E2EWorker(String baseDir) throws IOException {
+      this.baseDir = baseDir;
+    }
+
+    @Override
+    public Object call() throws Exception {
+      dfs = BenchmarkUtils.getDFSClient(conf);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
+
+      while (true) {
+        try {
+
+          //String path = OperationsUtils.getPath(opType,filePool);
+
+          if (/*path == null ||*/ ((System.currentTimeMillis() - startTime) > (duration))) {
+            return null;
+          }
+          
+          //OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
+
+          //successfulOps.incrementAndGet();
+
+          if (Logger.canILog()) {
+            Logger.printMsg("doing nothing ");
+          }
+        } catch (Exception e) {
+          //failedOps.incrementAndGet();
+          Logger.error(e);
+        }
+      }
+    }
+  }
 }

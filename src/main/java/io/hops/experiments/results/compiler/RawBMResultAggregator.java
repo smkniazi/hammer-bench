@@ -16,8 +16,9 @@
  */
 package io.hops.experiments.results.compiler;
 
+import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.results.RawBMResults;
+import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.utils.BenchmarkUtils;
 import java.io.File;
 import java.io.FileWriter;
@@ -36,7 +37,7 @@ import java.util.TreeSet;
  *
  * @author salman
  */
-public class RawBMResultAggregator {
+public class RawBMResultAggregator extends Aggregator{
 
   Map<Integer/*NN Count*/, Map<BenchmarkOperations, RawAggregate/*aggregates*/>> allResults =
           new HashMap<Integer, Map<BenchmarkOperations, RawAggregate>>();
@@ -45,27 +46,28 @@ public class RawBMResultAggregator {
   public RawBMResultAggregator() {
     
   }
+  
+  @Override
+  public void processRecord(BMResult result) {
+    RawBMResults rResults = (RawBMResults)result;
 
-  public void processRecord(RawBMResults result) {
-    // System.out.println(result);
-
-    Map<BenchmarkOperations, RawAggregate> map = allResults.get(result.getNoOfNamenodes());
+    Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfNamenodes());
 
     if (map == null) {
       map = new HashMap<BenchmarkOperations, RawAggregate>();
-      allResults.put(result.getNoOfNamenodes(), map);
+      allResults.put(rResults.getNoOfNamenodes(), map);
     }
 
-    RawAggregate agg = map.get(result.getOperationType());
+    RawAggregate agg = map.get(rResults.getOperationType());
     if (agg == null) {
       agg = new RawAggregate();
-      map.put(result.getOperationType(), agg);
+      map.put(rResults.getOperationType(), agg);
     }
 
-    agg.addSpeed(result.getSpeed());
-    agg.addFailedOps(result.getFailedOps());
-    agg.addSucessfulOps(result.getSuccessfulOps());
-    agg.addRunDuration(result.getDuration());
+    agg.addSpeed(rResults.getSpeed());
+    agg.addFailedOps(rResults.getFailedOps());
+    agg.addSucessfulOps(rResults.getSuccessfulOps());
+    agg.addRunDuration(rResults.getDuration());
   }
 
   CompiledResults processAllRecords() {

@@ -142,7 +142,7 @@ public class RawBenchmark extends Benchmark {
           successfulOps.incrementAndGet();
 
           if (Logger.canILog()) {
-            Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + speedPSec(successfulOps, phaseStartTime));
+            Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + BenchmarkUtils.round(speedPSec(successfulOps, phaseStartTime)));
           }
         } catch (Exception e) {
           failedOps.incrementAndGet();

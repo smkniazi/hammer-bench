@@ -39,7 +39,7 @@ public class E2ELatencyBenchmarkCommand {
 
         @Override
         public BenchmarkType getBenchMarkType() {
-            return BenchmarkType.RAW;
+            return BenchmarkType.E2ELatency;
         }
     }
 

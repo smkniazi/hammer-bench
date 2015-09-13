@@ -17,10 +17,11 @@
 package io.hops.experiments.results.compiler;
 
 import io.hops.experiments.controller.ConfigKeys;
-import io.hops.experiments.results.BMResults;
-import io.hops.experiments.results.BlockReportBMResults;
-import io.hops.experiments.results.InterleavedBMResults;
-import io.hops.experiments.results.RawBMResults;
+import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
+import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBMResult;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
+import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.results.compiler.RawBMResultAggregator.CompiledResults;
 import java.io.EOFException;
 import java.io.File;
@@ -39,12 +40,6 @@ import java.util.List;
 public class CompileResults {
 
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
-    argv = new String[3];
-    argv[0] = "/home/salman/Dropbox/bm-results/2Sep-HDFS-32thds-10000-clients";
-    argv[1] = "/home/salman/Dropbox/hops-bm/";///home/salman/bm_wit_cache";    
-    argv[2] = "/home/salman/code/hopg/hops-papers/hopsfs-2015/imgs";
-
-
     if (argv.length != 3) {
       System.err.println("Usage CompileResults hdfsResults hopsResults outputDir");
       System.exit(0);
@@ -62,21 +57,22 @@ public class CompileResults {
     RawBMResultAggregator hdfsRawAggregatredResults = new RawBMResultAggregator();
     InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults = new InterleavedBMResultsAggregator();
     BlockReportBMResultsAggregator hdfsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
-
+    E2EResultsAggregator hdfsE2EAggregatoredResults = new E2EResultsAggregator();
+    
     RawBMResultAggregator hopsRawAggregatredResults = new RawBMResultAggregator();
     InterleavedBMResultsAggregator hopsInterleavedAggregatedResults = new InterleavedBMResultsAggregator();
     BlockReportBMResultsAggregator hopsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
-
+    E2EResultsAggregator hopsE2EAggregatoredResults = new E2EResultsAggregator();
 
     
     List<File> hdfsResulsFiles = findResultFiles(hdfsInputDir);
     List<File> hopsResulsFiles = findResultFiles(hopsInputDir);
     System.out.println("Processing HDFS Files");
-    parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults);
+    parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults, hdfsE2EAggregatoredResults);
     System.out.println("Processing Hops Files");
-    parseFiles(hopsResulsFiles, hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults);
-    generateOutputFiles(hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults,
-            hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults, outputDir);
+    parseFiles(hopsResulsFiles, hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults,hopsE2EAggregatoredResults);
+    generateOutputFiles(hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults,hdfsE2EAggregatoredResults,
+            hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults, hopsE2EAggregatoredResults, outputDir);
   }
 
   private List<File> findResultFiles(String path) {
@@ -112,18 +108,20 @@ public class CompileResults {
 
   private void parseFiles(List<File> files, RawBMResultAggregator rawAggregatredResults,
           InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults)
+          BlockReportBMResultsAggregator blockReportAggregatedResults,
+          E2EResultsAggregator e2eAggregatedResults)
           throws FileNotFoundException, IOException, ClassNotFoundException {
     for (File file : files) {
       System.out.println("Processing File " + file);
-      parsetFile(file, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults);
+      parsetFile(file, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults,e2eAggregatedResults);
     }
   }
 
   private void parsetFile(File file,
           RawBMResultAggregator rawAggregatredResults,
           InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults)
+          BlockReportBMResultsAggregator blockReportAggregatedResults, 
+          E2EResultsAggregator e2eAggregatedResults)
           throws FileNotFoundException, IOException, ClassNotFoundException {
     FileInputStream fin = new FileInputStream(file);
     ObjectInputStream ois = new ObjectInputStream(fin);
@@ -131,11 +129,11 @@ public class CompileResults {
     Object obj = null;
     try {
       while ((obj = ois.readObject()) != null) {
-        if (!(obj instanceof BMResults)) {
+        if (!(obj instanceof BMResult)) {
           System.out.println("Wrong binary file " + file);
           System.exit(0);
         } else {
-          processResult((BMResults) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults);
+          processResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults,e2eAggregatedResults);
         }
       }
     } catch (EOFException e) {
@@ -145,17 +143,21 @@ public class CompileResults {
 
   }
 
-  private void processResult(BMResults result,
+  private void processResult(BMResult result,
           RawBMResultAggregator rawAggregatredResults,
           InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults) {
+          BlockReportBMResultsAggregator blockReportAggregatedResults, 
+          E2EResultsAggregator e2eAggregatedResults) {
     if (result instanceof RawBMResults) {
       rawAggregatredResults.processRecord((RawBMResults) result);
     } else if (result instanceof InterleavedBMResults) {
       interleavedAggregatedResults.processRecord((InterleavedBMResults) result);
     } else if (result instanceof BlockReportBMResults) {
       blockReportAggregatedResults.processRecord((BlockReportBMResults) result);
-    } else {
+    } else if (result instanceof E2ELatencyBMResult) {
+      e2eAggregatedResults.processRecord(result);
+    }
+    else {
       System.err.println("Wrong type of recode read.");
       System.exit(0);
     }
@@ -164,9 +166,11 @@ public class CompileResults {
   private void generateOutputFiles(RawBMResultAggregator hdfsRawAggregatredResults,
           InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults,
           BlockReportBMResultsAggregator hdfsBlockReportAggregatedResults,
+          E2EResultsAggregator hdfsE2EAggregatoredResults,
           RawBMResultAggregator hopsRawAggregatredResults,
           InterleavedBMResultsAggregator hopsInterleavedAggregatedResults,
           BlockReportBMResultsAggregator hopsBlockReportAggregatedResults, 
+          E2EResultsAggregator hopsE2EAggregatoredResults,
           String outputDir) throws IOException {
 
     CompiledResults hdfsRawCr = hdfsRawAggregatredResults.processAllRecords();

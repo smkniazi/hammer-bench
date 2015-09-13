@@ -1,23 +1,23 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package io.hops.experiments.benchmarks.common;
 
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
+import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBenchmark;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
@@ -48,35 +48,35 @@ public abstract class Benchmark {
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
-      throws IOException, InterruptedException;
+          throws IOException, InterruptedException;
 
-  protected abstract BenchmarkCommand.Response processCommandInternal
-      (BenchmarkCommand.Request command)  throws IOException,
-      InterruptedException;
+  protected abstract BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException,
+          InterruptedException;
 
-  public final BenchmarkCommand.Response processCommand(BenchmarkCommand
-      .Request command)
-      throws IOException, InterruptedException{
-    if(command instanceof WarmUpCommand.Request){
+  public final BenchmarkCommand.Response processCommand(BenchmarkCommand.Request command)
+          throws IOException, InterruptedException {
+    if (command instanceof WarmUpCommand.Request) {
       return warmUp((WarmUpCommand.Request) command);
     }
     return processCommandInternal(command);
   }
 
   public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-      Configuration conf, int slaveId, int dirsPerDir, int filesPerDir){
-    if(type == BenchmarkType.RAW){
+          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir) {
+    if (type == BenchmarkType.RAW) {
       return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
-    }else if(type == BenchmarkType.INTERLEAVED){
+    } else if (type == BenchmarkType.INTERLEAVED) {
       return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
-    }else if(type == BenchmarkType.BR){
+    } else if (type == BenchmarkType.BR) {
       return new BlockReportingBenchmark(conf, numThreads, slaveId);
-    }else {
+    } else if (type == BenchmarkType.E2ELatency) {
+      return new E2ELatencyBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
+    } else {
       throw new UnsupportedOperationException("Unsupported Benchmark " + type);
     }
   }
-  
   private static AtomicLong totalFilesCrated = new AtomicLong(0);
+
   protected class BaseWarmUp implements Callable {
 
     private DistributedFileSystem dfs;
@@ -112,18 +112,21 @@ public abstract class Benchmark {
           filePool.fileCreationSucceeded(filePath);
           BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
           totalFilesCrated.incrementAndGet();
-          if(Logger.canILog()){
-            long totalFilesThatWillBeCreated = filesToCreate* numThreads;
-            double percent = (totalFilesCrated.doubleValue()/totalFilesThatWillBeCreated)*100;
-            Logger.printMsg("Warmup "+BenchmarkUtils.round(percent)+"% completed");
-          }
+          log();
         } catch (Exception e) {
           Logger.error(e);
-
         }
       }
+      log();
       return null;
     }
-  };
 
+    private void log() {
+      if (Logger.canILog()) {
+        long totalFilesThatWillBeCreated = filesToCreate * numThreads;
+        double percent = (totalFilesCrated.doubleValue() / totalFilesThatWillBeCreated) * 100;
+        Logger.printMsg("Warmup " + BenchmarkUtils.round(percent) + "% completed");
+      }
+    }
+  };
 }

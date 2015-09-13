@@ -15,8 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.results;
+package io.hops.experiments.benchmarks.rawthroughput;
 
+import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.utils.BenchmarkUtils;
@@ -26,7 +27,7 @@ import java.text.DecimalFormat;
  *
  * @author salman
  */
-public class RawBMResults extends BMResults {
+public class RawBMResults extends BMResult {
   private final double speed;
   private final double duration;
   private final double successfulOps;

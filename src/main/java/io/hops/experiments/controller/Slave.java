@@ -17,13 +17,9 @@
  */
 package io.hops.experiments.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -33,11 +29,8 @@ import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.KillSlave;
 import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
 
 /**
  *
@@ -55,10 +48,7 @@ public class Slave {
     }
     private ServerSocket slaveServerSocket = null;
     private Socket connectionWithMaster = null;
-//    private ObjectInputStream recvFromMaster = null;
-//    private ObjectOutputStream sendToMaster = null;
     private InetAddress masterIP = null;
-    private int masterPort = 0;
     private Benchmark benchmark;
     private SlaveArgsReader args;
     private Handshake.Request handShake = null;
