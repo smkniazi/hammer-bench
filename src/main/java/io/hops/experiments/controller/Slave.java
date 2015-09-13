@@ -113,6 +113,7 @@ public class Slave {
         System.out.println("Waiting for connection from master ... ");
         slaveServerSocket = new ServerSocket(args.getSlaveListeningPort());
         connectionWithMaster = slaveServerSocket.accept();
+        masterIP =  connectionWithMaster.getInetAddress();
         System.out.print("Connected to master");
     }
 

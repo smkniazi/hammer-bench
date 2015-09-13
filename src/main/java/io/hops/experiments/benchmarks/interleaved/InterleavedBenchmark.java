@@ -123,8 +123,9 @@ public class InterleavedBenchmark extends Benchmark {
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
     InterleavedBenchmarkCommand.Request req = (InterleavedBenchmarkCommand.Request) command;
+    
     duration = req.getDuration();
-
+    System.out.println("Starting "+command.getBenchMarkType()+" for duration "+duration);
     List workers = new ArrayList<Worker>();
     for (int i = 0; i < numThreads; i++) {
       Callable worker = new Worker(req);
@@ -134,6 +135,8 @@ public class InterleavedBenchmark extends Benchmark {
     executor.invokeAll(workers); // blocking call
     long totalTime = System.currentTimeMillis() - startTime;
 
+    System.out.println("Finished "+command.getBenchMarkType()+" in "+totalTime);
+    
     double speed = (operationsCompleted.get() / (double) totalTime) * 1000;
 
     InterleavedBenchmarkCommand.Response response =

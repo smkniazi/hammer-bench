@@ -431,10 +431,6 @@ public class Master {
   private void sendToAllSlaves(Object obj) throws IOException {
     if (!slavesConnections.isEmpty()) {
       for (InetAddress slave : slavesConnections.keySet()) {
-        if (misbehavingSlaves.contains(slave)) {
-          printMasterLogMessages("*** ERROR " + slave + " is ignored. It seems to have errors");
-          continue;
-        }
         SlaveConnection conn = slavesConnections.get(slave);
         conn.sendToSlave(obj);
       }
@@ -445,10 +441,6 @@ public class Master {
     Map<InetAddress, Object> responses = new HashMap<InetAddress, Object>();
     if (!slavesConnections.isEmpty()) {
       for (InetAddress slave : slavesConnections.keySet()) {
-        if (misbehavingSlaves.contains(slave)) {
-          printMasterLogMessages("*** ERROR " + slave + " is ignored. It seems to have errors");
-          continue;
-        }
         SlaveConnection conn = slavesConnections.get(slave);
         Object obj = conn.recvFromSlave(timeout);
         if (obj != null) {
@@ -537,7 +529,7 @@ public class Master {
       socket = new Socket(slaveInetAddress, slavePort);
     }
 
-    public void sendToSlave(Object obj) throws IOException {
+    public void sendToSlave(Object obj) {
 
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
@@ -547,24 +539,28 @@ public class Master {
         } catch (Exception e) {
           handleMisBehavingSlave(socket.getInetAddress());
         }
+      } else {
+        printMasterLogMessages("*** ERROR send request to " + socket.getInetAddress() + " is ignored ");
       }
     }
 
-    public Object recvFromSlave(int timeout) throws IOException, ClassNotFoundException {
-      socket.setSoTimeout(timeout);
+    public Object recvFromSlave(int timeout) {
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
+          System.out.println("Setting time out to "+timeout);
+          socket.setSoTimeout(timeout);
           ObjectInputStream recvFromSlave = new ObjectInputStream(socket.getInputStream());
+          System.out.println("Goign to read obj "+timeout);
           Object obj = recvFromSlave.readObject();
           printMasterLogMessages("Recv " + obj.getClass().getName() + " from " + socket.getInetAddress());
+          socket.setSoTimeout(Integer.MAX_VALUE);
           return obj;
         } catch (Exception e) {
           handleMisBehavingSlave(socket.getInetAddress());
           return null;
-        } finally {
-          socket.setSoTimeout(Integer.MAX_VALUE);
         }
       } else {
+        printMasterLogMessages("*** ERROR recv request from " + socket.getInetAddress() + " is ignored ");
         return null;
       }
     }
@@ -579,11 +575,10 @@ public class Master {
     }
 
     private boolean isSlaveHealthy(InetAddress slave) {
-      if (misbehavingSlaves.contains(slave)) {
-        printMasterLogMessages("*** Unhealthy slave at " + slave);
-        return false;
-      } else {
+      if (!misbehavingSlaves.contains(slave)) {
         return true;
+      } else {
+        return false;
       }
     }
   }

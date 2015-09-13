@@ -38,30 +38,34 @@ public class Logger {
   private static InetAddress loggerIp = null;
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
-  
   private static DatagramSocket socket = null;
 
-  public static void error(Exception e) throws IOException {
-     printMsg(e.getClass().getName()+" "+e.getMessage());
+  public static void error(Exception e) {
+    e.printStackTrace();
+    printMsg(e.getClass().getName() + " " + e.getMessage());
   }
 
-  public static void printMsg(String msg) throws IOException {
-    if (enableRemoteLogging) {
+  public static void printMsg(String msg) {
+    if (enableRemoteLogging && msg.length() > 0) {
+      try {
+        if (socket == null) {
+          socket = new DatagramSocket();
+        }
 
-      if (socket == null) {
-        socket = new DatagramSocket();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(outputStream);
+        os.writeObject(msg);
+        byte[] data = outputStream.toByteArray();
+
+        DatagramPacket packet = new DatagramPacket(data, data.length,
+                loggerIp, loggerPort);
+        socket.send(packet);
+
+        System.out.println(msg);
+      } catch (Exception e) { // logging should not crash the client 
+        e.printStackTrace();
       }
-
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      ObjectOutputStream os = new ObjectOutputStream(outputStream);
-      os.writeObject(msg);
-      byte[] data = outputStream.toByteArray();
-
-      DatagramPacket packet = new DatagramPacket(data, data.length,
-              loggerIp, loggerPort);
-      socket.send(packet);
     }
-    System.out.println(msg);
   }
 
   public static synchronized boolean canILog() {
@@ -74,10 +78,12 @@ public class Logger {
   }
 
   public static void setLoggerIp(InetAddress loggerIp) {
+    System.out.println("Remote Logger IP: "+loggerIp);
     Logger.loggerIp = loggerIp;
   }
 
   public static void setLoggerPort(int loggerPort) {
+    System.out.println("Remote Logger Port: "+loggerPort);
     Logger.loggerPort = loggerPort;
   }
 
@@ -86,6 +92,7 @@ public class Logger {
   }
 
   public static class LogListener implements Runnable {
+
     private int port;
     private boolean running = true;
 
