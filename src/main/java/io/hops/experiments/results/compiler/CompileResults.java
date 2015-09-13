@@ -40,6 +40,7 @@ import java.util.List;
 public class CompileResults {
 
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
+
     if (argv.length != 3) {
       System.err.println("Usage CompileResults hdfsResults hopsResults outputDir");
       System.exit(0);
