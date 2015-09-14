@@ -118,7 +118,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             EXP_WARM_UP_TIME=600000 #10 mins
                             if [ $BenchMark = "BR" ]; then
                                 TotalClients=$(echo "scale=2; ($TotalNNCount * 10)" | bc)
-                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)				  
+                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)                              
                                 EXP_WARM_UP_TIME=3600000 #1hr
                             else
                                 TotalClients=$(echo "scale=2; ($TotalNNCount * 150 * 4)" | bc)

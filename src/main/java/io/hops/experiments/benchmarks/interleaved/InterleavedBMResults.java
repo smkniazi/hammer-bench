@@ -18,9 +18,11 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.utils.BenchmarkUtils;
 import java.text.DecimalFormat;
+import java.util.Map;
 
 /**
  *
@@ -31,15 +33,21 @@ public class InterleavedBMResults extends BMResult {
   private final double duration;
   private final double successfulOps;
   private final double failedOps;
+  private final Map<BenchmarkOperations,double[][]> percentile;
 
-  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double duration, double successfulOps, double failedOps) {
+  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile) {
     super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
     this.failedOps = failedOps;
+    this.percentile = percentile;
   }
 
+  public Map<BenchmarkOperations,double[][]> getPercentile(){
+    return percentile;
+  }
+  
   public double getSpeed() {
     return speed;
   }

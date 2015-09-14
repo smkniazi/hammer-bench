@@ -367,6 +367,11 @@ public class MasterArgsReader {
   public long getEnd2EndLatencyBMDuration(){
     return getLong(ConfigKeys.E2E_LATENCY_BM_DURATION_KEY, ConfigKeys.E2E_LATENCY_BM_DURATION_DEFAULT);
   }
+  
+  public boolean isPercentileEnabled(){
+    return getBoolean(ConfigKeys.GENERATE_PERCENTILES_KEY, ConfigKeys.GENERATE_PERCENTILES_DEFAULT);
+  }
+  
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
     return Integer.parseInt(val);

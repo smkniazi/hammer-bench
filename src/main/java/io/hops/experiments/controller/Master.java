@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
@@ -282,15 +283,20 @@ public class Master {
             args.getInterleavedFileChangeUserPercentage(),
             args.getInterleavedDirChangeUserPercentage(),
             args.getInterleavedBMDuration(), args.getFileSize(), args.getAppendFileSize(),
-            args.getReplicationFactor(), args.getBaseDir());
+            args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled());
     sendToAllSlaves(request);
 
     Thread.sleep(args.getInterleavedBMDuration());
     Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
+    processInterleavedResults(responses);
+  }
+
+  private void processInterleavedResults(Collection<Object> responses) throws FileNotFoundException, IOException {
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
+    Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
     for (Object obj : responses) {
       if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
         throw new IllegalStateException("Wrong response received from the client");
@@ -300,8 +306,43 @@ public class Master {
         failedOps.addValue(response.getTotalFailedOps());
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
+
+        if (args.isPercentileEnabled()) {
+          HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = response.getOpsExeTimes();
+          for (BenchmarkOperations opType : opsExeTimes.keySet()) {
+            ArrayList<Long> opExeTimesFromSlave = opsExeTimes.get(opType);
+            ArrayList<Long> opAllExeTimes = allOpsExecutionTimes.get(opType);
+            if (opAllExeTimes == null) {
+              opAllExeTimes = new ArrayList<Long>();
+              allOpsExecutionTimes.put(opType, opAllExeTimes);
+            }
+            opAllExeTimes.addAll(opExeTimesFromSlave);
+          }
+        }
       }
     }
+
+    Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
+     if (args.isPercentileEnabled()) {
+       for (BenchmarkOperations opType : allOpsExecutionTimes.keySet()) {
+         ArrayList<Long> opAllExeTimes = allOpsExecutionTimes.get(opType);
+         double []toDouble = new double[opAllExeTimes.size()];
+         for(int i = 0 ; i < opAllExeTimes.size();i++){
+           toDouble[i] = opAllExeTimes.get(i);
+         }
+         Percentile percentileCalculator = new Percentile();
+         percentileCalculator.setData(toDouble);
+         double delta = 0.5;
+         int rows = (int) Math.ceil((double)(100)/delta);
+         double[][] percentile = new double[rows][2];
+         for(double i = delta; i <= 100.0; i=i+delta){
+           percentile[0][]
+         }
+       }
+     }
+
+
+
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
             args.getNoOfNDBDataNodes(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
@@ -326,7 +367,7 @@ public class Master {
         //TODO
       }
     }
-    E2ELatencyBMResult result = new E2ELatencyBMResult(args.getNamenodeCount(),args.getNoOfNDBDataNodes());
+    E2ELatencyBMResult result = new E2ELatencyBMResult(args.getNamenodeCount(), args.getNoOfNDBDataNodes());
     printMasterResultMessages(result);
   }
 
@@ -356,9 +397,9 @@ public class Master {
     printMasterLogMessages("Warming Up ... ");
     prompt();
     WarmUpCommand.Request warmUpCommand = null;
-    if (args.getBenchMarkType() == BenchmarkType.INTERLEAVED ||
-            args.getBenchMarkType() == BenchmarkType.RAW || 
-            args.getBenchMarkType() == BenchmarkType.E2ELatency) {
+    if (args.getBenchMarkType() == BenchmarkType.INTERLEAVED
+            || args.getBenchMarkType() == BenchmarkType.RAW
+            || args.getBenchMarkType() == BenchmarkType.E2ELatency) {
       warmUpCommand = new NamespaceWarmUp.Request(args.getBenchMarkType(), args.getFilesToCreateInWarmUpPhase(), args.getReplicationFactor(),
               args.getFileSize(), args.getAppendFileSize(),
               args.getBaseDir());

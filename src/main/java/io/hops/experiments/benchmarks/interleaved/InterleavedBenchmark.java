@@ -53,9 +53,9 @@ public class InterleavedBenchmark extends Benchmark {
   AtomicLong operationsCompleted = new AtomicLong(0);
   AtomicLong operationsFailed = new AtomicLong(0);
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
+  HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
   private final int dirsPerDir;
   private final int filesPerDir;
-  
 
   public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir, int filesPerDir) {
     super(conf, numThreads);
@@ -81,9 +81,9 @@ public class InterleavedBenchmark extends Benchmark {
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
     InterleavedBenchmarkCommand.Request req = (InterleavedBenchmarkCommand.Request) command;
-    
+
     duration = req.getDuration();
-    System.out.println("Starting "+command.getBenchMarkType()+" for duration "+duration);
+    System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
     List workers = new ArrayList<Worker>();
     for (int i = 0; i < numThreads; i++) {
       Callable worker = new Worker(req);
@@ -93,12 +93,12 @@ public class InterleavedBenchmark extends Benchmark {
     executor.invokeAll(workers); // blocking call
     long totalTime = System.currentTimeMillis() - startTime;
 
-    System.out.println("Finished "+command.getBenchMarkType()+" in "+totalTime);
-    
+    System.out.println("Finished " + command.getBenchMarkType() + " in " + totalTime);
+
     double speed = (operationsCompleted.get() / (double) totalTime) * 1000;
 
     InterleavedBenchmarkCommand.Response response =
-            new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed);
+            new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes);
     return response;
   }
 
@@ -147,10 +147,10 @@ public class InterleavedBenchmark extends Benchmark {
 
       String message = "";
       if (Logger.canILog()) {
-        
-        message += format(25,"Completed Ops: "+operationsCompleted+" ");
-        message += format(20,"Failed Ops: "+operationsFailed+" ");
-        message += format(20,"Speed: "+speedPSec(operationsCompleted.get(), startTime)+" ops/s ");
+
+        message += format(25, "Completed Ops: " + operationsCompleted + " ");
+        message += format(20, "Failed Ops: " + operationsFailed + " ");
+        message += format(20, "Speed: " + speedPSec(operationsCompleted.get(), startTime) + " ops/s ");
 
         SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
         sorted.addAll(operationsStats.keySet());
@@ -158,10 +158,10 @@ public class InterleavedBenchmark extends Benchmark {
         for (BenchmarkOperations op : sorted) {
           AtomicLong stat = operationsStats.get(op);
           if (stat != null) {
-            
+
             double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
-            String msg = op + ": ["+percent+"] ";
-            message += format(op.toString().length()+10,msg);
+            String msg = op + ": [" + percent + "] ";
+            message += format(op.toString().length() + 10, msg);
           }
         }
         Logger.printMsg(message);
@@ -172,19 +172,24 @@ public class InterleavedBenchmark extends Benchmark {
       String path = OperationsUtils.getPath(opType, filePool);
       if (path != null) {
         boolean retVal = false;
+        long opExeTime = 0;
         try {
+          long opStartTime = 0L;
+          opStartTime = System.currentTimeMillis();
+
           OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
+          opExeTime = System.currentTimeMillis() - opStartTime;
           retVal = true;
         } catch (Exception e) {
           Logger.error(e);
         }
-        updateStats(opType, retVal);
+        updateStats(opType, retVal, opExeTime);
       } else {
         Logger.printMsg("Could not perform operation " + opType + ". Got Null from the file pool");
       }
     }
 
-    private void updateStats(BenchmarkOperations opType, boolean success) {
+    private void updateStats(BenchmarkOperations opType, boolean success, long opExeTime) {
       AtomicLong stat = operationsStats.get(opType);
       if (stat == null) { // this should be synchronized to get accurate stats. However, this will slow down and these stats are just for log messages. Some inconsistencies are OK
         stat = new AtomicLong(0);
@@ -194,14 +199,22 @@ public class InterleavedBenchmark extends Benchmark {
 
       if (success) {
         operationsCompleted.incrementAndGet();
+        if(req.isPercentileEnabled()){
+         ArrayList<Long> times =  opsExeTimes.get(opType);
+         if(times == null){
+           times = new ArrayList<Long>();
+           opsExeTimes.put(opType, times);
+         }
+         times.add(opExeTime);
+        }
       } else {
         operationsFailed.incrementAndGet();
       }
     }
   }
-  
+
   protected String format(int spaces, String string) {
-    String format = "%1$-"+spaces+"s";
+    String format = "%1$-" + spaces + "s";
     return String.format(format, string);
   }
 

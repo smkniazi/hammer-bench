@@ -16,9 +16,12 @@
  */
 package io.hops.experiments.benchmarks.interleaved;
 
+import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -48,12 +51,14 @@ public class InterleavedBenchmarkCommand {
     private long appendSize;
     private short replicationFactor;
     private String baseDir;
+    private boolean percentileEnabled;
 
     public Request(BigDecimal createPercent, BigDecimal appendPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent, BigDecimal lsDirPercent,
             BigDecimal chmodFilesPercent, BigDecimal chmodDirsPercent, BigDecimal mkdirPercent,
             BigDecimal setReplicationPercent, BigDecimal fileInfoPercent, BigDecimal dirInfoPercent,
             BigDecimal fileChownPercent, BigDecimal dirChownPercent,
-            long duration, long fileSize, long appendSize, short replicationFactor, String baseDir) {
+            long duration, long fileSize, long appendSize, short replicationFactor, String baseDir,
+            boolean percentileEnabled) {
       this.createPercent = createPercent;
       this.appendPercent = appendPercent;
       this.readPercent = readPercent;
@@ -74,6 +79,11 @@ public class InterleavedBenchmarkCommand {
       this.appendSize = appendSize;
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
+      this.percentileEnabled = percentileEnabled;
+    }
+
+    public boolean isPercentileEnabled() {
+      return percentileEnabled;
     }
 
     public BigDecimal getCreatePercent() {
@@ -169,14 +179,22 @@ public class InterleavedBenchmarkCommand {
     private final long totalSuccessfulOps;
     private final long totalFailedOps;
     private final double opsPerSec;
+    private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
 
-    public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec) {
+    public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
+            HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes) {
       this.runTime = runTime;
       this.totalSuccessfulOps = totalSuccessfulOps;
       this.totalFailedOps = totalFailedOps;
       this.opsPerSec = opsPerSec;
+      this.opsExeTimes = opsExeTimes;
     }
 
+    public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
+      return opsExeTimes;
+    }
+    
+    
     public long getRunTime() {
       return runTime;
     }

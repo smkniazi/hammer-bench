@@ -40,6 +40,9 @@ public class ConfigKeys {
     public static String E2E_LATENCY_BM_DURATION_KEY = "end2end.latency.bm.duration";
     public static long   E2E_LATENCY_BM_DURATION_DEFAULT = 60*1000;
     
+    public static String GENERATE_PERCENTILES_KEY = "generate.percentiles";
+    public static boolean   GENERATE_PERCENTILES_DEFAULT = true;
+    
     public static String INTERLEAVED_BM_DURATION_KEY = "interleaved.bm.duration";
     public static long   INTERLEAVED_BM_DURATION_DEFAULT = 60*1000;
     
