@@ -30,15 +30,15 @@ DNS_FullList=(`cat datanodes`)
 NNS_FullList=(`cat namenodes`)
 
 BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
-DFS_CLIENTS_PER_NAMENODE=50                        #In RAW and INTERLEAVED benchmarks DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) DFSClients are used to stress the namenodes.
-                                                   #These DFSClients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
-                                                   #if DFS_CLIENTS_PER_NAMENODE=1000 and there are 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
+DFS_CLIENTS_PER_NAMENODE=600                       #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
+                                                   #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
+                                                   #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
 TINY_DATANODES_PER_NAMENODE=10                     #No of simulated datanodes for benchmarking the blockreporting system
 
 #experiments to run
 #NOTE all experiment related parameters are in master.properties file
 Benchmark_Types=(
-            #RAW                                          #Test raw throughput of individual operations
+            #RAW                                         #Test raw throughput of individual operations
             INTERLEAVED                                  #Test synthetic workload from spotify 
             #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
             ) #space is delimeter
