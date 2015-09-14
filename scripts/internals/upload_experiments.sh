@@ -37,5 +37,7 @@
 	mkdir -p $temp_folder	
 	cp $HopsFS_Src_Folder/target/$JarFileName $temp_folder/
 	cp ./internals/HopsFS_Exp_Remote_Scripts/* $temp_folder/
+	cp ./master.properties $temp_folder/
+	cp ./slave.properties $temp_folder/
 
 	parallel-rsync -arzv -H "${BM_Machines_FullList[*]}" --user $HopsFS_User     $temp_folder/   $HopsFS_Experiments_Remote_Dist_Folder  

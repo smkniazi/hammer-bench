@@ -19,12 +19,15 @@ package io.hops.experiments.results.compiler;
 import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
+import io.hops.experiments.controller.MasterArgsReader;
 import io.hops.experiments.utils.BenchmarkUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *
@@ -201,6 +205,7 @@ public class RawBMResultAggregator extends Aggregator{
       
       allData += msg;
       
+      System.out.println(msg);
       CompileResults.writeToFile(outputFolder+"/"+op+".dat", msg, false);
       
       String plotCommand = "";
@@ -226,7 +231,9 @@ public class RawBMResultAggregator extends Aggregator{
         
       
     }
+    System.out.println(plotCommands);
     CompileResults.writeToFile(outputFolder+"/histo-internal.gnuplot", plotCommands, false);
+    System.out.println(allData);
     CompileResults.writeToFile(outputFolder+"/histogram-all-data.dat", allData, false);
   }
   
@@ -287,10 +294,37 @@ public class RawBMResultAggregator extends Aggregator{
       msg+="\n";
       allData+=msg;
     }
-    
+    System.out.println(allData);
     CompileResults.writeToFile(outputFile, allData, false);
 
   }
 
+  public static RawBMResults processSlaveResponses(Collection<Object> responses, RawBenchmarkCommand.Request request, MasterArgsReader args){
+    DescriptiveStatistics successfulOps = new DescriptiveStatistics();
+    DescriptiveStatistics failedOps = new DescriptiveStatistics();
+    DescriptiveStatistics speed = new DescriptiveStatistics();
+    DescriptiveStatistics duration = new DescriptiveStatistics();
+    for (Object obj : responses) {
+      if (!(obj instanceof RawBenchmarkCommand.Response)
+              || (obj instanceof RawBenchmarkCommand.Response
+              && ((RawBenchmarkCommand.Response) obj).getPhase() != request.getPhase())) {
+        throw new IllegalStateException("Wrong response received from the client");
+      } else {
+        RawBenchmarkCommand.Response response = (RawBenchmarkCommand.Response) obj;
+        successfulOps.addValue(response.getTotalSuccessfulOps());
+        failedOps.addValue(response.getTotalFailedOps());
+        speed.addValue(response.getOpsPerSec());
+        duration.addValue(response.getRunTime());
+      }
+    }
+
+    RawBMResults result = new RawBMResults(args.getNamenodeCount(),
+            args.getNoOfNDBDataNodes(),
+            request.getPhase(),
+            (successfulOps.getSum() / ((duration.getMean() / 1000))),
+            (duration.getMean() / 1000),
+            (successfulOps.getSum()), (failedOps.getSum()));
+    return result;
+  }
   
 }

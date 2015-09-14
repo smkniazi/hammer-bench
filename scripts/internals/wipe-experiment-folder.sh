@@ -20,6 +20,14 @@
 # A password-less sign-on should be setup prior to calling this script
 
 
+if [ -z $BM_Machines_FullList ]; then
+  DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  echo "Loading params "
+  source $DIR/../experiment-env.sh
+fi
+
+
+
 #All Unique Hosts
 All_Hosts=${BM_Machines_FullList[*]}
 All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')

@@ -36,7 +36,7 @@ sleep 5
 
 connectStr="$HopsFS_User@$1"
 echo "loading new master properties files on $1"
-scp ./internals/HopsFS_Exp_Remote_Scripts/master.properties $connectStr:$HopsFS_Experiments_Remote_Dist_Folder
+scp ./master.properties $connectStr:$HopsFS_Experiments_Remote_Dist_Folder
 echo "Starting Experiment Master on $1"
 ssh $connectStr $HopsFS_Experiments_Remote_Dist_Folder/start-master.sh 
 

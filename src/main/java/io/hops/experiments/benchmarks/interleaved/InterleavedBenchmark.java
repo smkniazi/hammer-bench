@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
@@ -32,7 +30,6 @@ import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
@@ -160,8 +157,8 @@ public class InterleavedBenchmark extends Benchmark {
           if (stat != null) {
 
             double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
-            String msg = op + ": [" + percent + "] ";
-            message += format(op.toString().length() + 10, msg);
+            String msg = op + ": [" + percent + "%] ";
+            message += format(op.toString().length() + 14, msg);
           }
         }
         Logger.printMsg(message);
@@ -199,17 +196,20 @@ public class InterleavedBenchmark extends Benchmark {
 
       if (success) {
         operationsCompleted.incrementAndGet();
-        if(req.isPercentileEnabled()){
-         ArrayList<Long> times =  opsExeTimes.get(opType);
-         if(times == null){
-           times = new ArrayList<Long>();
-           opsExeTimes.put(opType, times);
-         }
-         times.add(opExeTime);
+        if (req.isPercentileEnabled()) {
+          synchronized (opsExeTimes) {
+            ArrayList<Long> times = opsExeTimes.get(opType);
+            if (times == null) {
+              times = new ArrayList<Long>();
+              opsExeTimes.put(opType, times);
+            }
+            times.add(opExeTime);
+          }
+        } else {
+          operationsFailed.incrementAndGet();
         }
-      } else {
-        operationsFailed.incrementAndGet();
       }
+
     }
   }
 
@@ -223,4 +223,7 @@ public class InterleavedBenchmark extends Benchmark {
     double opsPerMSec = (double) (ops) / (double) timePassed;
     return BenchmarkUtils.round(opsPerMSec * 1000);
   }
+  
+  
+  
 }

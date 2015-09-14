@@ -29,5 +29,5 @@ if [ $BenchMark = "BR" ]; then
  $command  $com_mysql_clusterj_database < $DIR/br.sql
  echo "Truncate and create table Finished"
 
- sed -i 's|br.persist.database=.*|br.persist.database='$io_hops_metadata_ndb_mysqlserver_host:$io_hops_metadata_ndb_mysqlserver_port:$com_mysql_clusterj_database'|g'   $DIR/../../HDFS-Distributed-BenchMark/scripts/HopsFS_Exp_Remote_Scripts/master.properties
+ sed -i 's|br.persist.database=.*|br.persist.database='$io_hops_metadata_ndb_mysqlserver_host:$io_hops_metadata_ndb_mysqlserver_port:$com_mysql_clusterj_database'|g'   $DIR/../master.properties
 fi

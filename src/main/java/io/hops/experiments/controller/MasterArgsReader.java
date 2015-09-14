@@ -308,8 +308,8 @@ public class MasterArgsReader {
     return getInt(ConfigKeys.REMOTE_LOGGING_PORT_KEY, ConfigKeys.REMOTE_LOGGING_PORT_DEFAULT);
   }
 
-  public String getResultFile() {
-    return getString(ConfigKeys.RESULTS_FIlE_KEY, ConfigKeys.RESULTS_FIlE_DEFAULT);
+  public String getResultsDir() {
+    return getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
   }
 
   public int getFilesToCreateInWarmUpPhase() {
@@ -362,10 +362,6 @@ public class MasterArgsReader {
   
   public int getMaxSlavesFailureThreshold(){
     return getInt(ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_KEY, ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT);
-  }
-            
-  public long getEnd2EndLatencyBMDuration(){
-    return getLong(ConfigKeys.E2E_LATENCY_BM_DURATION_KEY, ConfigKeys.E2E_LATENCY_BM_DURATION_DEFAULT);
   }
   
   public boolean isPercentileEnabled(){

@@ -17,7 +17,6 @@
 package io.hops.experiments.benchmarks.common;
 
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
-import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBenchmark;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
@@ -69,8 +68,6 @@ public abstract class Benchmark {
       return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
     } else if (type == BenchmarkType.BR) {
       return new BlockReportingBenchmark(conf, numThreads, slaveId);
-    } else if (type == BenchmarkType.E2ELatency) {
-      return new E2ELatencyBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
     } else {
       throw new UnsupportedOperationException("Unsupported Benchmark " + type);
     }

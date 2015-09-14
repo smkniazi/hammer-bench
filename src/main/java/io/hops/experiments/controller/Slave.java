@@ -108,6 +108,7 @@ public class Slave {
     }
 
     private Object receiveRequestFromMaster() throws IOException, ClassNotFoundException {
+        connectionWithMaster.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
         ObjectInputStream recvFromMaster =  new ObjectInputStream(connectionWithMaster.getInputStream());
         Object obj = recvFromMaster.readObject();
         if (obj instanceof KillSlave) {
@@ -117,8 +118,12 @@ public class Slave {
     }
 
     private void sendResponseToMaster(Object obj) throws IOException {
+        System.out.println("Sending response to master ... ");
+        long startTime = System.currentTimeMillis();
+        connectionWithMaster.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
         ObjectOutputStream sendToMaster = new ObjectOutputStream(connectionWithMaster.getOutputStream());
         sendToMaster.writeObject(obj);
+        System.out.println("Sent response to master. Time: "+(System.currentTimeMillis() - startTime)+" ms");
     }
     
     private void createHdfsConf(Handshake.Request request){

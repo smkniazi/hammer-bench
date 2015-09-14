@@ -6,7 +6,7 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $DIR/experiment-env.sh
 
-exp_master_prop_file="$DIR/internals/HopsFS_Exp_Remote_Scripts/master.properties"
+exp_master_prop_file="$DIR/master.properties"
 exp_deploy_script="$DIR/internals/deploy-experiments.sh"
 exp_start_script="$DIR/internals/start-exp.sh"
 exp_stop_script="$DIR/internals/kill-exp.sh"
@@ -24,7 +24,7 @@ run() {
   echo "Slaves $ExpMaster ${ExpSlaves[@]}"
   echo "Master $ExpMaster"
   echo "Threads/Slave $ClientsPerSlave"
-  echo "OutputFile $OutputFile"
+  echo "currentExpDir $currentExpDir"
   echo "BenchMark $BenchMark"
   echo "HBTime $HBTime"
   echo "DataNodes $DNS_FullList_STR"
@@ -34,34 +34,33 @@ run() {
   sed -i 's|list.of.slaves.*|list.of.slaves='"$ExpMaster ${ExpSlaves[@]}"'|g'       $exp_master_prop_file
   sed -i 's|benchmark.type.*|benchmark.type='$BenchMark'|g'                         $exp_master_prop_file
   sed -i 's|num.slave.threads.*|num.slave.threads='$ClientsPerSlave'|g'             $exp_master_prop_file
-  sed -i 's|results.file.*|results.file='$exp_remote_bench_mark_result_file'|g'     $exp_master_prop_file      
+  sed -i 's|results.dir.*|results.dir='$exp_remote_bench_mark_result_dir'|g'        $exp_master_prop_file      
   sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
-  sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'   $exp_master_prop_file
+  sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'     $exp_master_prop_file
   sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file
  
   date1=$(date +"%s") 
-: <<'END'
+#: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   echo "*** Starting HopsFS ***"
   source $Start_HopsFS_Script
   echo "*** Going to sleep a bit so that all datanodes connect to the namenodes ***"
   sleep 5
   echo "*** strating the benchmark ***"
+  ssh $HopsFS_User@$ExpMaster mkdir -p $exp_remote_bench_mark_result_dir
   source $exp_start_script $ExpMaster 
-  scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_file $OutputFile.log
-  scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_file.hopsbin $OutputFile.hopsbin
+  scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_dir/* $currentExpDir/
+
   echo "*** shutting down the cluster ***"
   
   source $exp_stop_script           # kills exp
   source $exp_stop_hdfs_script      # kills hdfs
   source $kill_java_everywhere      # kills all zombie java processes
-  echo "*** results are ***"
-  cat $OutputFile.log
-END
+#END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
-  echo "ExpTime $OutputFile $(($diff / 60)) minutes and $(($diff % 60)) seconds."
+  echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
 }
 
 
@@ -70,7 +69,7 @@ mkdir -p $All_Results_Folder
 counter=0
 
 echo "*** deploying experiment jars ***"
-#source $exp_deploy_script
+source $exp_deploy_script
 
 while [  $counter -lt $REPEAT_EXP_TIMES ]; do
         let counter+=1
@@ -107,8 +106,8 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                         fi
                 
 
-                        currentDirInt="$currentDir/$BenchMark"
-                        mkdir -p $currentDirInt
+                        currentDirBM="$currentDir/$BenchMark"
+                        mkdir -p $currentOutputDir
                             
                             TotalNNCount=$currentNNIndex
                                        
@@ -117,11 +116,11 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             ClientsPerSlave=1
                             EXP_WARM_UP_TIME=600000 #10 mins
                             if [ $BenchMark = "BR" ]; then
-                                TotalClients=$(echo "scale=2; ($TotalNNCount * 10)" | bc)
+                                TotalClients=$(echo "scale=2; ($TotalNNCount * $TINY_DATANODES_PER_NAMENODE)" | bc)
                                 ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)                              
                                 EXP_WARM_UP_TIME=3600000 #1hr
                             else
-                                TotalClients=$(echo "scale=2; ($TotalNNCount * 150 * 4)" | bc)
+                                TotalClients=$(echo "scale=2; ($TotalNNCount * $DFS_CLIENTS_PER_NAMENODE)" | bc)
                                 ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)
                             fi
                             
@@ -142,7 +141,8 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
 
                             RPC_PORT=$(echo "($NameNodeRpcPort)" | bc)
                             BOOT_STRAP_NN="hdfs://$Current_Leader_NN:$RPC_PORT"                   
-                            OutputFile="$currentDirInt/$TotalNNCount-NN-$TotalClients-Clients-$BenchMark-BenchMark"        
+                            currentExpDir="$currentDirBM/$TotalNNCount-NN-$TotalClients-Clients-$BenchMark-BenchMark"
+                            mkdir -p  $currentExpDir       
                             run
                                           
                 done

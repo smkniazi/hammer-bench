@@ -16,6 +16,9 @@
  */
 package io.hops.experiments.controller;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
+import com.google.common.primitives.Doubles;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -38,14 +41,14 @@ import io.hops.experiments.controller.commands.KillSlave;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
-import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBenchmarkCommand;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
-import io.hops.experiments.benchmarks.e2eLatency.E2ELatencyBMResult;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import io.hops.experiments.results.compiler.InterleavedBMResultsAggregator;
+import io.hops.experiments.results.compiler.RawBMResultAggregator;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -54,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
@@ -86,8 +90,8 @@ public class Master {
       System.out.println("*** Starting the master ***");
       args = new MasterArgsReader(configFilePath);
 
-      resetResultFile();
-
+      removeExistingResultsFiles();
+      
       startRemoteLogger();
 
       connectSlaves();
@@ -100,10 +104,9 @@ public class Master {
       //start the commander
       startCommander();
 
+      generateResultsFile();
+      
       printAllResults();
-
-      generateBinaryFile();
-
     } catch (Exception e) {
       System.err.println(e);
       e.printStackTrace();
@@ -127,8 +130,8 @@ public class Master {
       startInterleavedCommander();
     } else if (args.getBenchMarkType() == BenchmarkType.BR) {
       startBlockReportingCommander();
-    } else if (args.getBenchMarkType() == BenchmarkType.E2ELatency) {
-      startE2ELatencyCommander();
+    } else {
+      throw new IllegalStateException("Unsupported Benchmark ");
     }
 
   }
@@ -288,86 +291,7 @@ public class Master {
 
     Thread.sleep(args.getInterleavedBMDuration());
     Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
-    processInterleavedResults(responses);
-  }
-
-  private void processInterleavedResults(Collection<Object> responses) throws FileNotFoundException, IOException {
-    DescriptiveStatistics successfulOps = new DescriptiveStatistics();
-    DescriptiveStatistics failedOps = new DescriptiveStatistics();
-    DescriptiveStatistics speed = new DescriptiveStatistics();
-    DescriptiveStatistics duration = new DescriptiveStatistics();
-    Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
-    for (Object obj : responses) {
-      if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
-        throw new IllegalStateException("Wrong response received from the client");
-      } else {
-        InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
-        successfulOps.addValue(response.getTotalSuccessfulOps());
-        failedOps.addValue(response.getTotalFailedOps());
-        speed.addValue(response.getOpsPerSec());
-        duration.addValue(response.getRunTime());
-
-        if (args.isPercentileEnabled()) {
-          HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = response.getOpsExeTimes();
-          for (BenchmarkOperations opType : opsExeTimes.keySet()) {
-            ArrayList<Long> opExeTimesFromSlave = opsExeTimes.get(opType);
-            ArrayList<Long> opAllExeTimes = allOpsExecutionTimes.get(opType);
-            if (opAllExeTimes == null) {
-              opAllExeTimes = new ArrayList<Long>();
-              allOpsExecutionTimes.put(opType, opAllExeTimes);
-            }
-            opAllExeTimes.addAll(opExeTimesFromSlave);
-          }
-        }
-      }
-    }
-
-    Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
-     if (args.isPercentileEnabled()) {
-       for (BenchmarkOperations opType : allOpsExecutionTimes.keySet()) {
-         ArrayList<Long> opAllExeTimes = allOpsExecutionTimes.get(opType);
-         double []toDouble = new double[opAllExeTimes.size()];
-         for(int i = 0 ; i < opAllExeTimes.size();i++){
-           toDouble[i] = opAllExeTimes.get(i);
-         }
-         Percentile percentileCalculator = new Percentile();
-         percentileCalculator.setData(toDouble);
-         double delta = 0.5;
-         int rows = (int) Math.ceil((double)(100)/delta);
-         double[][] percentile = new double[rows][2];
-         for(double i = delta; i <= 100.0; i=i+delta){
-           percentile[0][]
-         }
-       }
-     }
-
-
-
-    InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(),
-            (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
-            (successfulOps.getSum()), (failedOps.getSum()));
-    printMasterResultMessages(result);
-  }
-
-  private void startE2ELatencyCommander() throws IOException, InterruptedException, ClassNotFoundException {
-    System.out.println("Starting end to end latency benchmark ...");
-    prompt();
-    E2ELatencyBenchmarkCommand.Request request =
-            new E2ELatencyBenchmarkCommand.Request(args.getEnd2EndLatencyBMDuration());
-    sendToAllSlaves(request);
-
-    Thread.sleep(args.getEnd2EndLatencyBMDuration());
-    Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
-    for (Object obj : responses) {
-      if (!(obj instanceof E2ELatencyBenchmarkCommand.Response)) {
-        throw new IllegalStateException("Wrong response received from the client");
-      } else {
-        E2ELatencyBenchmarkCommand.Response response = (E2ELatencyBenchmarkCommand.Response) obj;
-        //TODO
-      }
-    }
-    E2ELatencyBMResult result = new E2ELatencyBMResult(args.getNamenodeCount(), args.getNoOfNDBDataNodes());
+    InterleavedBMResults result = InterleavedBMResultsAggregator.processInterleavedResults(responses,args);
     printMasterResultMessages(result);
   }
 
@@ -398,8 +322,7 @@ public class Master {
     prompt();
     WarmUpCommand.Request warmUpCommand = null;
     if (args.getBenchMarkType() == BenchmarkType.INTERLEAVED
-            || args.getBenchMarkType() == BenchmarkType.RAW
-            || args.getBenchMarkType() == BenchmarkType.E2ELatency) {
+            || args.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(args.getBenchMarkType(), args.getFilesToCreateInWarmUpPhase(), args.getReplicationFactor(),
               args.getFileSize(), args.getAppendFileSize(),
               args.getBaseDir());
@@ -437,30 +360,7 @@ public class Master {
     Thread.sleep(request.getDurationInMS());
     Collection<Object> responses = receiveFromAllSlaves(10 * 1000/*sec wait*/);
 
-    DescriptiveStatistics successfulOps = new DescriptiveStatistics();
-    DescriptiveStatistics failedOps = new DescriptiveStatistics();
-    DescriptiveStatistics speed = new DescriptiveStatistics();
-    DescriptiveStatistics duration = new DescriptiveStatistics();
-    for (Object obj : responses) {
-      if (!(obj instanceof RawBenchmarkCommand.Response)
-              || (obj instanceof RawBenchmarkCommand.Response
-              && ((RawBenchmarkCommand.Response) obj).getPhase() != request.getPhase())) {
-        throw new IllegalStateException("Wrong response received from the client");
-      } else {
-        RawBenchmarkCommand.Response response = (RawBenchmarkCommand.Response) obj;
-        successfulOps.addValue(response.getTotalSuccessfulOps());
-        failedOps.addValue(response.getTotalFailedOps());
-        speed.addValue(response.getOpsPerSec());
-        duration.addValue(response.getRunTime());
-      }
-    }
-
-    RawBMResults result = new RawBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(),
-            request.getPhase(),
-            (successfulOps.getSum() / ((duration.getMean() / 1000))),
-            (duration.getMean() / 1000),
-            (successfulOps.getSum()), (failedOps.getSum()));
+    RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, args);
     printMasterResultMessages(result);
   }
 
@@ -468,7 +368,7 @@ public class Master {
     if (args != null) {
       List<InetAddress> slaves = args.getListOfSlaves();
       for (InetAddress slave : slaves) {
-        printMasterLogMessages("Connection to slave " + slave);
+        printMasterLogMessages("Connecting to slave " + slave);
         try {
           SlaveConnection slaveConn = new SlaveConnection(slave, args.getSlaveListeningPort());
           slavesConnections.put(slave, slaveConn);
@@ -477,8 +377,9 @@ public class Master {
           printMasterLogMessages("*** ERROR  unable to connect " + slave);
         }
       }
-      if (misbehavingSlaves.size() >= args.getMaxSlavesFailureThreshold()) {
-        printMasterLogMessages("*** Too many slaves failed. Abort test.");
+      if (misbehavingSlaves.size() > args.getMaxSlavesFailureThreshold()) {
+        printMasterLogMessages("*** Too many slaves failed. Abort test. Failed Slaves Count "+misbehavingSlaves.size()+" Threshold: "+args.getMaxSlavesFailureThreshold());
+        System.exit(-1);
       }
     }
   }
@@ -531,32 +432,44 @@ public class Master {
 
   private void printMasterResultMessages(BMResult result) throws FileNotFoundException, IOException {
     blueColoredText(result.toString());
-    FileWriter out = new FileWriter(args.getResultFile(), true);
-    out.write(result.toString() + "\n");
-    out.close();
-
     results.add(result);
   }
-
-  private void resetResultFile() {
-    File file = new File(args.getResultFile());
-    if (file.exists()) {
-      file.delete();
+  
+  private void removeExistingResultsFiles() throws IOException{
+    File dir = new File(args.getResultsDir());
+    if(dir.exists()){
+       FileUtils.deleteDirectory(dir);
     }
-
-    file = new File(args.getResultFile() + ConfigKeys.BINARY_RESULT_FILE_EXT);
-    if (file.exists()) {
-      file.delete();
-    }
+    dir.mkdirs();
   }
 
-  private void generateBinaryFile() throws FileNotFoundException, IOException {
-    FileOutputStream fout = new FileOutputStream(args.getResultFile() + ConfigKeys.BINARY_RESULT_FILE_EXT);
+  private void generateResultsFile() throws FileNotFoundException, IOException {
+    
+    String filePath = args.getResultsDir();
+    if(!filePath.endsWith("/")){
+      filePath += "/";
+    }
+    filePath += ConfigKeys.BINARY_RESULT_FILE_NAME;
+    printMasterLogMessages("Writing results to "+filePath);
+    FileOutputStream fout = new FileOutputStream(filePath);
     ObjectOutputStream oos = new ObjectOutputStream(fout);
     for (BMResult result : results) {
       oos.writeObject(result);
     }
     oos.close();
+    
+    
+    filePath = args.getResultsDir();
+    if(!filePath.endsWith("/")){
+      filePath += "/";
+    }
+    filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
+    printMasterLogMessages("Writing results to "+filePath);
+    FileWriter out = new FileWriter(filePath, false);
+    for (BMResult result : results) {
+      out.write(result.toString() + "\n");
+    }
+    out.close();
   }
 
   private void redColoredText(String msg) {
@@ -573,7 +486,15 @@ public class Master {
     System.out.println("\n\n\n");
     System.out.println("************************ All Results ************************");
     System.out.println("\n\n\n");
-    BufferedReader br = new BufferedReader(new FileReader(args.getResultFile()));
+    
+    String filePath = args.getResultsDir();
+    if(!filePath.endsWith("/")){
+      filePath += "/";
+    }
+    filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
+    
+    printMasterLogMessages("Reading results from "+filePath);
+    BufferedReader br = new BufferedReader(new FileReader(filePath));
     try {
 
       String line = br.readLine();
@@ -600,7 +521,8 @@ public class Master {
 
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
-          printMasterLogMessages("SENT " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
+          printMasterLogMessages("SEND " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
+          socket.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
           ObjectOutputStream sendToSlave = new ObjectOutputStream(socket.getOutputStream());
           sendToSlave.writeObject(obj);
         } catch (Exception e) {
@@ -615,9 +537,10 @@ public class Master {
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
           socket.setSoTimeout(timeout);
+          socket.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
           ObjectInputStream recvFromSlave = new ObjectInputStream(socket.getInputStream());
           Object obj = recvFromSlave.readObject();
-          printMasterLogMessages("RECV " + obj.getClass().getCanonicalName() + " from " + socket.getInetAddress());
+          printMasterLogMessages("RECVD " + obj.getClass().getCanonicalName() + " from " + socket.getInetAddress());
           socket.setSoTimeout(Integer.MAX_VALUE);
           return obj;
         } catch (Exception e) {

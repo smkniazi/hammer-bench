@@ -23,7 +23,7 @@ package io.hops.experiments.controller;
  */
 public class ConfigKeys {
   
-    public static final int BUFFER_SIZE = 10*1024;
+    public static final int BUFFER_SIZE = 4*1024*1024; 
     
     public static String MAX_SLAVE_FAILURE_THREASHOLD_KEY = "max.slave.failure.threshold";   // only for logging
     public static int MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT = 0;
@@ -35,10 +35,7 @@ public class ConfigKeys {
     public static int NO_OF_NDB_DATANODES_DEFAULT = 0;
     
     public static String BENCHMARK_TYPE_KEY = "benchmark.type";
-    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM | E2ELatency."
-    
-    public static String E2E_LATENCY_BM_DURATION_KEY = "end2end.latency.bm.duration";
-    public static long   E2E_LATENCY_BM_DURATION_DEFAULT = 60*1000;
+    public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM ."
     
     public static String GENERATE_PERCENTILES_KEY = "generate.percentiles";
     public static boolean   GENERATE_PERCENTILES_DEFAULT = true;
@@ -205,9 +202,10 @@ public class ConfigKeys {
     public static String MASTER_LISTENING_PORT_KEY = "master.listening.port";
     public static int    MASTER_LISTENING_PORT_DEFAULT = 4444;
     
-    public static String RESULTS_FIlE_KEY = "results.file";
-    public static String RESULTS_FIlE_DEFAULT = "results.txt";
-    public static String BINARY_RESULT_FILE_EXT = ".hopsbin";
+    public static String RESULTS_DIR_KEY = "results.dir";
+    public static String RESULTS_DIR_DEFAULT =     ".";
+    public static String TEXT_RESULT_FILE_NAME =   "hopsresults.txt";
+    public static String BINARY_RESULT_FILE_NAME = "hopsresults.hopsbin";
     
     public static String FILES_TO_CRAETE_IN_WARM_UP_PHASE_KEY = "files.to.create.in.warmup.phase";
     public static int    FILES_TO_CRAETE_IN_WARM_UP_PHASE_DEFAULT = 10;

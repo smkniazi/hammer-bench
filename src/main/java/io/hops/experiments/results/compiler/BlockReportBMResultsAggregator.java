@@ -85,7 +85,9 @@ public class BlockReportBMResultsAggregator extends Aggregator{
     }
     
     
+    System.out.println(plot);
     CompileResults.writeToFile(outpuFolder+"/block-report.gnuplot", plot, false);
+    System.out.println(data);
     CompileResults.writeToFile(outpuFolder+"/block-report.dat", data, false);
     
   }
