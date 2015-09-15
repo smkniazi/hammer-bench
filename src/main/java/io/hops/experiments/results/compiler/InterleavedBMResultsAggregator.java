@@ -35,21 +35,30 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
  *
  * @author salman
  */
-public class InterleavedBMResultsAggregator extends Aggregator{
+public class InterleavedBMResultsAggregator extends Aggregator {
 
-  private Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
-          new HashMap<Integer, InterleavedAggregate>();
+  private Map<String /*workload name*/, Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/>> allWorkloadsResults =
+          new HashMap<String, Map<Integer, InterleavedAggregate>>();
 
+//  private Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
+//          new HashMap<Integer, InterleavedAggregate>();
   @Override
   public void processRecord(BMResult result) {
     //System.out.println(result);
-    InterleavedBMResults ilResult = (InterleavedBMResults)result;
+    InterleavedBMResults ilResult = (InterleavedBMResults) result;
 
-    InterleavedAggregate agg = allResults.get(ilResult.getNoOfNamenodes());
+    String workloadName = ilResult.getWorkloadName();
+    Map<Integer, InterleavedAggregate> workloadResults = allWorkloadsResults.get(workloadName);
+    if (workloadResults == null) {
+      workloadResults = new HashMap<Integer, InterleavedAggregate>();
+      allWorkloadsResults.put(workloadName, workloadResults);
+    }
+
+    InterleavedAggregate agg = workloadResults.get(ilResult.getNoOfNamenodes());
 
     if (agg == null) {
       agg = new InterleavedAggregate();
-      allResults.put(ilResult.getNoOfNamenodes(), agg);
+      workloadResults.put(ilResult.getNoOfNamenodes(), agg);
     }
 
     agg.addSpeed(ilResult.getSpeed());
@@ -57,50 +66,62 @@ public class InterleavedBMResultsAggregator extends Aggregator{
     agg.addSucessfulOps(ilResult.getSuccessfulOps());
     agg.addRunDuration(ilResult.getDuration());
   }
-  
-  public Map<Integer, InterleavedAggregate> getResults(){
-    return allResults;
+
+  public Map<String, Map<Integer, InterleavedAggregate>> getResults() {
+    return allWorkloadsResults;
   }
-  
-  public static void combineResults(Map<Integer, InterleavedAggregate> hdfs, Map<Integer, InterleavedAggregate> hopsfs, String outpuFolder) throws IOException {
-    
-    String data = "";
+
+  public static void combineResults(Map<String, Map<Integer, InterleavedAggregate>> hdfsAllWorkLoads, Map<String, Map<Integer, InterleavedAggregate>> hopsfsAllWorkloas, String outpuFolder) throws IOException {
+
     String plot = "set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n";
     plot += "set output '| ps2pdf - interleaved.pdf'\n";
-    plot +=" set size 1,0.75 \n ";
+    plot += "#set size 1,0.75 \n ";
     plot += "set ylabel \"ops/sec\" \n";
     plot += "set xlabel \"Number of Namenodes\" \n";
     plot += "set format y \"%.0s%c\"\n";
-    
-    if(hdfs.keySet().size() > 1 ){
-      System.out.println("NN count for HDFS cannot be greater than 1");
-      return;
-    }
-    
-    if(hopsfs.keySet().size() <= 0){
-      return;
-    }
-    
-    double hdfsVal = 0; 
-    if(hdfs.keySet().size() == 1){
-      hdfsVal = ((InterleavedAggregate)hdfs.values().toArray()[0]).getSpeed();
+    plot += "plot ";
+
+    for (String workload : hopsfsAllWorkloas.keySet()) {
+      Map<Integer, InterleavedAggregate> hopsWorkloadResult = hopsfsAllWorkloas.get(workload);
+      Map<Integer, InterleavedAggregate> hdfsWorkloadResult = hdfsAllWorkLoads.get(workload);
+
+      if (hopsWorkloadResult == null) {
+        System.out.println("No data for hopsfs for workload " + workload);
+        return;
+      }
+
+      double hdfsVal = 0;
+      if (hdfsWorkloadResult != null) {
+        if (hdfsWorkloadResult.keySet().size() > 1) {
+          System.out.println("NN count for HDFS cannot be greater than 1");
+          return;
+        }
+        
+        if (hdfsWorkloadResult.keySet().size() == 1) {
+          hdfsVal = ((InterleavedAggregate) hdfsWorkloadResult.values().toArray()[0]).getSpeed();
+        }
+      }
+
+      if (hopsWorkloadResult.keySet().size() <= 0) {
+        return;
+      }
+
+      plot += " '"+workload+"-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-"+workload+"\" with errorbars, " + hdfsVal + " title \"HDFS-"+workload+"\"  , \\\n";
+      String data = "";
+      for (Integer nn : hopsWorkloadResult.keySet()) {
+        InterleavedAggregate agg = hopsWorkloadResult.get(nn);
+        data += CompileResults.format(nn + "") + CompileResults.format(agg.getSpeed() + "")
+                + CompileResults.format(agg.getMinSpeed() + "") + CompileResults.format(agg.getMaxSpeed() + "")
+                + "\n";
+      }
+      System.out.println(data);
+      CompileResults.writeToFile(outpuFolder + "/"+workload+"-interleaved.dat", data, false);
     }
 
-    plot+="plot 'interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS\" with errorbars, "+hdfsVal+" title \"HDFS\" \n";;
-    
-    for(Integer nn: hopsfs.keySet()){
-      InterleavedAggregate agg = hopsfs.get(nn);
-      data+=CompileResults.format(nn+"")+CompileResults.format(agg.getSpeed()+"")+
-              CompileResults.format(agg.getMinSpeed()+"")+CompileResults.format(agg.getMaxSpeed()+"")+
-              "\n";
-    }
-    
     System.out.println(plot);
-    CompileResults.writeToFile(outpuFolder+"/interleaved.gnuplot", plot, false);
-    System.out.println(data);
-    CompileResults.writeToFile(outpuFolder+"/interleaved.dat", data, false);
+    CompileResults.writeToFile(outpuFolder + "/interleaved.gnuplot", plot, false);
   }
-  
+
   public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, MasterArgsReader args) throws FileNotFoundException, IOException {
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
@@ -146,44 +167,44 @@ public class InterleavedBMResultsAggregator extends Aggregator{
         int rows = (int) Math.ceil((double) (100) / delta);
         double[][] percentile = new double[rows][2];
         int index = 0;
-        for (double percen = delta; percen <= 100.0; percen += delta, index++) {  
+        for (double percen = delta; percen <= 100.0; percen += delta, index++) {
           percentile[index][0] = percentileCalculator.evaluate(percen);
           percentile[index][1] = percen; // percentile
           //System.out.println("percent "+percen+" data "+percentile[index][0]);
         }
         allOpsPercentiles.put(opType, percentile);
       }
-      
-      generatePercentileGraphs(allOpsPercentiles, args.getResultsDir());
+
+      generatePercentileGraphs(allOpsPercentiles, args.getResultsDir(), args.getInterleavedWorkloadName());
     }
-    
+
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(),
+            args.getNoOfNDBDataNodes(), args.getInterleavedWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles);
     return result;
   }
-  
-  private static void generatePercentileGraphs(Map<BenchmarkOperations, double[][]> allOpsPercentiles,String baseDir) throws IOException{
-    String gnuplotFilePath = baseDir+"/percentiles.gnuplot";
-    
+
+  private static void generatePercentileGraphs(Map<BenchmarkOperations, double[][]> allOpsPercentiles, String baseDir, String filesPrefix) throws IOException {
+    String gnuplotFilePath = baseDir + "/" + filesPrefix + "-" + "percentiles.gnuplot";
+
     //generate dat files
     StringBuilder gnuplotFileTxt = new StringBuilder();
     gnuplotFileTxt.append("set terminal postscript eps enhanced color font \"Helvetica,12\"  #monochrome\n");
-    gnuplotFileTxt.append("set output '| ps2pdf - percentiles.pdf' \n");
+    gnuplotFileTxt.append("set output '| ps2pdf - " + filesPrefix + "-percentiles.pdf' \n");
     gnuplotFileTxt.append("#set key right bottom \n");
     gnuplotFileTxt.append("set xlabel \"Time (ms)\"\n");
     gnuplotFileTxt.append("#set ylabel \"Percentile\"\n");
     gnuplotFileTxt.append("#set yrange [0:1]\n\n\n");
     gnuplotFileTxt.append("plot ");
-    
+
     StringBuilder dataFile = null;
-    for(BenchmarkOperations opType : allOpsPercentiles.keySet()){
+    for (BenchmarkOperations opType : allOpsPercentiles.keySet()) {
       dataFile = new StringBuilder();
-      String dataFilePath = baseDir+"/"+opType+".dat";
+      String dataFilePath = baseDir + "/" + filesPrefix + "-" + opType + ".dat";
       double[][] data = allOpsPercentiles.get(opType);
-      dataFile.append("0 0\n"); 
-      for(int i = 0; i < data.length; i++){
+      dataFile.append("0 0\n");
+      for (int i = 0; i < data.length; i++) {
         dataFile.append(data[i][0]);
         dataFile.append(" ");
         dataFile.append(data[i][1]);
@@ -191,17 +212,15 @@ public class InterleavedBMResultsAggregator extends Aggregator{
       }
       //System.out.println(dataFile.toString());
       CompileResults.writeToFile(dataFilePath, dataFile.toString(), false);
-      gnuplotFileTxt.append(" \"").append(opType).append(".dat").append("\" ");
+      gnuplotFileTxt.append(" \"").append(filesPrefix).append("-").append(opType).append(".dat").append("\" ");
       String title = opType.toString();
       title = title.replace("_", " ");
       gnuplotFileTxt.append(" using 1:2 title ").append("\"").append(title).append("\"");
       gnuplotFileTxt.append(" with lines  , \\\n");
     }
-    
+
     //System.out.println(gnuplotFileTxt.toString());
     CompileResults.writeToFile(gnuplotFilePath, gnuplotFileTxt.toString(), false);
-    
+
   }
-  
-  
 }

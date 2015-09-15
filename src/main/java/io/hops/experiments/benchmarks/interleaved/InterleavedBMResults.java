@@ -34,14 +34,20 @@ public class InterleavedBMResults extends BMResult {
   private final double successfulOps;
   private final double failedOps;
   private final Map<BenchmarkOperations,double[][]> percentile;
+  private final String workloadName;
 
-  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile) {
+  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile) {
     super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
     this.failedOps = failedOps;
     this.percentile = percentile;
+    this.workloadName = workloadName;
+  }
+
+  public String getWorkloadName() {
+    return workloadName;
   }
 
   public Map<BenchmarkOperations,double[][]> getPercentile(){

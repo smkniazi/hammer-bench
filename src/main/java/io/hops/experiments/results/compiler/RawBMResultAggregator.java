@@ -195,7 +195,7 @@ public class RawBMResultAggregator extends Aggregator{
           msg += CompileResults.format(hdfsVals.get(0) + "");
         } 
       }else {
-          msg += CompileResults.format(50000+"");
+          msg += CompileResults.format(0+"");
       }
       
       for (int i = 0; i < hopsFsCr.nnCounts.size(); i++) {

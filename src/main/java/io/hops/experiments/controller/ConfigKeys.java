@@ -73,6 +73,9 @@ public class ConfigKeys {
     public static String RAW_LS_DIR_PHASE_DURATION_KEY = "raw.ls.dirs.phase.duration"; 
     public static long   RAW_LS_DIR_PHASE_DURATION_DEFAULT = 0;
     
+    public static String INTERLEAVED_WORKLOAD_NAME_KEY = "interleaved.workload.name";
+    public static String INTERLEAVED_WORKLOAD_NAME_DEFAULT = "default"; 
+    
     public static String INTLVD_LS_DIR_PERCENTAGE_KEY = "interleaved.ls.dirs.percentage";
     public static double    INTLVD_LS_DIR_PERCENTAGE_DEFAULT = 0; 
     

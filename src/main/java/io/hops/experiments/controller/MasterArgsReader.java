@@ -196,6 +196,13 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_LS_DIR_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_DIR_PHASE_DURATION_DEFAULT);
   }
 
+  public static String INTERLEAVED_WORKLOAD_NAME_KEY = "interleaved.workload.name";
+    public static double INTERLEAVED_WORKLOAD_NAME_DEFAULT = 0; 
+    
+  public String getInterleavedWorkloadName() {
+    return getString(ConfigKeys.INTERLEAVED_WORKLOAD_NAME_KEY, ConfigKeys.INTERLEAVED_WORKLOAD_NAME_DEFAULT);
+  }
+  
   public BigDecimal getInterleavedLsDirPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_DEFAULT);
   }

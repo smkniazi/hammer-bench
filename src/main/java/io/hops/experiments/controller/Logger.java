@@ -39,11 +39,12 @@ public class Logger {
 
   public static void error(Exception e) {
     System.out.println(e);
-    final int MSG_SIZE = 100; //send small messages
+    final int MSG_SIZE = 200; //send small messages
     String msg = e.getClass().getName() + " " ;
     int consumed = msg.length();
     if(e.getMessage().length() > (MSG_SIZE - consumed)){ 
       msg += e.getMessage().substring(0, (MSG_SIZE - consumed));
+      msg += " ... ";
     }
     printMsg(msg);
   }

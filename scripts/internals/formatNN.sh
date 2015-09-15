@@ -8,9 +8,9 @@
 
 
 connectStr="$HopsFS_User@$Current_Leader_NN"
-echo "Formatting ... "
-echo "Drop Schema and Recreate  ...  on $Current_Leader_NN"
+#echo "Drop Schema and Recreate  ...  on $Current_Leader_NN"
 #ssh $connectStr $HopsFS_Remote_Dist_Folder/bin/hdfs namenode -dropAndCreateDB
+ssh $connectStr $HopsFS_Remote_Dist_Folder/sbin/drop-and-recreate-hops-db.sh
 echo "Formatting ...  on $Current_Leader_NN"
 ssh $connectStr $HopsFS_Remote_Dist_Folder/bin/hdfs namenode -format 
 
