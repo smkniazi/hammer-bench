@@ -205,9 +205,9 @@ public class InterleavedBenchmark extends Benchmark {
             }
             times.add(opExeTime);
           }
-        } else {
-          operationsFailed.incrementAndGet();
         }
+      } else {
+        operationsFailed.incrementAndGet();
       }
 
     }
@@ -223,7 +223,4 @@ public class InterleavedBenchmark extends Benchmark {
     double opsPerMSec = (double) (ops) / (double) timePassed;
     return BenchmarkUtils.round(opsPerMSec * 1000);
   }
-  
-  
-  
 }
