@@ -63,8 +63,8 @@ public class CompileResults {
     BlockReportBMResultsAggregator hopsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
 
     
-    List<File> hdfsResulsFiles = findResultFiles(hdfsInputDir);
-    List<File> hopsResulsFiles = findResultFiles(hopsInputDir);
+    List<File> hdfsResulsFiles = findFiles(hdfsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
+    List<File> hopsResulsFiles = findFiles(hopsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
     System.out.println("Processing HDFS Files");
     parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults);
     System.out.println("Processing Hops Files");
@@ -73,7 +73,7 @@ public class CompileResults {
             hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults, outputDir);
   }
 
-  private List<File> findResultFiles(String path) {
+  public static List<File> findFiles(String path, String suffix) {
     List<File> allResultFiles = new ArrayList<File>();
     File root = new File(path);
     if (!root.isDirectory()) {
@@ -93,7 +93,7 @@ public class CompileResults {
             dirs.add(content);
 
           } else {
-            if (content.getAbsolutePath().endsWith(ConfigKeys.BINARY_RESULT_FILE_NAME)) {
+            if (content.getAbsolutePath().endsWith(suffix)) {
               System.out.println("Found a result file  " + content.getAbsolutePath());
               allResultFiles.add(content);
             }

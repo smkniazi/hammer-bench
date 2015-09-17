@@ -25,6 +25,8 @@ public class ConfigKeys {
   
     public static final int BUFFER_SIZE = 4*1024*1024; 
     
+    public static final String RAW_RESPONSE_FILE_EXT = ".responses";
+    
     public static String MAX_SLAVE_FAILURE_THREASHOLD_KEY = "max.slave.failure.threshold";   // only for logging
     public static int MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT = 0;
     

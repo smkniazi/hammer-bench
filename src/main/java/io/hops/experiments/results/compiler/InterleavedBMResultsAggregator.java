@@ -21,13 +21,18 @@ import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
+import io.hops.experiments.controller.ConfigKeys;
 import io.hops.experiments.controller.MasterArgsReader;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
@@ -96,7 +101,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
           System.out.println("NN count for HDFS cannot be greater than 1");
           return;
         }
-        
+
         if (hdfsWorkloadResult.keySet().size() == 1) {
           hdfsVal = ((InterleavedAggregate) hdfsWorkloadResult.values().toArray()[0]).getSpeed();
         }
@@ -106,7 +111,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         return;
       }
 
-      plot += " '"+workload+"-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-"+workload+"\" with errorbars, " + hdfsVal + " title \"HDFS-"+workload+"\"  , \\\n";
+      plot += " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\"  , \\\n";
       String data = "";
       for (Integer nn : hopsWorkloadResult.keySet()) {
         InterleavedAggregate agg = hopsWorkloadResult.get(nn);
@@ -115,7 +120,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
                 + "\n";
       }
       System.out.println(data);
-      CompileResults.writeToFile(outpuFolder + "/"+workload+"-interleaved.dat", data, false);
+      CompileResults.writeToFile(outpuFolder + "/" + workload + "-interleaved.dat", data, false);
     }
 
     System.out.println(plot);
@@ -123,6 +128,8 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   }
 
   public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, MasterArgsReader args) throws FileNotFoundException, IOException {
+    Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
+    System.out.println("Processing the results ");
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
     DescriptiveStatistics speed = new DescriptiveStatistics();
@@ -138,45 +145,75 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         duration.addValue(response.getRunTime());
       }
     }
-
-    //gather data for calculating percentiles
-    Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
-    if (args.isPercentileEnabled()) {
-      Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimesList = new HashMap<BenchmarkOperations, ArrayList<Long>>();
-      for (Object obj : responses) {
+    
+    int responseCount = 0;
+    for (Object obj : responses) {
+      if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
+        throw new IllegalStateException("Wrong response received from the client");
+      } else {
+        String filePath = args.getResultsDir();
+        if (!filePath.endsWith("/")) {
+          filePath += "/";
+        }
         InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
-        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = response.getOpsExeTimes();
-        for (BenchmarkOperations opType : opsExeTimes.keySet()) {
-          ArrayList<Long> opExeTimesFromSlave = opsExeTimes.get(opType);
-          ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
-          if (opAllExeTimes == null) {
-            opAllExeTimes = new ArrayList<Long>();
-            allOpsExecutionTimesList.put(opType, opAllExeTimes);
-          }
-          opAllExeTimes.addAll(opExeTimesFromSlave);
-        }
+        filePath += "ResponseRawData"+responseCount+++ConfigKeys.RAW_RESPONSE_FILE_EXT;
+        System.out.println("Writing Rwaw results to " + filePath);
+        FileOutputStream fout = new FileOutputStream(filePath);
+        ObjectOutputStream oos = new ObjectOutputStream(fout);
+        oos.writeObject(response);
+        oos.close();
       }
-
-
-      for (BenchmarkOperations opType : allOpsExecutionTimesList.keySet()) {
-        ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
-        double[] toDouble = Doubles.toArray(opAllExeTimes);
-        Percentile percentileCalculator = new Percentile();
-        percentileCalculator.setData(toDouble);
-        double delta = 1;
-        int rows = (int) Math.ceil((double) (100) / delta);
-        double[][] percentile = new double[rows][2];
-        int index = 0;
-        for (double percen = delta; percen <= 100.0; percen += delta, index++) {
-          percentile[index][0] = percentileCalculator.evaluate(percen);
-          percentile[index][1] = percen; // percentile
-          //System.out.println("percent "+percen+" data "+percentile[index][0]);
-        }
-        allOpsPercentiles.put(opType, percentile);
-      }
-
-      generatePercentileGraphs(allOpsPercentiles, args.getResultsDir(), args.getInterleavedWorkloadName());
     }
+
+//    Set<BenchmarkOperations> toProcess = new HashSet<BenchmarkOperations>();
+//    toProcess.add(BenchmarkOperations.CREATE_FILE);
+//    toProcess.add(BenchmarkOperations.READ_FILE);
+//    toProcess.add(BenchmarkOperations.LS_DIR);
+//    toProcess.add(BenchmarkOperations.DIR_INFO);
+//
+//    //gather data for calculating percentiles
+//    
+//    if (args.isPercentileEnabled()) {
+//      Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimesList = new HashMap<BenchmarkOperations, ArrayList<Long>>();
+//      for (Object obj : responses) {
+//        InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
+//        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = response.getOpsExeTimes();
+//        for (BenchmarkOperations opType : opsExeTimes.keySet()) {
+//          if (toProcess.contains(opType)) {
+//            ArrayList<Long> opExeTimesFromSlave = opsExeTimes.get(opType);
+//            ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
+//            if (opAllExeTimes == null) {
+//              opAllExeTimes = new ArrayList<Long>();
+//              allOpsExecutionTimesList.put(opType, opAllExeTimes);
+//            }
+//            opAllExeTimes.addAll(opExeTimesFromSlave);
+//          }
+//        }
+//      }
+//
+//
+//      for (BenchmarkOperations opType : allOpsExecutionTimesList.keySet()) {
+//        if (toProcess.contains(opType)) {
+//          System.out.println("\n\nProcessing ...  " + opType);
+//          ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
+//          double[] toDouble = Doubles.toArray(opAllExeTimes);
+//          Percentile percentileCalculator = new Percentile();
+//          //percentileCalculator.setData(toDouble);
+//          double delta = 1;
+//          int rows = (int) Math.ceil((double) (100) / delta);
+//          double[][] percentile = new double[rows][2];
+//          int index = 0;
+//          for (double percen = delta; percen <= 100.0; percen += delta, index++) {
+//            percentile[index][0] = percentileCalculator.evaluate(toDouble, percen);
+//            percentile[index][1] = percen; // percentile
+//            System.out.println(opType + " Percentile " + percen + " Value: " + percentile[index][0]);
+//          }
+//          allOpsPercentiles.put(opType, percentile);
+//
+//        }
+//      }
+//      generatePercentileGraphs(allOpsPercentiles, args.getResultsDir(), args.getInterleavedWorkloadName());
+//    }
 
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
             args.getNoOfNDBDataNodes(), args.getInterleavedWorkloadName(),
@@ -185,42 +222,5 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     return result;
   }
 
-  private static void generatePercentileGraphs(Map<BenchmarkOperations, double[][]> allOpsPercentiles, String baseDir, String filesPrefix) throws IOException {
-    String gnuplotFilePath = baseDir + "/" + filesPrefix + "-" + "percentiles.gnuplot";
-
-    //generate dat files
-    StringBuilder gnuplotFileTxt = new StringBuilder();
-    gnuplotFileTxt.append("set terminal postscript eps enhanced color font \"Helvetica,12\"  #monochrome\n");
-    gnuplotFileTxt.append("set output '| ps2pdf - " + filesPrefix + "-percentiles.pdf' \n");
-    gnuplotFileTxt.append("#set key right bottom \n");
-    gnuplotFileTxt.append("set xlabel \"Time (ms)\"\n");
-    gnuplotFileTxt.append("#set ylabel \"Percentile\"\n");
-    gnuplotFileTxt.append("#set yrange [0:1]\n\n\n");
-    gnuplotFileTxt.append("plot ");
-
-    StringBuilder dataFile = null;
-    for (BenchmarkOperations opType : allOpsPercentiles.keySet()) {
-      dataFile = new StringBuilder();
-      String dataFilePath = baseDir + "/" + filesPrefix + "-" + opType + ".dat";
-      double[][] data = allOpsPercentiles.get(opType);
-      dataFile.append("0 0\n");
-      for (int i = 0; i < data.length; i++) {
-        dataFile.append(data[i][0]);
-        dataFile.append(" ");
-        dataFile.append(data[i][1]);
-        dataFile.append("\n");
-      }
-      //System.out.println(dataFile.toString());
-      CompileResults.writeToFile(dataFilePath, dataFile.toString(), false);
-      gnuplotFileTxt.append(" \"").append(filesPrefix).append("-").append(opType).append(".dat").append("\" ");
-      String title = opType.toString();
-      title = title.replace("_", " ");
-      gnuplotFileTxt.append(" using 1:2 title ").append("\"").append(title).append("\"");
-      gnuplotFileTxt.append(" with lines  , \\\n");
-    }
-
-    //System.out.println(gnuplotFileTxt.toString());
-    CompileResults.writeToFile(gnuplotFilePath, gnuplotFileTxt.toString(), false);
-
-  }
+ 
 }
