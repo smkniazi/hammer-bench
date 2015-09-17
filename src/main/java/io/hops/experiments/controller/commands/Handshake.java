@@ -43,6 +43,8 @@ public class Handshake implements Serializable {
     private final int dirPerDir;
     private final int filesPerDir;
     private final long maxFilesToCreate;
+    private final boolean fixedDepthTree;
+    private final int treeDepth;
 
     public Request(int numThreads, long fileSize, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
@@ -50,7 +52,9 @@ public class Handshake implements Serializable {
             String namenodeRpcAddress, String namenodeSelectionPolicy,
             long nameNodeListRefreshTime,
             int dirPerDir, int filesPerDir,
-            long maxFilesToCreate) {
+            long maxFilesToCreate,
+            boolean fixedDepthTree,
+            int treeDepth) {
       this.numThreads = numThreads;
       this.fileSize = fileSize;
       this.appendSize = appendSize;
@@ -65,7 +69,18 @@ public class Handshake implements Serializable {
       this.dirPerDir = dirPerDir;
       this.filesPerDir = filesPerDir;
       this.maxFilesToCreate = maxFilesToCreate;
+      this.fixedDepthTree = fixedDepthTree;
+      this.treeDepth = treeDepth;
     }
+
+    public boolean isFixedDepthTree() {
+      return fixedDepthTree;
+    }
+
+    public int getTreeDepth() {
+      return treeDepth;
+    }
+    
 
     public long getMaxFilesToCreate() {
       return maxFilesToCreate;

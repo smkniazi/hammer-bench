@@ -24,5 +24,5 @@ if [ "$#" -ne 3 ]; then
     exit 0
 fi
 
-java -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CompileResults $1 $2 $3 
-source plot.sh
+java -Xmx5g -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 
+

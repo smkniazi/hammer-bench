@@ -50,7 +50,7 @@ public class CalculatePercentiles {
           } else {
             InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
             responses.add(response);
-            System.out.println(response.getTotalSuccessfulOps());
+            System.out.println("No of Records "+response.getTotalSuccessfulOps());
           }
         }
       } catch (EOFException e) {

@@ -24,15 +24,14 @@ package io.hops.experiments.workload.generator;
  */
 public class TestFileGen {
     public static void main(String[] argv){
-        TreeFileGenerator gen = new TreeFileGenerator("/test",100,10,0);
-        
-        
-        for(int i = 0; i < 100; i++){
+        FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test",5);
+
+        for(int i = 0; i < 10000; i++){
             System.out.println(gen.getDirToCreate());
         }
         
         
-        for(int i = 0; i < 150; i++){
+        for(int i = 0; i < 10; i++){
             System.out.println(gen.getFileToCreate());
         }
     }

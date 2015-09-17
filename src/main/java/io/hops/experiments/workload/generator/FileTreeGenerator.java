@@ -27,7 +27,7 @@ import java.util.UUID;
  *
  * @author salman
  */
-public class TreeFileGenerator implements FilePool {
+public class FileTreeGenerator implements FilePool {
 
   private Random rand;
   private UUID uuid = null;
@@ -36,7 +36,9 @@ public class TreeFileGenerator implements FilePool {
   protected String threadDir;
   private NameSpaceGenerator nameSpaceGenerator;
 
-  public TreeFileGenerator(String baseDir, int filesPerDir, int dirPerDir, int addedDepth) {
+  public FileTreeGenerator(String baseDir, int filesPerDir,
+          int dirPerDir, int initialTreeDepth) {
+
     this.allThreadFiles = new LinkedList<String>();
     this.allThreadDirs = new LinkedList<String>();
     this.rand = new Random(System.currentTimeMillis());
@@ -57,9 +59,11 @@ public class TreeFileGenerator implements FilePool {
 
     String[] comp = PathUtils.getPathNames(threadDir);
 
-    if (comp.length < addedDepth) {
-      for (int i = comp.length; i < (addedDepth); i++) {
-        threadDir += "/depth_" + i;
+    int more = 0;
+    if (initialTreeDepth - comp.length > 0) {
+      more = initialTreeDepth - comp.length;
+      for (int i = comp.length; i < (initialTreeDepth); i++) {
+        threadDir += "/added_depth_" + i;
       }
     }
 
@@ -152,16 +156,16 @@ public class TreeFileGenerator implements FilePool {
   public String getFileToSetReplication() {
     return getRandomFile();
   }
-  
+
   @Override
-  public String getFileToAppend(){
+  public String getFileToAppend() {
     return getRandomFile();
   }
-  
-   @Override
+
+  @Override
   public String getFileToChown() {
     return getRandomFile();
-   }
+  }
 
   @Override
   public String getDirToChown() {
@@ -174,7 +178,7 @@ public class TreeFileGenerator implements FilePool {
     }
     int index = rand.nextInt(allThreadFiles.size());
     String path = allThreadFiles.get(index);
-   // System.out.println("Path "+path);
+    System.out.println("Path "+path);
     return path;
   }
 
@@ -186,7 +190,7 @@ public class TreeFileGenerator implements FilePool {
     String path = allThreadFiles.get(index);
     int dirIndex = path.lastIndexOf("/");
     path = path.substring(0, dirIndex);
-    //System.out.println("Path "+path);
+    System.out.println("Path "+path);
     return path;
   }
 }

@@ -185,6 +185,12 @@ public class ConfigKeys {
     
     public static String FILES_PER_DIR_KEY= "files.per.dir";
     public static int    FILES_PER_DIR_DEFAULT = 16;
+    
+    public static String  ENABLE_FIXED_DEPTH_TREE_KEY = "enable.fixed.depth.tree";
+    public static boolean ENABLE_FIXED_DEPTH_TREE_DEFAULT = false;
+    
+    public static String  TREE_DEPTH_KEY = "tree.depth";
+    public static int     TREE_DEPTH_DEFAULT = 3;
 
     public static String NUM_SLAVE_THREADS_KEY = "num.slave.threads";
     public static int    NUM_SLAVE_THREADS_DEFAULT = 1;

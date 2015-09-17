@@ -351,6 +351,14 @@ public class MasterArgsReader {
     return getInt(ConfigKeys.FILES_PER_DIR_KEY, ConfigKeys.FILES_PER_DIR_DEFAULT);
   }
 
+  public boolean isFixedDepthTree() {
+    return getBoolean(ConfigKeys.ENABLE_FIXED_DEPTH_TREE_KEY, ConfigKeys.ENABLE_FIXED_DEPTH_TREE_DEFAULT);
+  }          
+  
+  public int getTreeDepth(){
+    return getInt(ConfigKeys.TREE_DEPTH_KEY ,ConfigKeys.TREE_DEPTH_DEFAULT);
+  }
+            
   public long getRawFileChangeUserPhaseDuration() {
     return getLong(ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }

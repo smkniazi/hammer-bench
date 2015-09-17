@@ -53,12 +53,18 @@ public class RawBenchmark extends Benchmark {
   private long appendSize;
   private final int dirsPerDir;
   private final int filesPerDir;
+  private final int treeDepth;
+  private final boolean fixedDepthTree;
   
-  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, int filesPerDir, long maxFilesToCreate) {
+  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, 
+          int filesPerDir, long maxFilesToCreate,
+          boolean fixedDepthTree, int treeDepth) {
     super(conf, numThreads);
     this.dirsPerDir = dirsPerDir;
     this.filesPerDir = filesPerDir;
     this.maxFilesToCreate = maxFilesToCreate;
+    this.fixedDepthTree = fixedDepthTree;
+    this.treeDepth = treeDepth;
   }
 
   @Override
@@ -72,7 +78,7 @@ public class RawBenchmark extends Benchmark {
     List workers = new ArrayList<BaseWarmUp>();
     for (int i = 0; i < numThreads; i++) {
       Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
-              fileSize, baseDir, dirsPerDir, filesPerDir);
+              fileSize, baseDir, dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       workers.add(worker);
     }
     executor.invokeAll(workers); // blocking call
@@ -124,23 +130,21 @@ public class RawBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, 
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
 
       while (true) {
         try {
 
           String path = OperationsUtils.getPath(opType,filePool);
 
-          if (path == null || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))) {
+          if (path == null 
+                  || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))
+                  || (opType == BenchmarkOperations.CREATE_FILE && 
+                      maxFilesToCreate < (long)(successfulOps.get() 
+                                         + filesCreatedInWarmupPhase.get()))) {
             return null;
           }
-          
-          if(opType == BenchmarkOperations.CREATE_FILE && maxFilesToCreate < (long)(successfulOps.get() + Benchmark.filesCreatedInWarmupPhase.get())){
-             if (Logger.canILog()) {
-                Logger.printMsg("Finished writing. Created maximum number of files");
-             }
-            return null;
-          } 
           
           OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
           

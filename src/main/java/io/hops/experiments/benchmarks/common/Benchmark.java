@@ -61,11 +61,14 @@ public abstract class Benchmark {
   }
 
   public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir, long maxFilesToCreate) {
+          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir, 
+          long maxFilesToCreate, boolean fixedDepthTree, int treeDepth) {
     if (type == BenchmarkType.RAW) {
-      return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir, maxFilesToCreate);
+      return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir,
+              maxFilesToCreate, fixedDepthTree, treeDepth);
     } else if (type == BenchmarkType.INTERLEAVED) {
-      return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
+      return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir,
+               fixedDepthTree, treeDepth);
     } else if (type == BenchmarkType.BR) {
       return new BlockReportingBenchmark(conf, numThreads, slaveId);
     } else {
@@ -73,31 +76,38 @@ public abstract class Benchmark {
     }
   }
   
-  public static AtomicLong filesCreatedInWarmupPhase = new AtomicLong(0);
+  protected AtomicLong filesCreatedInWarmupPhase = new AtomicLong(0);
   protected class BaseWarmUp implements Callable {
 
     private DistributedFileSystem dfs;
     private FilePool filePool;
-    private int filesToCreate;
-    private short replicationFactor;
-    private long fileSize;
-    private String baseDir;
-    private int dirsPerDir;
-    private int filesPerDir;
+    private final int filesToCreate;
+    private final short replicationFactor;
+    private final long fileSize;
+    private final String baseDir;
+    private final int dirsPerDir;
+    private final int filesPerDir;
+    private final boolean fixedDepthTree;
+    private final int treeDepth;
 
-    public BaseWarmUp(int filesToCreate, short replicationFactor, long fileSize, String baseDir, int dirsPerDir, int filesPerDir) throws IOException {
+    public BaseWarmUp(int filesToCreate, short replicationFactor, long fileSize, 
+            String baseDir, int dirsPerDir, int filesPerDir,
+            boolean fixedDepthTree, int treeDepth) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSize = fileSize;
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
       this.dirsPerDir = dirsPerDir;
       this.filesPerDir = filesPerDir;
+      this.fixedDepthTree = fixedDepthTree;
+      this.treeDepth = treeDepth;
     }
 
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, filesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, 
+              filesPerDir, fixedDepthTree, treeDepth );
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {

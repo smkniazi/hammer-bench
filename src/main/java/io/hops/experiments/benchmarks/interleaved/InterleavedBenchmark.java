@@ -53,11 +53,17 @@ public class InterleavedBenchmark extends Benchmark {
   HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
   private final int dirsPerDir;
   private final int filesPerDir;
+  private final boolean fixedDepthTree;
+  private final int treeDepth;
 
-  public InterleavedBenchmark(Configuration conf, int numThreads, int inodesPerDir, int filesPerDir) {
+  public InterleavedBenchmark(Configuration conf, int numThreads, 
+          int inodesPerDir, int filesPerDir,
+          boolean fixedDepthTree, int treeDepth) {
     super(conf, numThreads);
     this.dirsPerDir = inodesPerDir;
     this.filesPerDir = filesPerDir;
+    this.fixedDepthTree = fixedDepthTree;
+    this.treeDepth = treeDepth;
   }
 
   @Override
@@ -68,7 +74,8 @@ public class InterleavedBenchmark extends Benchmark {
     for (int i = 0; i < numThreads; i++) {
       Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(),
               namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-              .getFileSize(), namespaceWarmUp.getBaseDir(), dirsPerDir, filesPerDir);
+              .getFileSize(), namespaceWarmUp.getBaseDir(), 
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       workers.add(worker);
     }
     executor.invokeAll(workers); // blocking call
@@ -113,7 +120,8 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(), dirsPerDir, filesPerDir);
+      filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(),
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
               req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
               req.getLsFilePercent(), req.getLsDirPercent(),

@@ -29,7 +29,8 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.permission.FsPermission;
 import io.hops.experiments.workload.generator.FilePool;
-import io.hops.experiments.workload.generator.TreeFileGenerator;
+import io.hops.experiments.workload.generator.FileTreeGenerator;
+import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
@@ -52,10 +53,16 @@ public class BenchmarkUtils {
         return client;
     }
 
-    public static FilePool getFilePool(Configuration conf, String baseDir, int dirsPerDir, int filesPerDir) {
+    public static FilePool getFilePool(Configuration conf, String baseDir, 
+            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth) {
         FilePool filePool = filePools.get();
         if (filePool == null) {
-            filePool = new TreeFileGenerator(baseDir,filesPerDir, dirsPerDir,0);
+            if(fixedDepthTree){
+              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth);
+            }else{
+              filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0);
+            }
+            
             filePools.set(filePool);
             System.out.println("New FilePool created. Total :"+ ++filePoolCount);
         }else{
