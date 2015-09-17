@@ -55,12 +55,14 @@ run() {
   echo "*** shutting down the cluster ***"
   
   source $exp_stop_script           # kills exp
+  
+  #source sto_rename_delete.sh /test
+  
   source $exp_stop_hdfs_script      # kills hdfs
   source $kill_java_everywhere      # kills all zombie java processes
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
-  source sto_rename_delete.sh /test
   echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
 }
 

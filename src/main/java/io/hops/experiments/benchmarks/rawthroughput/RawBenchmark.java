@@ -23,15 +23,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
@@ -138,13 +135,14 @@ public class RawBenchmark extends Benchmark {
             return null;
           }
           
-          if(opType == BenchmarkOperations.CREATE_FILE && maxFilesToCreate < successfulOps.get()){
-            Logger.printMsg("Finished writing. Created maximum number of files");
+          if(opType == BenchmarkOperations.CREATE_FILE && maxFilesToCreate < (long)(successfulOps.get() + Benchmark.filesCreatedInWarmupPhase.get())){
+             if (Logger.canILog()) {
+                Logger.printMsg("Finished writing. Created maximum number of files");
+             }
             return null;
-          }
+          } 
           
           OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
-
           
           successfulOps.incrementAndGet();
 

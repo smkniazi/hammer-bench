@@ -72,8 +72,8 @@ public abstract class Benchmark {
       throw new UnsupportedOperationException("Unsupported Benchmark " + type);
     }
   }
-  private static AtomicLong totalFilesCrated = new AtomicLong(0);
-
+  
+  public static AtomicLong filesCreatedInWarmupPhase = new AtomicLong(0);
   protected class BaseWarmUp implements Callable {
 
     private DistributedFileSystem dfs;
@@ -108,7 +108,7 @@ public abstract class Benchmark {
                   fileSize);
           filePool.fileCreationSucceeded(filePath);
           BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
-          totalFilesCrated.incrementAndGet();
+          filesCreatedInWarmupPhase.incrementAndGet();
           log();
         } catch (Exception e) {
           Logger.error(e);
@@ -121,7 +121,7 @@ public abstract class Benchmark {
     private void log() {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
-        double percent = (totalFilesCrated.doubleValue() / totalFilesThatWillBeCreated) * 100;
+        double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
         Logger.printMsg("Warmup " + BenchmarkUtils.round(percent) + "% completed");
       }
     }
