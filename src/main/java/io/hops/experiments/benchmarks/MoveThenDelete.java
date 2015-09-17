@@ -17,17 +17,11 @@
 package io.hops.experiments.benchmarks;
 
 import io.hops.experiments.controller.ConfigKeys;
-import io.hops.experiments.controller.Master;
 import io.hops.experiments.controller.MasterArgsReader;
 import io.hops.experiments.utils.BenchmarkUtils;
-import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
 
 /**
  *

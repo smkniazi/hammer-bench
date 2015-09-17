@@ -30,12 +30,12 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 public class CalculatePercentiles {
 
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
-    new CalculatePercentiles().doShit();
+    new CalculatePercentiles().doShit(argv[0], argv[1], argv[2]);
   }
   
-  private void doShit() throws FileNotFoundException, IOException, ClassNotFoundException {
+  private void doShit(String src, String dst, String prefix) throws FileNotFoundException, IOException, ClassNotFoundException {
     
-    List<File> files = CompileResults.findFiles("/tmp/hops-bm/run_1/INTERLEAVED/5-NN-300-Clients-INTERLEAVED-BenchMark", ConfigKeys.RAW_RESPONSE_FILE_EXT);
+    List<File> files = CompileResults.findFiles(src, ConfigKeys.RAW_RESPONSE_FILE_EXT);
     List<InterleavedBenchmarkCommand.Response> responses = new ArrayList<InterleavedBenchmarkCommand.Response>();
     
     for (File file : files) {
@@ -62,7 +62,7 @@ public class CalculatePercentiles {
       
     }
     System.out.println("Starting to process raw data ");
-    processResponses(responses, "/tmp", "Spotify" );
+    processResponses(responses, dst , prefix );
   }
 
   private void processResponses(List<InterleavedBenchmarkCommand.Response> responses, String path, String workloadName) throws IOException {

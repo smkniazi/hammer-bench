@@ -146,6 +146,8 @@ public class InterleavedBMResultsAggregator extends Aggregator {
       }
     }
     
+    //write the response objects to files. 
+    //these files are processed by CalculatePercentiles.java
     int responseCount = 0;
     for (Object obj : responses) {
       if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
@@ -164,56 +166,6 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         oos.close();
       }
     }
-
-//    Set<BenchmarkOperations> toProcess = new HashSet<BenchmarkOperations>();
-//    toProcess.add(BenchmarkOperations.CREATE_FILE);
-//    toProcess.add(BenchmarkOperations.READ_FILE);
-//    toProcess.add(BenchmarkOperations.LS_DIR);
-//    toProcess.add(BenchmarkOperations.DIR_INFO);
-//
-//    //gather data for calculating percentiles
-//    
-//    if (args.isPercentileEnabled()) {
-//      Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimesList = new HashMap<BenchmarkOperations, ArrayList<Long>>();
-//      for (Object obj : responses) {
-//        InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
-//        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = response.getOpsExeTimes();
-//        for (BenchmarkOperations opType : opsExeTimes.keySet()) {
-//          if (toProcess.contains(opType)) {
-//            ArrayList<Long> opExeTimesFromSlave = opsExeTimes.get(opType);
-//            ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
-//            if (opAllExeTimes == null) {
-//              opAllExeTimes = new ArrayList<Long>();
-//              allOpsExecutionTimesList.put(opType, opAllExeTimes);
-//            }
-//            opAllExeTimes.addAll(opExeTimesFromSlave);
-//          }
-//        }
-//      }
-//
-//
-//      for (BenchmarkOperations opType : allOpsExecutionTimesList.keySet()) {
-//        if (toProcess.contains(opType)) {
-//          System.out.println("\n\nProcessing ...  " + opType);
-//          ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
-//          double[] toDouble = Doubles.toArray(opAllExeTimes);
-//          Percentile percentileCalculator = new Percentile();
-//          //percentileCalculator.setData(toDouble);
-//          double delta = 1;
-//          int rows = (int) Math.ceil((double) (100) / delta);
-//          double[][] percentile = new double[rows][2];
-//          int index = 0;
-//          for (double percen = delta; percen <= 100.0; percen += delta, index++) {
-//            percentile[index][0] = percentileCalculator.evaluate(toDouble, percen);
-//            percentile[index][1] = percen; // percentile
-//            System.out.println(opType + " Percentile " + percen + " Value: " + percentile[index][0]);
-//          }
-//          allOpsPercentiles.put(opType, percentile);
-//
-//        }
-//      }
-//      generatePercentileGraphs(allOpsPercentiles, args.getResultsDir(), args.getInterleavedWorkloadName());
-//    }
 
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
             args.getNoOfNDBDataNodes(), args.getInterleavedWorkloadName(),

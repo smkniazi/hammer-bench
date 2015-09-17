@@ -20,7 +20,7 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 if [ "$#" -ne 3 ]; then
-    echo "Illegal number of parameters. Usage  compile-results {hdfsResults location} {hopsResults location} {compiled results location}"
+    echo "Illegal number of parameters. Usage  compile-percentiles {src} {dst} {file prefix for generated files}"
     exit 0
 fi
 
