@@ -49,7 +49,7 @@ public class RawBenchmark extends Benchmark {
   private AtomicInteger failedOps = new AtomicInteger(0);
   private long phaseStartTime;
   private long phaseDurationInMS;
-  private int maxFilesToCreate = Integer.MAX_VALUE;
+  private final long maxFilesToCreate;
   private String baseDir;
   private short replicationFactor;
   private long fileSize;
@@ -57,10 +57,11 @@ public class RawBenchmark extends Benchmark {
   private final int dirsPerDir;
   private final int filesPerDir;
   
-  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, int filesPerDir) {
+  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, int filesPerDir, long maxFilesToCreate) {
     super(conf, numThreads);
     this.dirsPerDir = dirsPerDir;
     this.filesPerDir = filesPerDir;
+    this.maxFilesToCreate = maxFilesToCreate;
   }
 
   @Override
@@ -137,8 +138,14 @@ public class RawBenchmark extends Benchmark {
             return null;
           }
           
+          if(opType == BenchmarkOperations.CREATE_FILE && maxFilesToCreate < successfulOps.get()){
+            Logger.printMsg("Finished writing. Created maximum number of files");
+            return null;
+          }
+          
           OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
 
+          
           successfulOps.incrementAndGet();
 
           if (Logger.canILog()) {

@@ -61,9 +61,9 @@ public abstract class Benchmark {
   }
 
   public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir) {
+          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir, long maxFilesToCreate) {
     if (type == BenchmarkType.RAW) {
-      return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
+      return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir, maxFilesToCreate);
     } else if (type == BenchmarkType.INTERLEAVED) {
       return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir);
     } else if (type == BenchmarkType.BR) {

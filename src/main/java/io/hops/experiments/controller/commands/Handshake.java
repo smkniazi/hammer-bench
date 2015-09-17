@@ -42,13 +42,15 @@ public class Handshake implements Serializable {
     private long nameNodeListRefreshTime;
     private final int dirPerDir;
     private final int filesPerDir;
+    private final long maxFilesToCreate;
 
     public Request(int numThreads, long fileSize, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
             boolean enableRemoteLogging, int remoteLoggingPort,
             String namenodeRpcAddress, String namenodeSelectionPolicy,
             long nameNodeListRefreshTime,
-            int dirPerDir, int filesPerDir) {
+            int dirPerDir, int filesPerDir,
+            long maxFilesToCreate) {
       this.numThreads = numThreads;
       this.fileSize = fileSize;
       this.appendSize = appendSize;
@@ -62,6 +64,11 @@ public class Handshake implements Serializable {
       this.namenodeRpcAddress = namenodeRpcAddress;
       this.dirPerDir = dirPerDir;
       this.filesPerDir = filesPerDir;
+      this.maxFilesToCreate = maxFilesToCreate;
+    }
+
+    public long getMaxFilesToCreate() {
+      return maxFilesToCreate;
     }
 
     public int getFilesPerDir() {

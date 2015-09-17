@@ -305,7 +305,7 @@ public class Master {
             args.getBaseDir(),
             args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
             args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
-            args.getNameNodeRefreshRate(), args.getDirPerDir(), args.getFilesPerDir()));
+            args.getNameNodeRefreshRate(), args.getDirPerDir(), args.getFilesPerDir(),args.getRawCreatePhaseMaxFilesToCreate()));
     Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {
