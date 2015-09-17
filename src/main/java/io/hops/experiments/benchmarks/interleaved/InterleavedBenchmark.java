@@ -149,18 +149,18 @@ public class InterleavedBenchmark extends Benchmark {
         message += format(20, "Failed Ops: " + operationsFailed + " ");
         message += format(20, "Speed: " + speedPSec(operationsCompleted.get(), startTime) + " ops/s ");
 
-        SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
-        sorted.addAll(operationsStats.keySet());
-
-        for (BenchmarkOperations op : sorted) {
-          AtomicLong stat = operationsStats.get(op);
-          if (stat != null) {
-
-            double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
-            String msg = op + ": [" + percent + "%] ";
-            message += format(op.toString().length() + 14, msg);
-          }
-        }
+//        SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+//        sorted.addAll(operationsStats.keySet());
+//
+//        for (BenchmarkOperations op : sorted) {
+//          AtomicLong stat = operationsStats.get(op);
+//          if (stat != null) {
+//
+//            double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
+//            String msg = op + ": [" + percent + "%] ";
+//            message += format(op.toString().length() + 14, msg);
+//          }
+//        }
         Logger.printMsg(message);
       }
     }
