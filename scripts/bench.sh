@@ -60,6 +60,7 @@ run() {
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
+  source sto_rename_delete.sh /test
   echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
 }
 
