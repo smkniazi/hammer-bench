@@ -28,12 +28,12 @@ gnuplot  histo.gnuplot
 sleep 2
 pdfcrop ./histogram.pdf
 
-#rotate
-#pdftk ./histogram-crop.pdf cat 1east output ./histogram.pdf  
-#rm ./histogram-crop.pdf 
+#rotate and crop
+pdftk ./histogram-crop.pdf cat 1east output ./histogram.pdf  
+rm ./histogram-crop.pdf 
 
 #no rotation
-mv ./histogram-crop.pdf  ./histogram.pdf
+#mv ./histogram-crop.pdf  ./histogram.pdf
 
 
 
