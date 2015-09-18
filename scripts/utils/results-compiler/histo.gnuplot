@@ -17,14 +17,14 @@ set xtics
 
 set ytics border in scale 0,0 mirror norotate  autojustify
 set ytics autofreq  norangelimit font ",12" rotate by 90 offset character 0, 0, 0
-set yrange [0:140000]
+set yrange [0:180000]
 set format y "%.0s%c"
-set ytics ("" 0, "20K" 20000,"40K" 40000, "60K" 60000,"80K" 80000,"100K" 100000,"120K" 120000, "140K" 140000)
+set ytics ("" 0, "20K" 20000,"40K" 40000, "60K" 60000,"80K" 80000,"100K" 100000,"120K" 120000, "140K" 140000, "160K" 160000, "180K" 180000, "200K" 200000)
 
 
 
 set y2tics mirror autofreq  norangelimit font ",12" right rotate by 90 offset character -0.7, 0, 0
-set y2tics ("" 0, "20K" 20000,"40K" 40000, "60K" 60000,"80K" 80000,"100K" 100000,"120K" 120000, "140K" 140000)
+set y2tics ("" 0, "20K" 20000,"40K" 40000, "60K" 60000,"80K" 80000,"100K" 100000,"120K" 120000, "140K" 140000, "160K" 160000, "180K" 180000, "200K" 200000)
 #set format y2 "%.0s%c"
 set y2label "ops/sec" offset character -3, 0, 0
 
