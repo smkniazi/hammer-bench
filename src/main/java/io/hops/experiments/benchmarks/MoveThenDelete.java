@@ -73,6 +73,7 @@ public class MoveThenDelete {
       System.out.println(e);
     }
     finally {
+      System.out.println("Exiting ... ");
       System.exit(0);
     }
   }
