@@ -24,5 +24,9 @@ if [ "$#" -ne 3 ]; then
     exit 0
 fi
 
+date1=$(date +"%s")
 java -Xmx5g -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 
+date2=$(date +"%s")
+diff=$(($date2-$date1))
+echo "Execution Time $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
 
