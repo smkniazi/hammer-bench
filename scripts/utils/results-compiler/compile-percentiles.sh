@@ -19,13 +19,13 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-if [ "$#" -ne 3 ]; then
-    echo "Illegal number of parameters. Usage  compile-percentiles {src} {dst} {file prefix for generated files}"
+if [ "$#" -ne 4 ]; then
+    echo "Illegal number of parameters. Usage  compile-percentiles {src} {dst} {file prefix for generated files} {no of threads}"
     exit 0
 fi
 
 date1=$(date +"%s")
-java -Xmx5g -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 
+java -Xmx5g -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 $4
 date2=$(date +"%s")
 diff=$(($date2-$date1))
 echo "Execution Time $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."

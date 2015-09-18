@@ -21,6 +21,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
@@ -29,12 +35,13 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
  */
 public class CalculatePercentiles {
 
-  public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
-    new CalculatePercentiles().doShit(argv[0], argv[1], argv[2]);
+  private ExecutorService executor;
+  public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException {
+    new CalculatePercentiles().doShit(argv[0], argv[1], argv[2], Integer.parseInt(argv[3]));
   }
   
-  private void doShit(String src, String dst, String prefix) throws FileNotFoundException, IOException, ClassNotFoundException {
-    
+  private void doShit(String src, String dst, String prefix, int noOfThreads) throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException {
+    this.executor = Executors.newFixedThreadPool(noOfThreads);
     List<File> files = CompileResults.findFiles(src, ConfigKeys.RAW_RESPONSE_FILE_EXT);
     List<InterleavedBenchmarkCommand.Response> responses = new ArrayList<InterleavedBenchmarkCommand.Response>();
     
@@ -65,8 +72,8 @@ public class CalculatePercentiles {
     processResponses(responses, dst , prefix );
   }
 
-  private void processResponses(List<InterleavedBenchmarkCommand.Response> responses, String path, String workloadName) throws IOException {
-    Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
+  private void processResponses(List<InterleavedBenchmarkCommand.Response> responses, String path, String workloadName) throws IOException, InterruptedException {
+    Map<BenchmarkOperations, Map<Double,Double>> allOpsPercentiles = new HashMap<BenchmarkOperations, Map<Double,Double>>();
     Set<BenchmarkOperations> toProcess = new HashSet<BenchmarkOperations>();
     toProcess.add(BenchmarkOperations.CREATE_FILE);
     toProcess.add(BenchmarkOperations.READ_FILE);
@@ -91,31 +98,58 @@ public class CalculatePercentiles {
       }
     }
 
-
+    
     for (BenchmarkOperations opType : allOpsExecutionTimesList.keySet()) {
       if (toProcess.contains(opType)) {
         System.out.println("\n\nProcessing ...  " + opType);
         ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
         double[] toDouble = Doubles.toArray(opAllExeTimes);
-        Percentile percentileCalculator = new Percentile();
-        //percentileCalculator.setData(toDouble);
         double delta = 1;
         int rows = (int) Math.ceil((double) (100) / delta);
         double[][] percentile = new double[rows][2];
         int index = 0;
+        List workers = new ArrayList<CalcPercentiles>();
+        Map<Double,Double> percentileMap = new ConcurrentHashMap<Double,Double>();
         for (double percen = delta; percen <= 100.0; percen += delta, index++) {
-          percentile[index][0] = percentileCalculator.evaluate(toDouble, percen);
-          percentile[index][1] = percen; // percentile
-          System.out.println(opType + " Percentile " + percen + " Value: " + percentile[index][0]);
+          workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
         }
-        allOpsPercentiles.put(opType, percentile);
+        
+        executor.invokeAll(workers); //block untill all points are calculated
+
+        allOpsPercentiles.put(opType, percentileMap);
 
       }
     }
     generatePercentileGraphs(allOpsPercentiles, path, workloadName);
   }
   
-   private void generatePercentileGraphs(Map<BenchmarkOperations, double[][]> allOpsPercentiles, String baseDir, String filesPrefix) throws IOException {
+   protected class CalcPercentiles implements Callable {
+
+    final double[] data;
+    final double point;
+    final  Map<Double,Double> values;
+    CalcPercentiles(Map<Double,Double> values, double[] data, double point){
+      this.data = data;
+      this.point = point;
+      this.values= values;
+    }
+    
+    @Override
+    public Object call() throws Exception {
+      Percentile p = new Percentile();
+       double value = p.evaluate(data, point);
+       if(values.get(point) == null){
+         values.put(point, value);
+         System.out.println(" Percentile " + point + " Value: " + value);
+       }else{
+         throw new IllegalStateException("Dont calculate same data point twice");
+       }
+       return null;
+    }
+   }
+
+  
+   private void generatePercentileGraphs(Map<BenchmarkOperations, Map<Double,Double>> allOpsPercentiles, String baseDir, String filesPrefix) throws IOException {
     String gnuplotFilePath = baseDir + "/" + filesPrefix + "-" + "percentiles.gnuplot";
 
     //generate dat files
@@ -132,14 +166,21 @@ public class CalculatePercentiles {
     for (BenchmarkOperations opType : allOpsPercentiles.keySet()) {
       dataFile = new StringBuilder();
       String dataFilePath = baseDir + "/" + filesPrefix + "-" + opType + ".dat";
-      double[][] data = allOpsPercentiles.get(opType);
+      
+      Map<Double,Double> percentileMap = allOpsPercentiles.get(opType);
+      SortedSet<Double> sortedKeys = new TreeSet<Double>();
+      sortedKeys.addAll(percentileMap.keySet());
+      
       dataFile.append("0 0\n");
-      for (int i = 0; i < data.length; i++) {
-        dataFile.append(data[i][0]);
+      
+      for(Double key: sortedKeys){
+        Double value = percentileMap.get(key);
+        dataFile.append(value);
         dataFile.append(" ");
-        dataFile.append(data[i][1]);
+        dataFile.append(key);
         dataFile.append("\n");
       }
+      
       //System.out.println(dataFile.toString());
       CompileResults.writeToFile(dataFilePath, dataFile.toString(), false);
       gnuplotFileTxt.append(" \"").append(filesPrefix).append("-").append(opType).append(".dat").append("\" ");
@@ -151,7 +192,6 @@ public class CalculatePercentiles {
 
     //System.out.println(gnuplotFileTxt.toString());
     CompileResults.writeToFile(gnuplotFilePath, gnuplotFileTxt.toString(), false);
-
   }
    
 }
