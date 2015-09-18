@@ -1,4 +1,4 @@
 #CHMOD_DIR          
 NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
 HopsFS              -                   6414.1              6033.52             4702.06             1956.24             0.0                 517.28              0.0                 0.0                 0.0                 0.0                 0.0                 0.0                 
-HDFS                0                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   
+HDFS                28510.41            -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   
