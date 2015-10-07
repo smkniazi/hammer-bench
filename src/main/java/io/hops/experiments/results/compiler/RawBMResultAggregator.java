@@ -319,7 +319,7 @@ public class RawBMResultAggregator extends Aggregator{
     }
 
     RawBMResults result = new RawBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(),
+            args.getNdbNodesCount(),
             request.getPhase(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))),
             (duration.getMean() / 1000),

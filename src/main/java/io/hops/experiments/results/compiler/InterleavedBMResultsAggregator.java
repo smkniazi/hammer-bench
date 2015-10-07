@@ -168,7 +168,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     }
 
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(), args.getInterleavedWorkloadName(),
+            args.getNdbNodesCount(), args.getInterleavedBMWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles);
     return result;

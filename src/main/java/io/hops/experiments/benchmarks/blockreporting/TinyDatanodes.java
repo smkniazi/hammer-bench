@@ -78,6 +78,7 @@ public class TinyDatanodes {
     this.blockSize = blockSize;
     this.datanodes = new TinyDatanode[nrDatanodes];
     conf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, "ROUND_ROBIN");
+    
     nameNodeSelector = NameNodeSelectorFactory.getSelector(conf, FileSystem
         .getDefaultUri(conf));
     machineName = InetAddress.getLocalHost().getHostName();

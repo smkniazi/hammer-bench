@@ -22,6 +22,9 @@ package io.hops.experiments.controller;
  * @author salman
  */
 public class ConfigKeys {
+    
+    public static final String BENCHMARK_FILE_SYSTEM_NAME_KEY = "benchmark.filesystem.name";
+    public static final String BENCHMARK_FILE_SYSTEM_NAME_DEFAULT = "HDFS";
   
     public static final int BUFFER_SIZE = 4*1024*1024; 
     

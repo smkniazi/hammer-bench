@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
+import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.coin.MultiFaceCoin;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;

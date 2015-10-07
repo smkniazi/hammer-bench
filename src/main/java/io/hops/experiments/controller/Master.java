@@ -40,7 +40,7 @@ import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.KillSlave;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
-import io.hops.experiments.benchmarks.common.NamespaceWarmUp;
+import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.benchmarks.BMResult;
@@ -138,70 +138,70 @@ public class Master {
 
   private void startRawCommander() throws IOException, InterruptedException, ClassNotFoundException {
 
-    if (args.getRawMkdirPhaseDuration() > 0) {
+    if (args.getRawBMMkdirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.MKDIRS, args.getRawMkdirPhaseDuration()));
+              BenchmarkOperations.MKDIRS, args.getRawBMMkdirPhaseDuration()));
     }
 
-    if (args.getRawCreateFilesPhaseDuration() > 0) {
+    if (args.getRawBMFilesCreationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCreateCommand.Request(
-              args.getRawCreatePhaseMaxFilesToCreate(),
+              args.getRawBMMaxFilesToCreate(),
               BenchmarkOperations.CREATE_FILE,
-              args.getRawCreateFilesPhaseDuration()));
+              args.getRawBMFilesCreationPhaseDuration()));
     }
 
-    if (args.getAppendFilePhaseDuration() > 0) {
+    if (args.getRawBMAppendFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.APPEND_FILE,
-              args.getAppendFilePhaseDuration()));
+              args.getRawBMAppendFilePhaseDuration()));
     }
 
-    if (args.getRawReadFilesPhaseDuration() > 0) {
+    if (args.getRawBMReadFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.READ_FILE,
-              args.getRawReadFilesPhaseDuration()));
+              args.getRawBMReadFilesPhaseDuration()));
     }
 
-    if (args.getRawLsFilePhaseDuration() > 0) {
+    if (args.getRawBMLsFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.LS_FILE,
-              args.getRawLsFilePhaseDuration()));
+              args.getRawBMLsFilePhaseDuration()));
     }
 
-    if (args.getRawLsDirPhaseDuration() > 0) {
+    if (args.getRawBMLsDirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.LS_DIR,
-              args.getRawLsDirPhaseDuration()));
+              args.getRawBMLsDirPhaseDuration()));
     }
 
-    if (args.getRawChmodFilesPhaseDuration() > 0) {
+    if (args.getRawBMChmodFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.CHMOD_FILE,
-              args.getRawChmodFilesPhaseDuration()));
+              args.getRawBMChmodFilesPhaseDuration()));
     }
 
-    if (args.getRawChmodDirsPhaseDuration() > 0) {
+    if (args.getRawBMChmodDirsPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.CHMOD_DIR,
-              args.getRawChmodDirsPhaseDuration()));
+              args.getRawBMChmodDirsPhaseDuration()));
     }
 
-    if (args.getRawSetReplicationPhaseDuration() > 0) {
+    if (args.getRawBMSetReplicationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.SET_REPLICATION,
-              args.getRawSetReplicationPhaseDuration()));
+              args.getRawBMSetReplicationPhaseDuration()));
     }
 
-    if (args.getRawGetFileInfoPhaseDuration() > 0) {
+    if (args.getRawBMGetFileInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.FILE_INFO,
-              args.getRawGetFileInfoPhaseDuration()));
+              args.getRawBMGetFileInfoPhaseDuration()));
     }
 
-    if (args.getRawGetDirInfoPhaseDuration() > 0) {
+    if (args.getRawBMGetDirInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.DIR_INFO,
-              args.getRawGetDirInfoPhaseDuration()));
+              args.getRawBMGetDirInfoPhaseDuration()));
     }
 
 
@@ -219,16 +219,16 @@ public class Master {
     }
 
 
-    if (args.getRawRenameFilesPhaseDuration() > 0) {
+    if (args.getRawBMRenameFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.RENAME_FILE,
-              args.getRawRenameFilesPhaseDuration()));
+              args.getRawBMRenameFilesPhaseDuration()));
     }
 
-    if (args.getRawDeleteFilesPhaseDuration() > 0) {
+    if (args.getRawBMDeleteFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.DELETE_FILE,
-              args.getRawDeleteFilesPhaseDuration()));
+              args.getRawBMDeleteFilesPhaseDuration()));
     }
   }
 
@@ -263,7 +263,7 @@ public class Master {
     }
 
     BlockReportBMResults result = new BlockReportBMResults(args.getNamenodeCount(),
-            args.getNoOfNDBDataNodes(),
+            args.getNdbNodesCount(),
             speed.getSum(), successfulOps.getSum(),
             failedOps.getSum(), avgTimePerReport.getMean(), avgTimeTogetANewNameNode.getMean());
 
@@ -274,15 +274,15 @@ public class Master {
     System.out.println("Starting Interleaved Benchmark ...");
     prompt();
     InterleavedBenchmarkCommand.Request request =
-            new InterleavedBenchmarkCommand.Request(args.getInterleavedCreateFilesPercentage(),
-            args.getInterleavedAppendFilePercentage(),
-            args.getInterleavedReadFilesPercentage(), args.getInterleavedRenameFilesPercentage(), args.getInterleavedDeleteFilesPercentage(),
-            args.getInterleavedLsFilePercentage(), args.getInterleavedLsDirPercentage(),
-            args.getInterleavedChmodFilesPercentage(), args.getInterleavedChmodDirsPercentage(),
-            args.getInterleavedMkdirPercentage(),
-            args.getInterleavedSetReplicationPercentage(),
-            args.getInterleavedGetFileInfoPercentage(),
-            args.getInterleavedGetDirInfoPercentage(),
+            new InterleavedBenchmarkCommand.Request(args.getInterleavedBMCreateFilesPercentage(),
+            args.getInterleavedBMAppendFilePercentage(),
+            args.getInterleavedBMReadFilesPercentage(), args.getInterleavedBMRenameFilesPercentage(), args.getInterleavedBMDeleteFilesPercentage(),
+            args.getInterleavedBMLsFilePercentage(), args.getInterleavedBMLsDirPercentage(),
+            args.getInterleavedBMChmodFilesPercentage(), args.getInterleavedBMChmodDirsPercentage(),
+            args.getInterleavedBMMkdirPercentage(),
+            args.getInterleavedBMSetReplicationPercentage(),
+            args.getInterleavedBMGetFileInfoPercentage(),
+            args.getInterleavedBMGetDirInfoPercentage(),
             args.getInterleavedFileChangeUserPercentage(),
             args.getInterleavedDirChangeUserPercentage(),
             args.getInterleavedBMDuration(), args.getFileSize(), args.getAppendFileSize(),
@@ -306,7 +306,7 @@ public class Master {
             args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
             args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
             args.getNameNodeRefreshRate(), args.getDirPerDir(), 
-            args.getFilesPerDir(),args.getRawCreatePhaseMaxFilesToCreate(),
+            args.getFilesPerDir(),args.getRawBMMaxFilesToCreate(),
             args.isFixedDepthTree(), args.getTreeDepth()));
     Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
 
@@ -352,7 +352,7 @@ public class Master {
 
   public void startRawBenchmarkPhase(RawBenchmarkCommand.Request request) throws IOException, InterruptedException, ClassNotFoundException {
     printMasterLogMessages("Starting " + request.getPhase() + " using "
-            + args.getSlaveNumThreads() * args.getListOfSlaves().size()
+            + args.getSlaveNumThreads() * args.getSlavesList().size()
             + " client(s). Time phase duration "
             + request.getDurationInMS() / (double) (1000 * 60) + " mins");
     prompt();
@@ -368,7 +368,7 @@ public class Master {
 
   private void connectSlaves() throws IOException {
     if (args != null) {
-      List<InetAddress> slaves = args.getListOfSlaves();
+      List<InetAddress> slaves = args.getSlavesList();
       for (InetAddress slave : slaves) {
         printMasterLogMessages("Connecting to slave " + slave);
         try {

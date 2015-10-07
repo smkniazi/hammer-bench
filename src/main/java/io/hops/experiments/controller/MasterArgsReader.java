@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.controller;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -65,15 +66,15 @@ public class MasterArgsReader {
   private void validateArgs() throws UnknownHostException {
 
     // check for the
-    if (getRawCreateFilesPhaseDuration() <= 0 && getBenchMarkType() == BenchmarkType.RAW) {
+    if (getRawBMFilesCreationPhaseDuration() <= 0 && getBenchMarkType() == BenchmarkType.RAW) {
       throw new IllegalArgumentException("You must write some files before testing other filesystem operations");
     }
 
-    if (getInterleavedCreateFilesPercentage().doubleValue() <= 0 && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
+    if (getInterleavedBMCreateFilesPercentage().doubleValue() <= 0 && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       throw new IllegalArgumentException("You must write some files before testing other filesystem operations");
     }
 
-    if (getInterleavedCreateFilesPercentage().doubleValue() <= getInterleavedDeleteFilesPercentage().doubleValue() && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
+    if (getInterleavedBMCreateFilesPercentage().doubleValue() <= getInterleavedBMDeleteFilesPercentage().doubleValue() && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       throw new IllegalArgumentException("Delete operations can not be more than create operations");
     }
 
@@ -81,24 +82,23 @@ public class MasterArgsReader {
     switch (getBenchMarkType()) {
       case INTERLEAVED:
         //create a coin to check the percentages
-        new MultiFaceCoin(getInterleavedCreateFilesPercentage(), 
-                getInterleavedAppendFilePercentage(),
-                getInterleavedReadFilesPercentage(),
-                getInterleavedRenameFilesPercentage(),
-                getInterleavedDeleteFilesPercentage(), getInterleavedLsFilePercentage(),
-                getInterleavedLsDirPercentage(), getInterleavedChmodFilesPercentage(),
-                getInterleavedChmodDirsPercentage(), getInterleavedMkdirPercentage(),
-                getInterleavedSetReplicationPercentage(),
-                getInterleavedGetFileInfoPercentage(),
-                getInterleavedGetDirInfoPercentage(),
+        new MultiFaceCoin(getInterleavedBMCreateFilesPercentage(),
+                getInterleavedBMAppendFilePercentage(),
+                getInterleavedBMReadFilesPercentage(),
+                getInterleavedBMRenameFilesPercentage(),
+                getInterleavedBMDeleteFilesPercentage(), getInterleavedBMLsFilePercentage(),
+                getInterleavedBMLsDirPercentage(), getInterleavedBMChmodFilesPercentage(),
+                getInterleavedBMChmodDirsPercentage(), getInterleavedBMMkdirPercentage(),
+                getInterleavedBMSetReplicationPercentage(),
+                getInterleavedBMGetFileInfoPercentage(),
+                getInterleavedBMGetDirInfoPercentage(),
                 getInterleavedFileChangeUserPercentage(),
-                getInterleavedDirChangeUserPercentage()
-                );
+                getInterleavedDirChangeUserPercentage());
         break;
     }
   }
 
-  public List<InetAddress> getListOfSlaves() throws UnknownHostException {
+  public List<InetAddress> getSlavesList() throws UnknownHostException {
     if (listOfSlaves == null) {
       listOfSlaves = new ArrayList<InetAddress>();
       String listOfSlavesString = getString(ConfigKeys.LIST_OF_SLAVES_KEY, ConfigKeys.LIST_OF_SLAVES_DEFAULT);
@@ -109,6 +109,10 @@ public class MasterArgsReader {
       }
     }
     return listOfSlaves;
+  }
+
+  public BenchMarkFileSystemName getBenchMarkFileSystemName() {
+    return BenchMarkFileSystemName.fromString(getString(ConfigKeys.BENCHMARK_FILE_SYSTEM_NAME_KEY, ConfigKeys.BENCHMARK_FILE_SYSTEM_NAME_DEFAULT));
   }
 
   public int getSlaveListeningPort() {
@@ -128,122 +132,121 @@ public class MasterArgsReader {
     return getInt(ConfigKeys.NO_OF_NAMENODES_KEY, ConfigKeys.NO_OF_NAMENODES_DEFAULT);
   }
 
-  public int getNoOfNDBDataNodes() {
+  public int getNdbNodesCount() {
     return getInt(ConfigKeys.NO_OF_NDB_DATANODES_KEY, ConfigKeys.NO_OF_NDB_DATANODES_DEFAULT);
   }
 
-  public long getRawCreateFilesPhaseDuration() {
+  public long getRawBMFilesCreationPhaseDuration() {
     return getLong(ConfigKeys.RAW_CREATE_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_CREATE_FILES_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedCreateFilesPercentage() {
+  public BigDecimal getInterleavedBMCreateFilesPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_CREATE_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_CREATE_FILES_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawCreatePhaseMaxFilesToCreate() {
+  public long getRawBMMaxFilesToCreate() {
     return getLong(ConfigKeys.RAW_CREATE_PHASE_MAX_FILES_TO_CRAETE_KEY, ConfigKeys.RAW_CREATE_PHASE_MAX_FILES_TO_CRAETE_DEFAULT);
   }
 
-  public long getRawReadFilesPhaseDuration() {
+  public long getRawBMReadFilesPhaseDuration() {
     return getLong(ConfigKeys.RAW_READ_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_READ_FILES_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedReadFilesPercentage() {
+  public BigDecimal getInterleavedBMReadFilesPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_READ_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_READ_FILES_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawRenameFilesPhaseDuration() {
+  public long getRawBMRenameFilesPhaseDuration() {
     return getLong(ConfigKeys.RAW_RENAME_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_RENAME_FILES_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedRenameFilesPercentage() {
+  public BigDecimal getInterleavedBMRenameFilesPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_RENAME_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_RENAME_FILES_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawDeleteFilesPhaseDuration() {
+  public long getRawBMDeleteFilesPhaseDuration() {
     return getLong(ConfigKeys.RAW_DElETE_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_DELETE_FILES_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedDeleteFilesPercentage() {
+  public BigDecimal getInterleavedBMDeleteFilesPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_DELETE_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_DELETE_FILES_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawChmodFilesPhaseDuration() {
+  public long getRawBMChmodFilesPhaseDuration() {
     return getLong(ConfigKeys.RAW_CHMOD_FILES_PHASE_DURATION_KEY, ConfigKeys.RAW_CHMOD_FILES_PHASE_DURATION_DEFAULT);
   }
 
-  public long getRawChmodDirsPhaseDuration() {
+  public long getRawBMChmodDirsPhaseDuration() {
     return getLong(ConfigKeys.RAW_CHMOD_DIRS_PHASE_DURATION_KEY, ConfigKeys.RAW_CHMOD_DIRS_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedChmodFilesPercentage() {
+  public BigDecimal getInterleavedBMChmodFilesPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_CHMOD_FILES_PERCENTAGE_KEY, ConfigKeys.INTLVD_CHMOD_FILES_PERCENTAGE_DEFAULT);
   }
 
-  public BigDecimal getInterleavedChmodDirsPercentage() {
+  public BigDecimal getInterleavedBMChmodDirsPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_KEY, ConfigKeys.INTLVD_CHMOD_DIRS_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawLsFilePhaseDuration() {
+  public long getRawBMLsFilePhaseDuration() {
     return getLong(ConfigKeys.RAW_LS_FILE_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_FILE_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedLsFilePercentage() {
+  public BigDecimal getInterleavedBMLsFilePercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_LS_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_LS_FILE_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawLsDirPhaseDuration() {
+  public long getRawBMLsDirPhaseDuration() {
     return getLong(ConfigKeys.RAW_LS_DIR_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_DIR_PHASE_DURATION_DEFAULT);
   }
-
   public static String INTERLEAVED_WORKLOAD_NAME_KEY = "interleaved.workload.name";
-    public static double INTERLEAVED_WORKLOAD_NAME_DEFAULT = 0; 
-    
-  public String getInterleavedWorkloadName() {
+  public static double INTERLEAVED_WORKLOAD_NAME_DEFAULT = 0;
+
+  public String getInterleavedBMWorkloadName() {
     return getString(ConfigKeys.INTERLEAVED_WORKLOAD_NAME_KEY, ConfigKeys.INTERLEAVED_WORKLOAD_NAME_DEFAULT);
   }
-  
-  public BigDecimal getInterleavedLsDirPercentage() {
+
+  public BigDecimal getInterleavedBMLsDirPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_LS_DIR_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawMkdirPhaseDuration() {
+  public long getRawBMMkdirPhaseDuration() {
     return getLong(ConfigKeys.RAW_MKDIR_PHASE_DURATION_KEY, ConfigKeys.RAW_MKDIR_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedMkdirPercentage() {
+  public BigDecimal getInterleavedBMMkdirPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_MKDIR_PERCENTAGE_KEY, ConfigKeys.INTLVD_MKDIR_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawSetReplicationPhaseDuration() {
+  public long getRawBMSetReplicationPhaseDuration() {
     return getLong(ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_KEY, ConfigKeys.RAW_SETREPLICATION_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedSetReplicationPercentage() {
+  public BigDecimal getInterleavedBMSetReplicationPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_KEY, ConfigKeys.INTLVD_SETREPLICATION_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawGetFileInfoPhaseDuration() {
+  public long getRawBMGetFileInfoPhaseDuration() {
     return getLong(ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_FILE_INFO_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedGetFileInfoPercentage() {
+  public BigDecimal getInterleavedBMGetFileInfoPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_FILE_INFO_PERCENTAGE_DEFAULT);
   }
 
-  public long getRawGetDirInfoPhaseDuration() {
+  public long getRawBMGetDirInfoPhaseDuration() {
     return getLong(ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_KEY, ConfigKeys.RAW_GET_DIR_INFO_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedGetDirInfoPercentage() {
+  public BigDecimal getInterleavedBMGetDirInfoPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_KEY, ConfigKeys.INTLVD_GET_DIR_INFO_PERCENTAGE_DEFAULT);
   }
-    
-  public long getAppendFilePhaseDuration() {
+
+  public long getRawBMAppendFilePhaseDuration() {
     return getLong(ConfigKeys.RAW_FILE_APPEND_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_APPEND_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedAppendFilePercentage() {
+  public BigDecimal getInterleavedBMAppendFilePercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT);
   }
 
@@ -290,7 +293,7 @@ public class MasterArgsReader {
   public long getFileSize() {
     return getLong(ConfigKeys.FILE_SIZE_IN_Bytes_KEY, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
   }
-  
+
   public long getAppendFileSize() {
     return getLong(ConfigKeys.APPEND_FILE_SIZE_IN_Bytes_KEY, ConfigKeys.APPEND_FILE_SIZE_IN_Bytes_DEFAULT);
   }
@@ -342,23 +345,23 @@ public class MasterArgsReader {
   public long getNameNodeRefreshRate() {
     return getLong(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT);
   }
-  
+
   public int getDirPerDir() {
     return getInt(ConfigKeys.DIR_PER_DIR_KEY, ConfigKeys.DIR_PER_DIR_DEFAULT);
-  }          
-  
+  }
+
   public int getFilesPerDir() {
     return getInt(ConfigKeys.FILES_PER_DIR_KEY, ConfigKeys.FILES_PER_DIR_DEFAULT);
   }
 
   public boolean isFixedDepthTree() {
     return getBoolean(ConfigKeys.ENABLE_FIXED_DEPTH_TREE_KEY, ConfigKeys.ENABLE_FIXED_DEPTH_TREE_DEFAULT);
-  }          
-  
-  public int getTreeDepth(){
-    return getInt(ConfigKeys.TREE_DEPTH_KEY ,ConfigKeys.TREE_DEPTH_DEFAULT);
   }
-            
+
+  public int getTreeDepth() {
+    return getInt(ConfigKeys.TREE_DEPTH_KEY, ConfigKeys.TREE_DEPTH_DEFAULT);
+  }
+
   public long getRawFileChangeUserPhaseDuration() {
     return getLong(ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }
@@ -374,15 +377,15 @@ public class MasterArgsReader {
   public BigDecimal getInterleavedDirChangeUserPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT);
   }
-  
-  public int getMaxSlavesFailureThreshold(){
+
+  public int getMaxSlavesFailureThreshold() {
     return getInt(ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_KEY, ConfigKeys.MAX_SLAVE_FAILURE_THREASHOLD_DEFAULT);
   }
-  
-  public boolean isPercentileEnabled(){
+
+  public boolean isPercentileEnabled() {
     return getBoolean(ConfigKeys.GENERATE_PERCENTILES_KEY, ConfigKeys.GENERATE_PERCENTILES_DEFAULT);
   }
-  
+
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
     return Integer.parseInt(val);
@@ -418,22 +421,20 @@ public class MasterArgsReader {
     }
 
     //System.out.println(key+" value "+userVal);
-    return new BigDecimal(userVal,new MathContext(4,RoundingMode.HALF_UP));
+    return new BigDecimal(userVal, new MathContext(4, RoundingMode.HALF_UP));
   }
 
   private boolean isTwoDecimalPlace(double val) {
-    if (val == 0 || val == ((int)val)) {
+    if (val == 0 || val == ((int) val)) {
       return true;
     } else {
       String valStr = Double.toString(val);
       int i = valStr.lastIndexOf('.');
       if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
         return true;
-      }else{
+      } else {
         return false;
       }
     }
   }
-  
-  
 }
