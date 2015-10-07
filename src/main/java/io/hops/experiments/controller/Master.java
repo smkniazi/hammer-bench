@@ -138,70 +138,70 @@ public class Master {
 
   private void startRawCommander() throws IOException, InterruptedException, ClassNotFoundException {
 
-    if (args.getRawBMMkdirPhaseDuration() > 0) {
+    if (args.getRawBmMkdirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.MKDIRS, args.getRawBMMkdirPhaseDuration()));
+              BenchmarkOperations.MKDIRS, args.getRawBmMkdirPhaseDuration()));
     }
 
-    if (args.getRawBMFilesCreationPhaseDuration() > 0) {
+    if (args.getRawBmFilesCreationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCreateCommand.Request(
-              args.getRawBMMaxFilesToCreate(),
+              args.getRawBmMaxFilesToCreate(),
               BenchmarkOperations.CREATE_FILE,
-              args.getRawBMFilesCreationPhaseDuration()));
+              args.getRawBmFilesCreationPhaseDuration()));
     }
 
-    if (args.getRawBMAppendFilePhaseDuration() > 0) {
+    if (args.getRawBmAppendFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.APPEND_FILE,
-              args.getRawBMAppendFilePhaseDuration()));
+              args.getRawBmAppendFilePhaseDuration()));
     }
 
-    if (args.getRawBMReadFilesPhaseDuration() > 0) {
+    if (args.getRawBmReadFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.READ_FILE,
-              args.getRawBMReadFilesPhaseDuration()));
+              args.getRawBmReadFilesPhaseDuration()));
     }
 
-    if (args.getRawBMLsFilePhaseDuration() > 0) {
+    if (args.getRawBmLsFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.LS_FILE,
-              args.getRawBMLsFilePhaseDuration()));
+              args.getRawBmLsFilePhaseDuration()));
     }
 
-    if (args.getRawBMLsDirPhaseDuration() > 0) {
+    if (args.getRawBmLsDirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.LS_DIR,
-              args.getRawBMLsDirPhaseDuration()));
+              args.getRawBmLsDirPhaseDuration()));
     }
 
-    if (args.getRawBMChmodFilesPhaseDuration() > 0) {
+    if (args.getRawBmChmodFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.CHMOD_FILE,
-              args.getRawBMChmodFilesPhaseDuration()));
+              args.getRawBmChmodFilesPhaseDuration()));
     }
 
-    if (args.getRawBMChmodDirsPhaseDuration() > 0) {
+    if (args.getRawBmChmodDirsPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.CHMOD_DIR,
-              args.getRawBMChmodDirsPhaseDuration()));
+              args.getRawBmChmodDirsPhaseDuration()));
     }
 
-    if (args.getRawBMSetReplicationPhaseDuration() > 0) {
+    if (args.getRawBmSetReplicationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.SET_REPLICATION,
-              args.getRawBMSetReplicationPhaseDuration()));
+              args.getRawBmSetReplicationPhaseDuration()));
     }
 
-    if (args.getRawBMGetFileInfoPhaseDuration() > 0) {
+    if (args.getRawBmGetFileInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.FILE_INFO,
-              args.getRawBMGetFileInfoPhaseDuration()));
+              args.getRawBmGetFileInfoPhaseDuration()));
     }
 
-    if (args.getRawBMGetDirInfoPhaseDuration() > 0) {
+    if (args.getRawBmGetDirInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.DIR_INFO,
-              args.getRawBMGetDirInfoPhaseDuration()));
+              args.getRawBmGetDirInfoPhaseDuration()));
     }
 
 
@@ -219,16 +219,16 @@ public class Master {
     }
 
 
-    if (args.getRawBMRenameFilesPhaseDuration() > 0) {
+    if (args.getRawBmRenameFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.RENAME_FILE,
-              args.getRawBMRenameFilesPhaseDuration()));
+              args.getRawBmRenameFilesPhaseDuration()));
     }
 
-    if (args.getRawBMDeleteFilesPhaseDuration() > 0) {
+    if (args.getRawBmDeleteFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
               BenchmarkOperations.DELETE_FILE,
-              args.getRawBMDeleteFilesPhaseDuration()));
+              args.getRawBmDeleteFilesPhaseDuration()));
     }
   }
 
@@ -274,22 +274,22 @@ public class Master {
     System.out.println("Starting Interleaved Benchmark ...");
     prompt();
     InterleavedBenchmarkCommand.Request request =
-            new InterleavedBenchmarkCommand.Request(args.getInterleavedBMCreateFilesPercentage(),
-            args.getInterleavedBMAppendFilePercentage(),
-            args.getInterleavedBMReadFilesPercentage(), args.getInterleavedBMRenameFilesPercentage(), args.getInterleavedBMDeleteFilesPercentage(),
-            args.getInterleavedBMLsFilePercentage(), args.getInterleavedBMLsDirPercentage(),
-            args.getInterleavedBMChmodFilesPercentage(), args.getInterleavedBMChmodDirsPercentage(),
-            args.getInterleavedBMMkdirPercentage(),
-            args.getInterleavedBMSetReplicationPercentage(),
-            args.getInterleavedBMGetFileInfoPercentage(),
-            args.getInterleavedBMGetDirInfoPercentage(),
+            new InterleavedBenchmarkCommand.Request(args.getInterleavedBmCreateFilesPercentage(),
+            args.getInterleavedBmAppendFilePercentage(),
+            args.getInterleavedBmReadFilesPercentage(), args.getInterleavedBmRenameFilesPercentage(), args.getInterleavedBmDeleteFilesPercentage(),
+            args.getInterleavedBmLsFilePercentage(), args.getInterleavedBmLsDirPercentage(),
+            args.getInterleavedBmChmodFilesPercentage(), args.getInterleavedBmChmodDirsPercentage(),
+            args.getInterleavedBmMkdirPercentage(),
+            args.getInterleavedBmSetReplicationPercentage(),
+            args.getInterleavedBmGetFileInfoPercentage(),
+            args.getInterleavedBmGetDirInfoPercentage(),
             args.getInterleavedFileChangeUserPercentage(),
             args.getInterleavedDirChangeUserPercentage(),
-            args.getInterleavedBMDuration(), args.getFileSize(), args.getAppendFileSize(),
+            args.getInterleavedBmDuration(), args.getFileSize(), args.getAppendFileSize(),
             args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled());
     sendToAllSlaves(request);
 
-    Thread.sleep(args.getInterleavedBMDuration());
+    Thread.sleep(args.getInterleavedBmDuration());
     Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
     InterleavedBMResults result = InterleavedBMResultsAggregator.processInterleavedResults(responses,args);
     printMasterResultMessages(result);
@@ -306,7 +306,7 @@ public class Master {
             args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
             args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
             args.getNameNodeRefreshRate(), args.getDirPerDir(), 
-            args.getFilesPerDir(),args.getRawBMMaxFilesToCreate(),
+            args.getFilesPerDir(),args.getRawBmMaxFilesToCreate(),
             args.isFixedDepthTree(), args.getTreeDepth()));
     Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
 
