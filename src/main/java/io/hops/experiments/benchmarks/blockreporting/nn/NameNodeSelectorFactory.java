@@ -25,7 +25,6 @@ import java.net.URI;
 public class NameNodeSelectorFactory {
   public static BlockReportingNameNodeSelector getSelector(Configuration conf, URI defaultUri)
       throws IOException {
-    return new HopsNameNodeSelector(conf, defaultUri);
-    //return new HadoopNameNodeSelector(conf, defaultUri);
+    return new HadoopNameNodeSelector(conf, defaultUri);
   }
 }
