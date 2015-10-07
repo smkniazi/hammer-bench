@@ -48,6 +48,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 
 public class TinyDatanodes {
 
@@ -67,7 +68,7 @@ public class TinyDatanodes {
   public TinyDatanodes(Configuration conf, String baseDir, int
       numOfDataNodes, int blocksPerReport, int blocksPerFile, int
       filesPerDirectory, int replication, int blockSize, int slaveId, String
-      databaseConnection)
+      databaseConnection, BenchMarkFileSystemName fsName)
       throws IOException {
     this.baseDir = baseDir;
     this.nrDatanodes = numOfDataNodes;
@@ -79,7 +80,7 @@ public class TinyDatanodes {
     this.datanodes = new TinyDatanode[nrDatanodes];
     conf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, "ROUND_ROBIN");
     
-    nameNodeSelector = NameNodeSelectorFactory.getSelector(conf, FileSystem
+    nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
         .getDefaultUri(conf));
     machineName = InetAddress.getLocalHost().getHostName();
     this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);

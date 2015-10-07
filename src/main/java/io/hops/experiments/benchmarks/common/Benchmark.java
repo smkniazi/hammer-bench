@@ -21,6 +21,7 @@ import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
+import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
@@ -59,20 +60,19 @@ public abstract class Benchmark {
     }
     return processCommandInternal(command);
   }
-
-  public static Benchmark getBenchmark(BenchmarkType type, int numThreads,
-          Configuration conf, int slaveId, int dirsPerDir, int filesPerDir, 
-          long maxFilesToCreate, boolean fixedDepthTree, int treeDepth) {
-    if (type == BenchmarkType.RAW) {
-      return new RawBenchmark(conf, numThreads, dirsPerDir, filesPerDir,
-              maxFilesToCreate, fixedDepthTree, treeDepth);
-    } else if (type == BenchmarkType.INTERLEAVED) {
-      return new InterleavedBenchmark(conf, numThreads, dirsPerDir, filesPerDir,
-               fixedDepthTree, treeDepth);
-    } else if (type == BenchmarkType.BR) {
-      return new BlockReportingBenchmark(conf, numThreads, slaveId);
+  
+  public static Benchmark getBenchmark(Configuration conf, Handshake.Request handShake) {
+    if (handShake.getBenchMarkType() == BenchmarkType.RAW) {
+      return new RawBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
+              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth());
+    } else if (handShake.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
+      return new InterleavedBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
+               handShake.isFixedDepthTree(), handShake.getTreeDepth());
+    } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
+      return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
+              handShake.getBenchMarkFileSystemName());
     } else {
-      throw new UnsupportedOperationException("Unsupported Benchmark " + type);
+      throw new UnsupportedOperationException("Unsupported Benchmark " + handShake.getBenchMarkType());
     }
   }
   

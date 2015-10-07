@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.controller.commands;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
 import java.io.Serializable;
@@ -45,6 +46,7 @@ public class Handshake implements Serializable {
     private final long maxFilesToCreate;
     private final boolean fixedDepthTree;
     private final int treeDepth;
+    private final BenchMarkFileSystemName benchMarkFileSystemName;
 
     public Request(int numThreads, long fileSize, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
@@ -54,7 +56,7 @@ public class Handshake implements Serializable {
             int dirPerDir, int filesPerDir,
             long maxFilesToCreate,
             boolean fixedDepthTree,
-            int treeDepth) {
+            int treeDepth, BenchMarkFileSystemName fsName) {
       this.numThreads = numThreads;
       this.fileSize = fileSize;
       this.appendSize = appendSize;
@@ -71,6 +73,11 @@ public class Handshake implements Serializable {
       this.maxFilesToCreate = maxFilesToCreate;
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
+      this.benchMarkFileSystemName = fsName;
+    }
+
+    public BenchMarkFileSystemName getBenchMarkFileSystemName() {
+      return benchMarkFileSystemName;
     }
 
     public boolean isFixedDepthTree() {

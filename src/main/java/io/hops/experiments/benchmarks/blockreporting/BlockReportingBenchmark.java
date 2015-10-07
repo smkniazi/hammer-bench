@@ -18,6 +18,7 @@
 package io.hops.experiments.benchmarks.blockreporting;
 
 import com.google.common.collect.Lists;
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
@@ -28,13 +29,10 @@ import org.apache.hadoop.util.Time;
 
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockReportingBenchmark extends Benchmark{
@@ -50,12 +48,13 @@ public class BlockReportingBenchmark extends Benchmark{
   private DescriptiveStatistics brElapsedTimes = new DescriptiveStatistics();
 
   private TinyDatanodes datanodes;
-  
-  private int slaveId;
+  private final int slaveId;
+  private final BenchMarkFileSystemName fsName;
   public BlockReportingBenchmark(Configuration conf, int numThreads, int
-      slaveID) {
+      slaveID,BenchMarkFileSystemName fsName) {
     super(conf, numThreads);
     this.slaveId = slaveID;
+    this.fsName = fsName;
   }
 
   @Override
@@ -67,7 +66,7 @@ public class BlockReportingBenchmark extends Benchmark{
     datanodes = new TinyDatanodes(conf, request.getBaseDir(), numThreads,
         request.getBlocksPerReport(), request.getBlocksPerFile(), request.getFilesPerDir(),
         request.getReplication(), request.getMaxBlockSize(), slaveId, request
-        .getDatabaseConnection());
+        .getDatabaseConnection(), fsName);
 
     try {
       long t = Time.now();

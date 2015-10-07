@@ -17,14 +17,25 @@
  */
 package io.hops.experiments.benchmarks.blockreporting.nn;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import org.apache.hadoop.conf.Configuration;
 
 import java.io.IOException;
 import java.net.URI;
 
 public class NameNodeSelectorFactory {
-  public static BlockReportingNameNodeSelector getSelector(Configuration conf, URI defaultUri)
+  public static BlockReportingNameNodeSelector getSelector(
+          BenchMarkFileSystemName filesystemName, 
+          Configuration conf, URI defaultUri)
       throws IOException {
-    return new HadoopNameNodeSelector(conf, defaultUri);
+    
+    if(filesystemName == BenchMarkFileSystemName.HDFS){
+      return new HadoopNameNodeSelector(conf, defaultUri);
+    } if(filesystemName == BenchMarkFileSystemName.HopsFS){
+      return new HopsNameNodeSelector(conf, defaultUri);
+    } 
+    else{
+      throw new IllegalStateException("NameNode selection is only possible in HDFS and HopsFS");
+    }
   }
 }

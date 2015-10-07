@@ -307,7 +307,8 @@ public class Master {
             args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
             args.getNameNodeRefreshRate(), args.getDirPerDir(), 
             args.getFilesPerDir(),args.getRawBmMaxFilesToCreate(),
-            args.isFixedDepthTree(), args.getTreeDepth()));
+            args.isFixedDepthTree(), args.getTreeDepth(), 
+            args.getBenchMarkFileSystemName()));
     Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {

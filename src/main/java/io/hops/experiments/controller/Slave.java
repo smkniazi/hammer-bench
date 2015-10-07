@@ -70,11 +70,12 @@ public class Slave {
         if (obj instanceof Handshake.Request) {
             handShake = (Handshake.Request) obj;
             createHdfsConf(handShake);
-            benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
-                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId(),
-                handShake.getDirPerDir(), handShake.getFilesPerDir(), 
-                handShake.getMaxFilesToCreate(), 
-                handShake.isFixedDepthTree(), handShake.getTreeDepth());
+            benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
+//            benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
+//                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId(),
+//                handShake.getDirPerDir(), handShake.getFilesPerDir(), 
+//                handShake.getMaxFilesToCreate(), 
+//                handShake.isFixedDepthTree(), handShake.getTreeDepth());
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);
