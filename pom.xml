@@ -40,7 +40,7 @@
     </dependency>
     
     <!-- Hops Dependencies -->
-    <dependency>
+    <!--    <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>2.4.0</version>
@@ -50,22 +50,38 @@
       <groupId>io.hops</groupId>
       <artifactId>hadoop-common</artifactId>
       <version>2.4.0</version>
-      <type>jar</type>
-    </dependency>
-
-    <!-- HDFS Dependencies -->
-<!--    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <version>2.0.4-alpha</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>2.0.4-alpha</version>
       <type>jar</type>
     </dependency>-->
+
+    <!-- HDFS Dependencies -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <version>2.0.4-alpha</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>2.0.4-alpha</version>
+      <type>jar</type>
+    </dependency>
+    
+    
+    <!-- CephFS Dependencies -->
+    <dependency>
+      <groupId>com.ceph</groupId>
+      <artifactId>libcephfs</artifactId>
+      <version>0.80.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ceph.fs</groupId>
+      <artifactId>cephfs-hadoop</artifactId>
+      <version>0.80.5</version>
+    </dependency>
+
+
 
   </dependencies>
 

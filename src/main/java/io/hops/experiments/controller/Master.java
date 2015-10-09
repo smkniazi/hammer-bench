@@ -16,9 +16,6 @@
  */
 package io.hops.experiments.controller;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
-import com.google.common.primitives.Doubles;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -97,7 +94,6 @@ public class Master {
 
       handShakeWithSlaves(); // Let all the clients know show is the master
 
-      //send init to slaves
       warmUpSlaves();
 
       //start the commander
@@ -107,7 +103,6 @@ public class Master {
       
       printAllResults();
     } catch (Exception e) {
-      System.err.println(e);
       e.printStackTrace();
     } finally {
       sendToAllSlaves(new KillSlave());

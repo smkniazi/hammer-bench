@@ -102,7 +102,7 @@ public class TinyDatanode implements Comparable<String> {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
         .getNameNodes();
     // get versions from the namenode
-    nsInfo = namenodes.get(1).getDataNodeRPC().versionRequest();
+    nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
         new DatanodeID(DNS.getDefaultIP("default"),
             DNS.getDefaultHost("default", "default"), "", getNodePort(dnIdx),

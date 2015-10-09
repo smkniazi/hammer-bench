@@ -80,26 +80,26 @@ public class MasterArgsReader {
     }
 
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
-        //create a coin to check the percentages
-        new MultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
-                getInterleavedBmAppendFilePercentage(),
-                getInterleavedBmReadFilesPercentage(),
-                getInterleavedBmRenameFilesPercentage(),
-                getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
-                getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
-                getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
-                getInterleavedBmSetReplicationPercentage(),
-                getInterleavedBmGetFileInfoPercentage(),
-                getInterleavedBmGetDirInfoPercentage(),
-                getInterleavedFileChangeUserPercentage(),
-                getInterleavedDirChangeUserPercentage());
+      //create a coin to check the percentages
+      new MultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
+              getInterleavedBmAppendFilePercentage(),
+              getInterleavedBmReadFilesPercentage(),
+              getInterleavedBmRenameFilesPercentage(),
+              getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
+              getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
+              getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
+              getInterleavedBmSetReplicationPercentage(),
+              getInterleavedBmGetFileInfoPercentage(),
+              getInterleavedBmGetDirInfoPercentage(),
+              getInterleavedFileChangeUserPercentage(),
+              getInterleavedDirChangeUserPercentage());
     }
-    
-    if(getBenchMarkType() == BenchmarkType.BR && 
-            (getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS &&
-            getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS)){
+
+    if (getBenchMarkType() == BenchmarkType.BR
+            && (getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS
+            && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS)) {
       throw new IllegalStateException("Block report benchmark is only supported for HDFS and HopsFS");
-      
+
     }
   }
 
@@ -391,54 +391,56 @@ public class MasterArgsReader {
     return getBoolean(ConfigKeys.GENERATE_PERCENTILES_KEY, ConfigKeys.GENERATE_PERCENTILES_DEFAULT);
   }
 
-   
-  public String getFsCephImp(){
+  public String getFsCephImp() {
     return getString(ConfigKeys.FS_CEPH_IMPL_KEY, ConfigKeys.FS_CEPH_IMPL_DEFAULT);
   }
-  
-  public String getCephAuthKeyRing(){
+
+  public String getCephAuthKeyRing() {
     return getString(ConfigKeys.CEPH_AUTH_KEYRING_KEY, ConfigKeys.CEPH_AUTH_KEYRING_DEFAULT);
   }
-  
-  public String getCephConfigFile(){
+
+  public String getCephConfigFile() {
     return getString(ConfigKeys.CEPH_CONF_FILE_KEY, ConfigKeys.CEPH_CONF_FILE_DEFAULT);
   }
-  
-  public String getCephRootDir(){
+
+  public String getCephRootDir() {
     return getString(ConfigKeys.CEPH_ROOT_DIR_KEY, ConfigKeys.CEPH_ROOT_DIR_DEFAULT);
   }
-  
-  public String getCephMonAddress(){
+
+  public String getCephMonAddress() {
     return getString(ConfigKeys.CEPH_MON_ADDRESS_KEY, ConfigKeys.CEPH_MON_ADDRESS_DEFAULT);
   }
-  
-  public String getCephAuthId(){
+
+  public String getCephAuthId() {
     return getString(ConfigKeys.CEPH_AUTH_ID_KEY, ConfigKeys.CEPH_AUTH_ID_DEFAULT);
   }
-  
-  public Properties getFsConfig(){
+
+  public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
-    if(getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS){
+    if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS) {
+      System.out.println("Creating config for HDFS");
       dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
-    }else if(getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS){
-        dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
-        dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,  
-                Long.toString(getNameNodeRefreshRate()));
-        dfsClientConf.setProperty(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
-            getNameNodeSelectorPolicy());
-    }else if(getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS){
+    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
+      System.out.println("Creating config for HopsFS");
       dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
+      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
+              Long.toString(getNameNodeRefreshRate()));
+      dfsClientConf.setProperty(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
+              getNameNodeSelectorPolicy());
+    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
+      System.out.println("Creating config for CephFS");
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_KEYRING_KEY, getCephAuthKeyRing());
       dfsClientConf.setProperty(ConfigKeys.CEPH_CONF_FILE_KEY, getCephConfigFile());
       dfsClientConf.setProperty(ConfigKeys.CEPH_ROOT_DIR_KEY, getCephRootDir());
       dfsClientConf.setProperty(ConfigKeys.CEPH_MON_ADDRESS_KEY, getCephMonAddress());
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_ID_KEY, getCephAuthId());
-    }else if(getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS){
+    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS) {
+      System.out.println("Creating config for MapR-FS");
       dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
-      throw new UnsupportedOperationException(getBenchMarkFileSystemName()+" is not yet supported");
-    }else{
-      throw new UnsupportedOperationException(getBenchMarkFileSystemName()+" is not yet supported");
+      throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
+    } else {
+      throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     }
     return dfsClientConf;
   }

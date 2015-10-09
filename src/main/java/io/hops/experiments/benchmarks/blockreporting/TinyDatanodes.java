@@ -69,7 +69,7 @@ public class TinyDatanodes {
       numOfDataNodes, int blocksPerReport, int blocksPerFile, int
       filesPerDirectory, int replication, int blockSize, int slaveId, String
       databaseConnection, BenchMarkFileSystemName fsName)
-      throws Exception {
+      throws IOException, Exception {
     this.baseDir = baseDir;
     this.nrDatanodes = numOfDataNodes;
     this.blocksPerReport = blocksPerReport;
