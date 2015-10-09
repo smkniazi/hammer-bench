@@ -48,13 +48,13 @@ public abstract class Benchmark {
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
-          throws IOException, InterruptedException;
+          throws Exception;
 
-  protected abstract BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException,
+  protected abstract BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws Exception,
           InterruptedException;
 
   public final BenchmarkCommand.Response processCommand(BenchmarkCommand.Request command)
-          throws IOException, InterruptedException {
+          throws Exception {
     if (command instanceof WarmUpCommand.Request) {
       return warmUp((WarmUpCommand.Request) command);
     }

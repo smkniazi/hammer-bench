@@ -20,6 +20,8 @@ import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
 import java.io.Serializable;
+import java.util.Properties;
+
 
 /**
  *
@@ -38,25 +40,22 @@ public class Handshake implements Serializable {
     private String baseDir;
     private boolean enableRemoteLogging;
     private int remoteLoggingPort;
-    private String namenodeRpcAddress;
-    private String namenodeSelectionPolicy;
-    private long nameNodeListRefreshTime;
     private final int dirPerDir;
     private final int filesPerDir;
     private final long maxFilesToCreate;
     private final boolean fixedDepthTree;
     private final int treeDepth;
     private final BenchMarkFileSystemName benchMarkFileSystemName;
+    private final Properties fsConfig;
 
     public Request(int numThreads, long fileSize, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
             boolean enableRemoteLogging, int remoteLoggingPort,
-            String namenodeRpcAddress, String namenodeSelectionPolicy,
-            long nameNodeListRefreshTime,
             int dirPerDir, int filesPerDir,
             long maxFilesToCreate,
             boolean fixedDepthTree,
-            int treeDepth, BenchMarkFileSystemName fsName) {
+            int treeDepth, BenchMarkFileSystemName fsName,
+            Properties fsConfig) {
       this.numThreads = numThreads;
       this.fileSize = fileSize;
       this.appendSize = appendSize;
@@ -65,15 +64,17 @@ public class Handshake implements Serializable {
       this.baseDir = baseDir;
       this.enableRemoteLogging = enableRemoteLogging;
       this.remoteLoggingPort = remoteLoggingPort;
-      this.nameNodeListRefreshTime = nameNodeListRefreshTime;
-      this.namenodeSelectionPolicy = namenodeSelectionPolicy;
-      this.namenodeRpcAddress = namenodeRpcAddress;
       this.dirPerDir = dirPerDir;
       this.filesPerDir = filesPerDir;
       this.maxFilesToCreate = maxFilesToCreate;
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
       this.benchMarkFileSystemName = fsName;
+      this.fsConfig = fsConfig; 
+    }
+
+    public Properties getFsConfig() {
+      return fsConfig;
     }
 
     public BenchMarkFileSystemName getBenchMarkFileSystemName() {
@@ -123,18 +124,6 @@ public class Handshake implements Serializable {
 
     public int getRemoteLoggingPort() {
       return remoteLoggingPort;
-    }
-
-    public String getNamenodeRpcAddress() {
-      return namenodeRpcAddress;
-    }
-
-    public String getNamenodeSelectionPolicy() {
-      return namenodeSelectionPolicy;
-    }
-
-    public long getNameNodeListRefreshTime() {
-      return nameNodeListRefreshTime;
     }
 
     public int getSlaveId() {

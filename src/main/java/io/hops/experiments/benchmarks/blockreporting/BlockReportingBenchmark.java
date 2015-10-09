@@ -1,19 +1,18 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package io.hops.experiments.benchmarks.blockreporting;
 
@@ -35,23 +34,19 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockReportingBenchmark extends Benchmark{
+public class BlockReportingBenchmark extends Benchmark {
 
   private static final Random rand = new Random(UUID.randomUUID().getLeastSignificantBits());
-
   private long startTime;
   private AtomicInteger successfulOps = new AtomicInteger(0);
   private AtomicInteger failedOps = new AtomicInteger(0);
-
-  private DescriptiveStatistics getNewNameNodeElapsedTime = new
-      DescriptiveStatistics();
+  private DescriptiveStatistics getNewNameNodeElapsedTime = new DescriptiveStatistics();
   private DescriptiveStatistics brElapsedTimes = new DescriptiveStatistics();
-
   private TinyDatanodes datanodes;
   private final int slaveId;
   private final BenchMarkFileSystemName fsName;
-  public BlockReportingBenchmark(Configuration conf, int numThreads, int
-      slaveID,BenchMarkFileSystemName fsName) {
+
+  public BlockReportingBenchmark(Configuration conf, int numThreads, int slaveID, BenchMarkFileSystemName fsName) {
     super(conf, numThreads);
     this.slaveId = slaveID;
     this.fsName = fsName;
@@ -59,39 +54,38 @@ public class BlockReportingBenchmark extends Benchmark{
 
   @Override
   protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
-      throws IOException, InterruptedException {
+          throws Exception {
+    try{
     BlockReportingWarmUp.Request request =
-        (BlockReportingWarmUp.Request) warmUp;
+            (BlockReportingWarmUp.Request) warmUp;
 
     datanodes = new TinyDatanodes(conf, request.getBaseDir(), numThreads,
-        request.getBlocksPerReport(), request.getBlocksPerFile(), request.getFilesPerDir(),
-        request.getReplication(), request.getMaxBlockSize(), slaveId, request
-        .getDatabaseConnection(), fsName);
+            request.getBlocksPerReport(), request.getBlocksPerFile(), request.getFilesPerDir(),
+            request.getReplication(), request.getMaxBlockSize(), slaveId, request
+            .getDatabaseConnection(), fsName);
+    long t = Time.now();
+    datanodes.generateInput(request.isSkipCreations(), executor);
+    Logger.printMsg("WarmUp done in " + (Time.now() - t) / 1000 + " seconds");
 
-    try {
-      long t = Time.now();
-      datanodes.generateInput(request.isSkipCreations(), executor);
-      Logger.printMsg("WarmUp done in " + (Time.now() - t) /1000 + " seconds");
-    }catch (Exception e){
-      e.printStackTrace();
+    }catch(Exception e){
       Logger.error(e);
+      throw e;
     }
-
     return new BlockReportingWarmUp.Response();
   }
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(
-      BenchmarkCommand.Request command)
-      throws IOException, InterruptedException {
+          BenchmarkCommand.Request command)
+          throws IOException, InterruptedException {
     BlockReportingBenchmarkCommand.Request request =
-        (BlockReportingBenchmarkCommand.Request) command;
+            (BlockReportingBenchmarkCommand.Request) command;
     int numOfReports = request.getNumOfReports();
 
     List workers = Lists.newArrayList();
-    for(int dn = 0; dn < numThreads; dn++){
+    for (int dn = 0; dn < numThreads; dn++) {
       workers.add(new Reporter(dn, numOfReports, request
-          .getMinTimeBeforeNextReport(), request.getMaxTimeBeforeNextReport()));
+              .getMinTimeBeforeNextReport(), request.getMaxTimeBeforeNextReport()));
     }
 
     startTime = Time.now();
@@ -101,18 +95,19 @@ public class BlockReportingBenchmark extends Benchmark{
     datanodes.printStats();
 
     return new BlockReportingBenchmarkCommand.Response(successfulOps.get(),
-        failedOps.get(), speed ,brElapsedTimes.getMean(),
-        getNewNameNodeElapsedTime.getMean());
+            failedOps.get(), speed, brElapsedTimes.getMean(),
+            getNewNameNodeElapsedTime.getMean());
   }
 
-  private class Reporter implements Callable{
+  private class Reporter implements Callable {
+
     private final int dnIdx;
     private final int numOfReports;
     private final int minTimeBeforeNextReport;
     private final int maxTimeBeforeNextReport;
 
     public Reporter(int dnIdx, int numOfReports, int minTimeBeforeNextReport,
-        int maxTimeBeforeNextReport) {
+            int maxTimeBeforeNextReport) {
       this.dnIdx = dnIdx;
       this.numOfReports = numOfReports;
       this.minTimeBeforeNextReport = minTimeBeforeNextReport;
@@ -121,12 +116,11 @@ public class BlockReportingBenchmark extends Benchmark{
 
     @Override
     public Object call() throws Exception {
-      for(int report = 0; report < numOfReports; report++) {
+      for (int report = 0; report < numOfReports; report++) {
         try {
 
-          if(minTimeBeforeNextReport > 0 && maxTimeBeforeNextReport > 0) {
-            long sleep = minTimeBeforeNextReport + rand.nextInt
-                (maxTimeBeforeNextReport - minTimeBeforeNextReport);
+          if (minTimeBeforeNextReport > 0 && maxTimeBeforeNextReport > 0) {
+            long sleep = minTimeBeforeNextReport + rand.nextInt(maxTimeBeforeNextReport - minTimeBeforeNextReport);
             Thread.sleep(sleep);
           }
 
@@ -135,16 +129,15 @@ public class BlockReportingBenchmark extends Benchmark{
           getNewNameNodeElapsedTime.addValue(ts[0]);
           brElapsedTimes.addValue(ts[1]);
 
-          if(Logger.canILog()){
-            Logger.printMsg("Successful BR ops " + successfulOps.get
-                () + " Failed BR ops " + failedOps.get() + " Speed " +
-                currentSpeed() + " " +
-                "ops/sec" + " BR details [nn=" + ts[0] + "(" +
-                getNewNameNodeElapsedTime.getMean() +"), br=" +
-                ts[1]+ "(" + brElapsedTimes.getMean() + ")]");
+          if (Logger.canILog()) {
+            Logger.printMsg("Successful BR ops " + successfulOps.get() + " Failed BR ops " + failedOps.get() + " Speed "
+                    + currentSpeed() + " "
+                    + "ops/sec" + " BR details [nn=" + ts[0] + "("
+                    + getNewNameNodeElapsedTime.getMean() + "), br="
+                    + ts[1] + "(" + brElapsedTimes.getMean() + ")]");
           }
 
-        }catch (Exception e){
+        } catch (Exception e) {
           failedOps.incrementAndGet();
           Logger.error(e);
         }
@@ -153,7 +146,7 @@ public class BlockReportingBenchmark extends Benchmark{
     }
   }
 
-  double currentSpeed(){
+  double currentSpeed() {
     double timePassed = Time.now() - startTime;
     double opsPerMSec = (double) (successfulOps.get()) / timePassed;
     return opsPerMSec * 1000;

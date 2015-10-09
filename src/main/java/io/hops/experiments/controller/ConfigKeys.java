@@ -143,7 +143,24 @@ public class ConfigKeys {
     
     public static String INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY = "interleaved.dir.change.user.percentage";
     public static double INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT = 0;     
+        
+    public static String FS_CEPH_IMPL_KEY = "fs.ceph.impl";
+    public static String FS_CEPH_IMPL_DEFAULT = "org.apache.hadoop.fs.ceph.CephFileSystem";
     
+    public static String CEPH_AUTH_KEYRING_KEY = "ceph.auth.keyring";
+    public static String CEPH_AUTH_KEYRING_DEFAULT = "/etc/ceph/ceph.client.admin.keyring";
+    
+    public static String CEPH_CONF_FILE_KEY = "ceph.conf.file";
+    public static String CEPH_CONF_FILE_DEFAULT = "/etc/ceph/ceph.conf";
+    
+    public static String CEPH_ROOT_DIR_KEY = "ceph.root.dir";
+    public static String CEPH_ROOT_DIR_DEFAULT = "/";
+            
+    public static String CEPH_MON_ADDRESS_KEY = "ceph.mon.address";
+    public static String CEPH_MON_ADDRESS_DEFAULT = "machine:6789";
+    
+    public static String CEPH_AUTH_ID_KEY = "ceph.auth.id";
+    public static String CEPH_AUTH_ID_DEFAULT = "user";
     
     public static String BR_NUM_REPORTS = "br.numofreports";
     public static int BR_NUM_REPORTS_DEFAULT = 10;

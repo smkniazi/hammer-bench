@@ -27,6 +27,7 @@ import org.apache.hadoop.hdfs.server.namenode.NameNode;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,11 @@ class HadoopNameNodeSelector implements BlockReportingNameNodeSelector{
     @Override
     public DatanodeProtocol getDataNodeRPC() {
       return datanodeProto;
+    }
+
+    @Override
+    public String getHostName() {
+      return host;
     }
   };
 

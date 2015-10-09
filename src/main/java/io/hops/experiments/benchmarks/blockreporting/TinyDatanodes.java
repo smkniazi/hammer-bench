@@ -69,7 +69,7 @@ public class TinyDatanodes {
       numOfDataNodes, int blocksPerReport, int blocksPerFile, int
       filesPerDirectory, int replication, int blockSize, int slaveId, String
       databaseConnection, BenchMarkFileSystemName fsName)
-      throws IOException {
+      throws Exception {
     this.baseDir = baseDir;
     this.nrDatanodes = numOfDataNodes;
     this.blocksPerReport = blocksPerReport;
@@ -207,7 +207,7 @@ public class TinyDatanodes {
   }
 
   long[] executeOp(int dnIdx)
-      throws IOException {
+      throws Exception {
     assert dnIdx < nrDatanodes : "Wrong dnIdx.";
     TinyDatanode dn = datanodes[dnIdx];
     return dn.blockReport();

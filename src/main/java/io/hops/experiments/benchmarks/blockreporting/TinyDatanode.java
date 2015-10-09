@@ -98,11 +98,11 @@ public class TinyDatanode implements Comparable<String> {
     return dnRegistration.getXferAddr();
   }
 
-  void register(boolean isDataNodePopulated) throws IOException {
+  void register(boolean isDataNodePopulated) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
         .getNameNodes();
     // get versions from the namenode
-    nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
+    nsInfo = namenodes.get(1).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
         new DatanodeID(DNS.getDefaultIP("default"),
             DNS.getDefaultHost("default", "default"), "", getNodePort(dnIdx),
@@ -126,7 +126,7 @@ public class TinyDatanode implements Comparable<String> {
    * Send a heartbeat to the name-node.
    * Ignore reply commands.
    */
-  void sendHeartbeat() throws IOException {
+  void sendHeartbeat() throws Exception {
     // register datanode
     // TODO:FEDERATION currently a single block pool is supported
     StorageReport[] rep =
@@ -160,7 +160,7 @@ public class TinyDatanode implements Comparable<String> {
     return true;
   }
 
-  void formBlockReport(boolean isDataNodePopulated) throws IOException {
+  void formBlockReport(boolean isDataNodePopulated) throws Exception {
     // fill remaining slots with blocks that do not exist
     for (int idx = blocks.size() - 1; idx >= nrBlocks; idx--) {
       blocks.set(idx, new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0));
@@ -175,11 +175,11 @@ public class TinyDatanode implements Comparable<String> {
     }
   }
 
-  long[] blockReport() throws IOException {
+  long[] blockReport() throws Exception {
     return blockReport(blockReportList);
   }
 
-  private long[] blockReport(long[] blocksReport) throws IOException {
+  private long[] blockReport(long[] blocksReport) throws Exception {
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
         .getNameNodeToReportTo();
@@ -190,7 +190,7 @@ public class TinyDatanode implements Comparable<String> {
     return new long[]{start - start1,  end - start};
   }
 
-  private void firstBlockReport(long[] blocksReport) throws IOException {
+  private void firstBlockReport(long[] blocksReport) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
         .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes){

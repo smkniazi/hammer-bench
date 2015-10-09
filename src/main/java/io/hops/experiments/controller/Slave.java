@@ -31,6 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Set;
 
 /**
  *
@@ -57,8 +58,7 @@ public class Slave {
     public void start(String configFilePath) throws Exception {
         args = new SlaveArgsReader(configFilePath);
         connect();
-        handShakeWithMaster(); // Let all the clients know show is the master 
-       //warmUp already handled by startlistener
+        handShakeWithMaster(); 
         startListener();
     }
 
@@ -69,13 +69,14 @@ public class Slave {
 
         if (obj instanceof Handshake.Request) {
             handShake = (Handshake.Request) obj;
-            createHdfsConf(handShake);
+            dfsClientConf = new Configuration();
+            for(Object key : handShake.getFsConfig().keySet()){
+              String keyStr = (String)key;
+              String val = handShake.getFsConfig().getProperty(keyStr);
+              dfsClientConf.set(keyStr, val);
+            }
+            
             benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
-//            benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
-//                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId(),
-//                handShake.getDirPerDir(), handShake.getFilesPerDir(), 
-//                handShake.getMaxFilesToCreate(), 
-//                handShake.isFixedDepthTree(), handShake.getTreeDepth());
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);
@@ -88,7 +89,7 @@ public class Slave {
         }
     }
 
-    private void startListener() throws IOException, ClassNotFoundException, InterruptedException {
+    private void startListener() throws Exception{
         while (true) {
             Object obj = receiveRequestFromMaster();
             if (obj instanceof BenchmarkCommand.Request) {
@@ -127,14 +128,5 @@ public class Slave {
         ObjectOutputStream sendToMaster = new ObjectOutputStream(connectionWithMaster.getOutputStream());
         sendToMaster.writeObject(obj);
         System.out.println("Sent response to master. Time: "+(System.currentTimeMillis() - startTime)+" ms");
-    }
-    
-    private void createHdfsConf(Handshake.Request request){
-        dfsClientConf = new Configuration();
-        dfsClientConf.set(ConfigKeys.FS_DEFAULTFS_KEY, request.getNamenodeRpcAddress());
-        dfsClientConf.set(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
-            Long.toString(request.getNameNodeListRefreshTime()));
-        dfsClientConf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
-            request.getNamenodeSelectionPolicy());
     }
 }

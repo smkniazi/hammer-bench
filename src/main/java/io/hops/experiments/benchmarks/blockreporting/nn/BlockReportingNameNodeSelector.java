@@ -22,6 +22,7 @@ import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 
@@ -30,15 +31,16 @@ public interface BlockReportingNameNodeSelector {
   public static interface BlockReportingNameNodeHandle{
     ClientProtocol getRPCHandle();
     DatanodeProtocol getDataNodeRPC();
+    String  getHostName();
   }
 
-  BlockReportingNameNodeHandle getNextNameNodeRPCS() throws IOException;
+  BlockReportingNameNodeHandle getNextNameNodeRPCS() throws Exception;
 
-  BlockReportingNameNodeHandle getLeader() throws IOException;
+  BlockReportingNameNodeHandle getLeader() throws Exception;
 
-  DatanodeProtocol getNameNodeToReportTo() throws IOException;
+  DatanodeProtocol getNameNodeToReportTo() throws Exception;
 
-  List<BlockReportingNameNodeHandle> getNameNodes() throws IOException;
+  List<BlockReportingNameNodeHandle> getNameNodes() throws Exception;
 
   Map<String, Integer> getReportsStats();
 }

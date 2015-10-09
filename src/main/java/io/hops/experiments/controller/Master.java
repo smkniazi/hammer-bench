@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
@@ -304,11 +303,10 @@ public class Master {
             args.getReplicationFactor(), args.getBenchMarkType(),
             args.getBaseDir(),
             args.isEnableRemoteLogging(), args.getRemoteLogginPort(),
-            args.getNameNodeRpcAddress(), args.getNameNodeSelectorPolicy(),
-            args.getNameNodeRefreshRate(), args.getDirPerDir(), 
+            args.getDirPerDir(), 
             args.getFilesPerDir(),args.getRawBmMaxFilesToCreate(),
             args.isFixedDepthTree(), args.getTreeDepth(), 
-            args.getBenchMarkFileSystemName()));
+            args.getBenchMarkFileSystemName(),args.getFsConfig()));
     Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {
