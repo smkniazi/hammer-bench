@@ -2,88 +2,145 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>se.sics.hop</groupId>
-    <artifactId>hop-experiments</artifactId>
-    <version>1.0-SNAPSHOT</version>
+  <groupId>se.sics.hop</groupId>
+  <artifactId>hop-experiments</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-    <dependencies>
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>1.2</version>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.2</version>
+    </dependency>
 
-        <dependency>
-            <groupId>args4j</groupId>
-            <artifactId>args4j</artifactId>
-            <version>2.0.29</version>
-        </dependency>
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.0.29</version>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.0</version>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.18</version>
+    </dependency>
+      
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>18.0</version>
+    </dependency>
+    
+    <!-- Hops Dependencies -->
+    <!--    <dependency>
+      <groupId>io.hops</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <version>2.4.0</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>io.hops</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>2.4.0</version>
+      <type>jar</type>
+    </dependency>-->
 
-      <dependency>
-        <groupId>io.hops</groupId>
-        <artifactId>hadoop-hdfs</artifactId>
-        <version>2.4.0</version>
-        <type>jar</type>
-      </dependency>
-      <dependency>
-        <groupId>io.hops</groupId>
-        <artifactId>hadoop-common</artifactId>
-        <version>2.4.0</version>
-        <type>jar</type>
-      </dependency>
+    <!-- HDFS Dependencies -->
+<!--    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <version>2.4.1</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>2.4.1</version>
+      <type>jar</type>
+    </dependency>-->
+    
+    
+    <!-- CephFS Dependencies -->
+<!--    <dependency>
+      <groupId>com.ceph</groupId>
+      <artifactId>libcephfs</artifactId>
+      <version>0.80.5</version>
+    </dependency>
 
-      <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.18</version>
-      </dependency>
+    <dependency>
+      <groupId>com.ceph.fs</groupId>
+      <artifactId>cephfs-hadoop</artifactId>
+      <version>0.80.5</version>
+    </dependency>-->
+    
+    
+    <!-- MapR-FS Dependencies -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>2.4.1-mapr-1408</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20080701</version>
+    </dependency>
 
-    </dependencies>
+  </dependencies>
+  
+  <!-- MapR-FS Repo -->
+  <repositories>
+    <repository>
+      <id>MapR-Repo</id>
+      <name>MapR-Repo</name>
+      <url>http://repository.mapr.com/maven/</url>
+    </repository>
+  </repositories>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <!--manifest>
-                          <mainClass>se.sics.hop.experiments.BenchMark</mainClass>
-                        </manifest-->
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <!--manifest>
+              <mainClass>se.sics.hop.experiments.BenchMark</mainClass>
+            </manifest-->
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
 
-            </plugin>
-        </plugins>
-    </build>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

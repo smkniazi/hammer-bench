@@ -1,0 +1,4 @@
+#set_replication    
+NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
+HopsFS              -                   5873.41             8086.47             7936.18             9122.11             8977.98             8291.55             6738.99             0.0                 9071.13             4443.66             1210.8              0.0                 
+HDFS                0                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   

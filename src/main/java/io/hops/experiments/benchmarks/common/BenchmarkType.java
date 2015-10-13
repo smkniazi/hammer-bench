@@ -22,9 +22,9 @@ package io.hops.experiments.benchmarks.common;
  * @author salman
  */
 public enum BenchmarkType {
-    RAW ("RAW"),
+    RAW           ("RAW"),
     INTERLEAVED   ("INTERLEAVED"),
-    BR ("BR");
+    BR            ("BR");
     
     private final String type;
     private BenchmarkType(String type){

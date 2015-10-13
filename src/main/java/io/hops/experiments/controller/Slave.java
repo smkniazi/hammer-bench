@@ -17,13 +17,9 @@
  */
 package io.hops.experiments.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -33,6 +29,9 @@ import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.KillSlave;
 import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Set;
 
 /**
  *
@@ -48,9 +47,9 @@ public class Slave {
         }
         new Slave().start(configFilePath);
     }
-    private DatagramSocket slaveSocket = null;
+    private ServerSocket slaveServerSocket = null;
+    private Socket connectionWithMaster = null;
     private InetAddress masterIP = null;
-    private int masterPort = 0;
     private Benchmark benchmark;
     private SlaveArgsReader args;
     private Handshake.Request handShake = null;
@@ -58,22 +57,26 @@ public class Slave {
 
     public void start(String configFilePath) throws Exception {
         args = new SlaveArgsReader(configFilePath);
-        bind();
-        handShakeWithMaster(); // Let all the clients know show is the master 
-       //warmUp already handled by startlistener
+        connect();
+        handShakeWithMaster(); 
         startListener();
     }
 
     private void handShakeWithMaster() throws IOException, ClassNotFoundException {
-        System.out.println("Waiting for hand shake ... ");
-
+        
+        System.out.println("Waiting for handshake message ");
         Object obj = receiveRequestFromMaster();
 
         if (obj instanceof Handshake.Request) {
             handShake = (Handshake.Request) obj;
-            createHdfsConf(handShake);
-            benchmark = Benchmark.getBenchmark(handShake.getBenchMarkType(),
-                handShake.getNumThreads(), dfsClientConf, handShake.getSlaveId());
+            dfsClientConf = new Configuration();
+            for(Object key : handShake.getFsConfig().keySet()){
+              String keyStr = (String)key;
+              String val = handShake.getFsConfig().getProperty(keyStr);
+              dfsClientConf.set(keyStr, val);
+            }
+            
+            benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);
@@ -86,7 +89,7 @@ public class Slave {
         }
     }
 
-    private void startListener() throws IOException, ClassNotFoundException, InterruptedException {
+    private void startListener() throws Exception{
         while (true) {
             Object obj = receiveRequestFromMaster();
             if (obj instanceof BenchmarkCommand.Request) {
@@ -100,48 +103,30 @@ public class Slave {
         }
     }
 
-    private void bind() throws SocketException, UnknownHostException {
-        slaveSocket = new DatagramSocket(args.getSlaveListeningPort(), InetAddress.getByName("0.0.0.0"));
+    private void connect() throws SocketException, UnknownHostException, IOException {
+        System.out.println("Waiting for connection from master ... ");
+        slaveServerSocket = new ServerSocket(args.getSlaveListeningPort());
+        connectionWithMaster = slaveServerSocket.accept();
+        masterIP =  connectionWithMaster.getInetAddress();
+        System.out.print("Connected to master");
     }
 
     private Object receiveRequestFromMaster() throws IOException, ClassNotFoundException {
-        byte[] recvData = new byte[ConfigKeys.BUFFER_SIZE];
-        DatagramPacket recvPacket = new DatagramPacket(recvData, recvData.length);
-        slaveSocket.receive(recvPacket);
-        byte[] data = recvPacket.getData();
-        ByteArrayInputStream in = new ByteArrayInputStream(data);
-        ObjectInputStream is = new ObjectInputStream(in);
-
-        if (masterIP == null && masterPort == 0) {// save the address of master 
-            masterIP = recvPacket.getAddress();
-            masterPort = recvPacket.getPort();
-        }
-
-        Object obj = is.readObject();
+        connectionWithMaster.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
+        ObjectInputStream recvFromMaster =  new ObjectInputStream(connectionWithMaster.getInputStream());
+        Object obj = recvFromMaster.readObject();
         if (obj instanceof KillSlave) {
             System.exit(0);
         }
-
         return obj;
     }
 
     private void sendResponseToMaster(Object obj) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ObjectOutputStream os = new ObjectOutputStream(outputStream);
-        os.writeObject(obj);
-        byte[] data = outputStream.toByteArray();
-
-        DatagramPacket packet = new DatagramPacket(data, data.length,
-                masterIP, masterPort);
-        slaveSocket.send(packet);
-    }
-    
-    private void createHdfsConf(Handshake.Request request){
-        dfsClientConf = new Configuration();
-        dfsClientConf.set(ConfigKeys.FS_DEFAULTFS_KEY, request.getNamenodeRpcAddress());
-        dfsClientConf.set(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
-            Long.toString(request.getNameNodeListRefreshTime()));
-        dfsClientConf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
-            request.getNamenodeSelectionPolicy());
+        System.out.println("Sending response to master ... ");
+        long startTime = System.currentTimeMillis();
+        connectionWithMaster.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
+        ObjectOutputStream sendToMaster = new ObjectOutputStream(connectionWithMaster.getOutputStream());
+        sendToMaster.writeObject(obj);
+        System.out.println("Sent response to master. Time: "+(System.currentTimeMillis() - startTime)+" ms");
     }
 }

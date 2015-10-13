@@ -27,19 +27,33 @@ public interface FilePool {
   
   public String getFileToCreate();
   
-  public void fileCreationFailed(String file);
+  public void fileCreationSucceeded(String file);
 
+  public String getFileToAppend();
+  
   public String getFileToRead();
   
   public String getFileToStat();
   
   public String getDirToStat();
   
-  public String getPathToChangePermissions();
+  public String getFileToInfo();
+  
+  public String getDirToInfo();
+  
+  public String getFileToSetReplication();
+  
+  public String getFilePathToChangePermissions();
+  
+  public String getDirPathToChangePermissions();
   
   public String getFileToRename();
   
   public void fileRenamed(String from, String to);
   
   public String getFileToDelete();
+  
+  public String getFileToChown();
+  
+  public String getDirToChown();
 }

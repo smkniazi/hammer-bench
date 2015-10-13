@@ -19,49 +19,46 @@ package io.hops.experiments.utils;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
-
-
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.permission.FsPermission;
 import io.hops.experiments.workload.generator.FilePool;
-import io.hops.experiments.workload.generator.TreeFileGenerator;
+import io.hops.experiments.workload.generator.FileTreeGenerator;
+import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
-    private static ThreadLocal<DistributedFileSystem> dfsClients = new ThreadLocal<DistributedFileSystem>();
+    private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
     private static ThreadLocal<FilePool> filePools = new ThreadLocal<FilePool>();
     
     private static int filePoolCount = 0;
     private static int dfsClientsCount = 0;
 
-    public static DistributedFileSystem getDFSClient(Configuration conf) throws IOException {
-        System.out.println(Thread.currentThread().getName()  +
-            " get dfs ");
-        DistributedFileSystem client = dfsClients.get();
-        System.out.println(Thread.currentThread().getName()  +
-            " dfs " + client);
+    public static FileSystem getDFSClient(Configuration conf) throws IOException {
+        FileSystem client = dfsClients.get();
         if (client == null) {
             System.out.println(Thread.currentThread().getName()  +
-                " create new" );
-            client = (DistributedFileSystem) FileSystem.newInstance(conf);
-            System.out.println("New DSFClient created. Total :"+ ++dfsClientsCount);
+                " Creating new client. Total: "+ ++dfsClientsCount);
+            client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
         }else{
-            //System.out.println("Reusing existing client");
+            System.out.println("Reusing Existing Client "+client);
         }
         return client;
     }
 
-    public static FilePool getFilePool(Configuration conf, String baseDir) {
+    public static FilePool getFilePool(Configuration conf, String baseDir, 
+            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth) {
         FilePool filePool = filePools.get();
         if (filePool == null) {
-            filePool = new TreeFileGenerator(baseDir,16,16,0);
+            if(fixedDepthTree){
+              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth);
+            }else{
+              filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0);
+            }
+            
             filePools.set(filePool);
             System.out.println("New FilePool created. Total :"+ ++filePoolCount);
         }else{
@@ -71,7 +68,7 @@ public class BenchmarkUtils {
         return filePool;
     }
     
-    public static void createFile(DistributedFileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
+    public static void createFile(FileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
         FSDataOutputStream out = dfs.create(path, replication);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
@@ -81,39 +78,61 @@ public class BenchmarkUtils {
         out.close();
     }
 
-    public static void readFile(DistributedFileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
+    public static void readFile(FileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
         FSDataInputStream in = dfs.open(path);
-        if (size != 0) {
-            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
-                in.readInt();
-            }
-        }
+//        if (size != 0) {
+//            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
+//                in.readInt();
+//            }
+//        }
         in.close();
     }
 
-    public static boolean renameFile(DistributedFileSystem dfs, Path from, Path to) throws IOException {
+    public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
         return dfs.rename(from, to);    
     }
 
-    public static boolean deleteFile(DistributedFileSystem dfs, Path file) throws IOException {
+    public static boolean deleteFile(FileSystem dfs, Path file) throws IOException {
         return dfs.delete(file, true);
     }
     
-    public static void stat(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void ls(FileSystem dfs, Path path) throws IOException {
        dfs.listStatus(path);
     }
     
-    public static void chmodPath(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void getInfo(FileSystem dfs, Path path) throws IOException {
+       dfs.getFileStatus(path);
+    }
+    
+    public static void chmodPath(FileSystem dfs, Path path) throws IOException {
         dfs.setPermission(path, new FsPermission((short)0777));
     }
     
-    public static void mkdirs(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void mkdirs(FileSystem dfs, Path path) throws IOException {
         dfs.mkdirs(path);
     }
-
-    public static double speedPSec(AtomicInteger ops, long startTime) {
-        long timePassed = (System.currentTimeMillis() - startTime);
-        double opsPerMSec = (double) (ops.get()) / (double) timePassed;
-        return opsPerMSec * 1000;
+    
+    public static void chown(FileSystem dfs, Path path) throws IOException {     
+        dfs.setOwner(path, System.getProperty("user.name"), System.getProperty("user.name"));
     }
+    
+    public static void setReplication(FileSystem dfs, Path path) throws IOException {
+        dfs.setReplication(path, (short)3);
+    }
+    
+    public static double round(double val){
+      double round = val * 100;
+      round = Math.ceil(round);
+      return round / 100;
+    }
+
+  public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
+    FSDataOutputStream out = dfs.append(path);
+        if (size != 0) {
+            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
+                out.writeInt(1);
+            }
+        }
+        out.close();
+  }
 }
