@@ -19,11 +19,7 @@ package io.hops.experiments.utils;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
-
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,18 +30,18 @@ import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
-    private static ThreadLocal<DistributedFileSystem> dfsClients = new ThreadLocal<DistributedFileSystem>();
+    private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
     private static ThreadLocal<FilePool> filePools = new ThreadLocal<FilePool>();
     
     private static int filePoolCount = 0;
     private static int dfsClientsCount = 0;
 
-    public static DistributedFileSystem getDFSClient(Configuration conf) throws IOException {
-        DistributedFileSystem client = dfsClients.get();
+    public static FileSystem getDFSClient(Configuration conf) throws IOException {
+        FileSystem client = dfsClients.get();
         if (client == null) {
             System.out.println(Thread.currentThread().getName()  +
                 " Creating new client. Total: "+ ++dfsClientsCount);
-            client = (DistributedFileSystem) FileSystem.newInstance(conf);
+            client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
         }else{
             System.out.println("Reusing Existing Client "+client);
@@ -72,7 +68,7 @@ public class BenchmarkUtils {
         return filePool;
     }
     
-    public static void createFile(DistributedFileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
+    public static void createFile(FileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
         FSDataOutputStream out = dfs.create(path, replication);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
@@ -82,7 +78,7 @@ public class BenchmarkUtils {
         out.close();
     }
 
-    public static void readFile(DistributedFileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
+    public static void readFile(FileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
         FSDataInputStream in = dfs.open(path);
 //        if (size != 0) {
 //            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
@@ -92,35 +88,35 @@ public class BenchmarkUtils {
         in.close();
     }
 
-    public static boolean renameFile(DistributedFileSystem dfs, Path from, Path to) throws IOException {
+    public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
         return dfs.rename(from, to);    
     }
 
-    public static boolean deleteFile(DistributedFileSystem dfs, Path file) throws IOException {
+    public static boolean deleteFile(FileSystem dfs, Path file) throws IOException {
         return dfs.delete(file, true);
     }
     
-    public static void ls(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void ls(FileSystem dfs, Path path) throws IOException {
        dfs.listStatus(path);
     }
     
-    public static void getInfo(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void getInfo(FileSystem dfs, Path path) throws IOException {
        dfs.getFileStatus(path);
     }
     
-    public static void chmodPath(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void chmodPath(FileSystem dfs, Path path) throws IOException {
         dfs.setPermission(path, new FsPermission((short)0777));
     }
     
-    public static void mkdirs(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void mkdirs(FileSystem dfs, Path path) throws IOException {
         dfs.mkdirs(path);
     }
     
-    public static void chown(DistributedFileSystem dfs, Path path) throws IOException {     
+    public static void chown(FileSystem dfs, Path path) throws IOException {     
         dfs.setOwner(path, System.getProperty("user.name"), System.getProperty("user.name"));
     }
     
-    public static void setReplication(DistributedFileSystem dfs, Path path) throws IOException {
+    public static void setReplication(FileSystem dfs, Path path) throws IOException {
         dfs.setReplication(path, (short)3);
     }
     
@@ -130,7 +126,7 @@ public class BenchmarkUtils {
       return round / 100;
     }
 
-  public static void appendFile(DistributedFileSystem dfs, Path path, long size) throws IOException {
+  public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
     FSDataOutputStream out = dfs.append(path);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {

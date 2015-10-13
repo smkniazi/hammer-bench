@@ -38,7 +38,7 @@ public class Logger {
   private static DatagramSocket socket = null;
 
   public static void error(Exception e) {
-    System.out.println(e);
+    e.printStackTrace();
     final int MSG_SIZE = 200; //send small messages
     String msg = e.getClass().getName() + " " ;
     int consumed = msg.length();

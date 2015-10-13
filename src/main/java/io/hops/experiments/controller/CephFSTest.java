@@ -23,7 +23,7 @@ public class CephFSTest {
   private void start() throws IOException {
     Configuration conf = new Configuration();
     conf.set("fs.ceph.impl", "org.apache.hadoop.fs.ceph.CephFileSystem");
-    conf.set("fs.default.name", "ceph:///");
+    conf.set("fs.defaultFS", "ceph:///");
     conf.set("ceph.conf.file", "/etc/ceph/ceph.conf");
     conf.set("ceph.root.dir", "/");
     conf.set("ceph.mon.address", "salman2:6789");
@@ -35,13 +35,14 @@ public class CephFSTest {
      FileSystem client = (FileSystem) FileSystem.newInstance(conf);
 
      System.out.println("Initialized.");
-     
+
+     client.create(new Path("/test1asdf/file.txt"),(short)3).close();
      client.mkdirs(new Path("/test1"));
      client.mkdirs(new Path("/test2"));
      client.mkdirs(new Path("/test3"));
      
      
-     client.create(new Path("/file.txt")).close();
+     
      
      
      

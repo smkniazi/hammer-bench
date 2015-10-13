@@ -8,8 +8,8 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import java.io.IOException;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 /**
  *
@@ -57,7 +57,7 @@ public class OperationsUtils {
       return path;
     }
 
-    public static boolean performOp(DistributedFileSystem dfs, BenchmarkOperations opType, 
+    public static boolean performOp(FileSystem dfs, BenchmarkOperations opType, 
             FilePool filePool, String pathStr, short replicationFactor,
             long fileSize, long appendSize) throws IOException {
       Path path = new Path(pathStr);

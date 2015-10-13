@@ -29,12 +29,12 @@ import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.workload.generator.FilePool;
+import org.apache.hadoop.fs.FileSystem;
 
 /**
  *
@@ -118,7 +118,7 @@ public class RawBenchmark extends Benchmark {
   public class Generic implements Callable {
 
     private BenchmarkOperations opType;
-    private DistributedFileSystem dfs;
+    private FileSystem dfs;
     private FilePool filePool;
     private String baseDir;
 
@@ -129,10 +129,15 @@ public class RawBenchmark extends Benchmark {
 
     @Override
     public Object call() throws Exception {
-      dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, 
+      try{
+        dfs = BenchmarkUtils.getDFSClient(conf);
+        filePool = BenchmarkUtils.getFilePool(conf, baseDir, 
               dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
-
+      }catch(Exception e){
+        Logger.error(e);
+        e.printStackTrace();
+        throw e;
+      } 
       while (true) {
         try {
 

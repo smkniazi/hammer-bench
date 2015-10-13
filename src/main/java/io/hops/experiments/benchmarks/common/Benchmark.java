@@ -16,7 +16,6 @@
  */
 package io.hops.experiments.benchmarks.common;
 
-import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
@@ -32,8 +31,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 public abstract class Benchmark {
 
@@ -69,8 +68,9 @@ public abstract class Benchmark {
       return new InterleavedBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
                handShake.isFixedDepthTree(), handShake.getTreeDepth());
     } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
-      return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
-              handShake.getBenchMarkFileSystemName());
+        throw new UnsupportedOperationException("BR is commented out as it is only supported for hadoop 2.0.4-alpha");
+//         return     new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
+//              handShake.getBenchMarkFileSystemName());
     } else {
       throw new UnsupportedOperationException("Unsupported Benchmark " + handShake.getBenchMarkType());
     }
@@ -79,7 +79,7 @@ public abstract class Benchmark {
   protected AtomicLong filesCreatedInWarmupPhase = new AtomicLong(0);
   protected class BaseWarmUp implements Callable {
 
-    private DistributedFileSystem dfs;
+    private FileSystem dfs;
     private FilePool filePool;
     private final int filesToCreate;
     private final short replicationFactor;

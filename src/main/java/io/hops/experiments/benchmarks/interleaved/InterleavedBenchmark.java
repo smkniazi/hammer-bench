@@ -30,7 +30,6 @@ import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
@@ -38,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.hadoop.fs.FileSystem;
 
 /**
  *
@@ -108,7 +108,7 @@ public class InterleavedBenchmark extends Benchmark {
 
   public class Worker implements Callable {
 
-    private DistributedFileSystem dfs;
+    private FileSystem dfs;
     private FilePool filePool;
     private InterleavedBenchmarkCommand.Request req;
     private MultiFaceCoin coin;

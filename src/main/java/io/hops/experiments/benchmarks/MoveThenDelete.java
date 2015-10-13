@@ -20,8 +20,8 @@ import io.hops.experiments.controller.ConfigKeys;
 import io.hops.experiments.controller.MasterArgsReader;
 import io.hops.experiments.utils.BenchmarkUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 /**
  *
@@ -48,7 +48,7 @@ public class MoveThenDelete {
       Configuration conf = createHdfsConf();
 
       // do shit here
-      DistributedFileSystem dfs = BenchmarkUtils.getDFSClient(conf);
+      FileSystem dfs = BenchmarkUtils.getDFSClient(conf);
       
 
       Path from = new Path(hdfsFolder);

@@ -429,6 +429,7 @@ public class MasterArgsReader {
               getNameNodeSelectorPolicy());
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
       System.out.println("Creating config for CephFS");
+      dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_KEYRING_KEY, getCephAuthKeyRing());
       dfsClientConf.setProperty(ConfigKeys.CEPH_CONF_FILE_KEY, getCephConfigFile());
@@ -438,7 +439,6 @@ public class MasterArgsReader {
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS) {
       System.out.println("Creating config for MapR-FS");
       dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
-      throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     } else {
       throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     }
@@ -466,7 +466,7 @@ public class MasterArgsReader {
   }
 
   private String getString(String key, String defaultVal) {
-    return props.getProperty(key, defaultVal);
+    return props.getProperty(key, defaultVal).trim();
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
