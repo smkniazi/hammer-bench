@@ -40,7 +40,7 @@
     </dependency>
     
     <!-- Hops Dependencies -->
-    <!--    <dependency>
+    <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>2.4.0</version>
@@ -51,7 +51,7 @@
       <artifactId>hadoop-common</artifactId>
       <version>2.4.0</version>
       <type>jar</type>
-    </dependency>-->
+    </dependency>
 
     <!-- HDFS Dependencies -->
 <!--    <dependency>
@@ -83,7 +83,7 @@
     
     
     <!-- MapR-FS Dependencies -->
-    <dependency>
+<!--    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>2.4.1-mapr-1408</version>
@@ -92,18 +92,18 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20080701</version>
-    </dependency>
+    </dependency>-->
 
   </dependencies>
   
   <!-- MapR-FS Repo -->
-  <repositories>
+<!--  <repositories>
     <repository>
       <id>MapR-Repo</id>
       <name>MapR-Repo</name>
       <url>http://repository.mapr.com/maven/</url>
     </repository>
-  </repositories>
+  </repositories>-->
 
   <build>
     <plugins>
