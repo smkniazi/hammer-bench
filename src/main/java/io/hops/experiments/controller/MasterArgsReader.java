@@ -255,8 +255,8 @@ public class MasterArgsReader {
     return getBigDecimal(ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT);
   }
 
-  public int getBLockReportingNumOfReports() {
-    return getInt(ConfigKeys.BR_NUM_REPORTS, ConfigKeys.BR_NUM_REPORTS_DEFAULT);
+  public int getBlockReportBenchMarkDuration() {
+    return getInt(ConfigKeys.BR_BENCHMARK_DURATION_KEY, ConfigKeys.BR_BENCHMARK_DURATION_DEFAULT);
   }
 
   public int getBlockReportingNumOfBlocksPerReport() {

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockReportingBenchmark extends Benchmark {
@@ -81,16 +82,15 @@ public class BlockReportingBenchmark extends Benchmark {
           throws IOException, InterruptedException {
     BlockReportingBenchmarkCommand.Request request =
             (BlockReportingBenchmarkCommand.Request) command;
-    int numOfReports = request.getNumOfReports();
 
     List workers = Lists.newArrayList();
     for (int dn = 0; dn < numThreads; dn++) {
-      workers.add(new Reporter(dn, numOfReports, request
+      workers.add(new Reporter(dn, request
               .getMinTimeBeforeNextReport(), request.getMaxTimeBeforeNextReport()));
     }
 
     startTime = Time.now();
-    executor.invokeAll(workers);
+    executor.invokeAll(workers, request.getBlockReportBenchMarkDuration(), TimeUnit.MILLISECONDS);
     double speed = currentSpeed();
     datanodes.printStats();
     return new BlockReportingBenchmarkCommand.Response(successfulOps.get(),
@@ -101,21 +101,19 @@ public class BlockReportingBenchmark extends Benchmark {
   private class Reporter implements Callable {
 
     private final int dnIdx;
-    private final int numOfReports;
     private final int minTimeBeforeNextReport;
     private final int maxTimeBeforeNextReport;
 
-    public Reporter(int dnIdx, int numOfReports, int minTimeBeforeNextReport,
+    public Reporter(int dnIdx, int minTimeBeforeNextReport,
             int maxTimeBeforeNextReport) {
       this.dnIdx = dnIdx;
-      this.numOfReports = numOfReports;
       this.minTimeBeforeNextReport = minTimeBeforeNextReport;
       this.maxTimeBeforeNextReport = maxTimeBeforeNextReport;
     }
 
     @Override
     public Object call() throws Exception {
-      for (int report = 0; report < numOfReports; report++) {
+      while (true) {
         try {
 
           if (minTimeBeforeNextReport > 0 && maxTimeBeforeNextReport > 0) {
@@ -145,7 +143,6 @@ public class BlockReportingBenchmark extends Benchmark {
           Logger.error(e);
         }
       }
-      return null;
     }
   }
 

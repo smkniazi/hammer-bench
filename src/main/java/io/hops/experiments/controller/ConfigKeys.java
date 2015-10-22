@@ -162,8 +162,8 @@ public class ConfigKeys {
     public static String CEPH_AUTH_ID_KEY = "ceph.auth.id";
     public static String CEPH_AUTH_ID_DEFAULT = "user";
     
-    public static String BR_NUM_REPORTS = "br.numofreports";
-    public static int BR_NUM_REPORTS_DEFAULT = 10;
+    public static String BR_BENCHMARK_DURATION_KEY = "br.benchmark.duration";
+    public static int BR_BENCHMARK_DURATION_DEFAULT = 0;
 
     public static String BR_NUM_BLOCKS_PER_REPORT = "br.blocks.per.report";
     public static int BR_NUM_BLOCKS_PER_REPORT_DEFAULT = 10;

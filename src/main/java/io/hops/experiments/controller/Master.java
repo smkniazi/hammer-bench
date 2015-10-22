@@ -230,7 +230,7 @@ public class Master {
     System.out.println("Starting BlockReporting Benchmark ...");
     prompt();
     BlockReportingBenchmarkCommand.Request request = new BlockReportingBenchmarkCommand.Request(args
-            .getBLockReportingNumOfReports(), args
+            .getBlockReportBenchMarkDuration(), args
             .getBlockReportingMinTimeBeforeNextReport(), args
             .getBlockReportingMaxTimeBeforeNextReport());
 
