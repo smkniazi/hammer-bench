@@ -126,8 +126,8 @@ public class TinyDatanodes {
     filesToCreate = nrFiles;
     int fileCreationThreads = nrDatanodes * 10;
 
-    Logger.printMsg(" Creating " + nrFiles + " with "
-            + blocksPerFile + " blocks each.");
+    Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
+            + blocksPerFile + " blocks.");
 
     List writers = Lists.newArrayList();
 

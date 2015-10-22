@@ -45,6 +45,7 @@ import java.util.List;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn
     .BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
+import io.hops.experiments.controller.Logger;
 
 public class TinyDatanode implements Comparable<String> {
 
@@ -169,6 +170,8 @@ public class TinyDatanode implements Comparable<String> {
     if(isDataNodePopulated){
       firstBlockReport(blockReportList);
     }
+    
+    Logger.printMsg("Datanode # "+this.dnIdx+" has generated a block report of size "+blocks.size());
   }
 
   long[] blockReport() throws Exception {
