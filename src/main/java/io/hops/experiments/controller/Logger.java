@@ -64,8 +64,9 @@ public class Logger {
         DatagramPacket packet = new DatagramPacket(data, data.length,
                 loggerIp, loggerPort);
         socket.send(packet);
-
         System.out.println(msg);
+        os.close();
+        outputStream.close();
       } catch (Exception e) { // logging should not crash the client 
         e.printStackTrace();
       }
@@ -113,19 +114,22 @@ public class Logger {
         e.printStackTrace();
       }
       while (running) {
+        DatagramPacket recvPacket = null;
         try {
           byte[] recvData = new byte[ConfigKeys.BUFFER_SIZE];
-          DatagramPacket recvPacket = new DatagramPacket(recvData, recvData.length);
+          recvPacket = new DatagramPacket(recvData, recvData.length);
           socket.receive(recvPacket);
-
-          byte[] data = recvPacket.getData();
-          ByteArrayInputStream in = new ByteArrayInputStream(data);
+          ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-
           System.out.println(recvPacket.getAddress().getHostName() + " -> " + msg);
+          is.close();
+          in.close();
+          recvPacket = null;
         } catch (Exception e) { // Logger should not crash the application
-          e.printStackTrace();
+          if(recvPacket != null){
+            System.out.println("Exception when receiving from "+recvPacket.getAddress().getHostName()+" "+e);
+          }
         }
       }
     }
