@@ -43,23 +43,22 @@ run() {
   date1=$(date +"%s") 
 #: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  echo "*** Starting HopsFS ***"
-  source $Start_HopsFS_Script
-  echo "*** Going to sleep a bit so that all datanodes connect to the namenodes ***"
-  sleep 5
+#  echo "*** Starting HopsFS ***"
+#  source $Start_HopsFS_Script
+#  echo "*** Going to sleep a bit so that all datanodes connect to the namenodes ***"
+#  sleep 5
   echo "*** strating the benchmark ***"
   ssh $HopsFS_User@$ExpMaster mkdir -p $exp_remote_bench_mark_result_dir
   source $exp_start_script $ExpMaster 
   scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_dir/* $currentExpDir/
 
-  echo "*** shutting down the cluster ***"
-  
+#  echo "*** shutting down the cluster ***" 
   source $exp_stop_script           # kills exp
   
   #source sto_rename_delete.sh /test
   
-  source $exp_stop_hdfs_script      # kills hdfs
-  source $kill_java_everywhere      # kills all zombie java processes
+#  source $exp_stop_hdfs_script      # kills hdfs
+#  source $kill_java_everywhere      # kills all zombie java processes
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))

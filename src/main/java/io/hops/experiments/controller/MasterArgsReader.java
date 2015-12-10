@@ -417,19 +417,23 @@ public class MasterArgsReader {
 
   public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
+    dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
     if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS) {
       System.out.println("Creating config for HDFS");
-      dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
+      dfsClientConf.setProperty("dfs.ha.namenodes.mycluster",props.getProperty("dfs.ha.namenodes.mycluster"));
+      dfsClientConf.setProperty("dfs.nameservices",props.getProperty("dfs.nameservices"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn1",props.getProperty("dfs.namenode.rpc-address.mycluster.nn1"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn2",props.getProperty("dfs.namenode.rpc-address.mycluster.nn2"));
+      dfsClientConf.setProperty("dfs.client.failover.proxy.provider.mycluster",props.getProperty("dfs.client.failover.proxy.provider.mycluster"));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
-      dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
+
       dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
               Long.toString(getNameNodeRefreshRate()));
       dfsClientConf.setProperty(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
               getNameNodeSelectorPolicy());
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
       System.out.println("Creating config for CephFS");
-      dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_KEYRING_KEY, getCephAuthKeyRing());
       dfsClientConf.setProperty(ConfigKeys.CEPH_CONF_FILE_KEY, getCephConfigFile());
@@ -438,7 +442,7 @@ public class MasterArgsReader {
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_ID_KEY, getCephAuthId());
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS) {
       System.out.println("Creating config for MapR-FS");
-      dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
+      //FS_DEFAULTFS_KEY is already defined
     } else {
       throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     }
