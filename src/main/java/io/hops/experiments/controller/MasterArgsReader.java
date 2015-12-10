@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
+
 import io.hops.experiments.coin.MultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import java.math.BigDecimal;
@@ -61,6 +59,11 @@ public class MasterArgsReader {
     Properties props = new Properties();
     InputStream input = new FileInputStream(PROP_FILE);
     props.load(input);
+    Enumeration<?> keys = props.propertyNames();
+    while(keys.hasMoreElements()){
+      String key = (String)keys.nextElement();
+      System.out.println("Key "+key+" Value: "+props.getProperty(key));
+    }
     return props;
   }
 
