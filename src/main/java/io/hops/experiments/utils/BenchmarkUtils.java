@@ -80,11 +80,11 @@ public class BenchmarkUtils {
 
     public static void readFile(FileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
         FSDataInputStream in = dfs.open(path);
-//        if (size != 0) {
-//            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
-//                in.readInt();
-//            }
-//        }
+        if (size != 0) {
+            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
+                in.readInt();
+            }
+        }
         in.close();
     }
 

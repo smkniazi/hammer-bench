@@ -255,4 +255,40 @@ public class ConfigKeys {
     
     public static String DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY="dsf.client.refresh.namenode.list";
     public static long   DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT=60*60*1000;
+
+    public static String DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY="dfs.clinet.max.retires.on.failure";
+    public static int   DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT=5;
+
+    public static String DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY="dsf.client.initial.wait.on.retry";
+    public static long   DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT=0;
+
+
+    //failover test
+    public static String TEST_FAILOVER= "test.failover";
+    public static boolean TEST_FAILOVER_DEFAULT = false;
+
+    public static String RESTART_NAMENODE_AFTER_KEY = "restart.a.namenode.after";
+    public static long RESTART_NAMENODE_AFTER_DEFAULT = Long.MAX_VALUE;
+
+
+    public static String FAIL_OVER_TEST_START_TIME_KEY = "failover.test.start.time";
+    public static long FAIL_OVER_TEST_START_TIME_DEFAULT = Long.MAX_VALUE;
+
+    public static String FAIL_OVER_TEST_DURATION_KEY = "failover.test.duration";
+    public static long FAIL_OVER_TEST_DURATION_DEFAULT = Long.MAX_VALUE;
+
+    public static String FAILOVER_NAMENODES= "failover.namenodes";
+    public static String FAILOVER_NAMENODES_DEFAULT = null;
+
+    public static String HADOOP_SBIN= "hadoop.sbin";
+    public static String HADOOP_SBIN_DEFAULT = null;
+
+    public static String HADOOP_USER= "hadoop.user";
+    public static String HADOOP_USER_DEFAULT = null;
+
+    public static String NAMENOE_RESTART_COMMANDS= "failover.nn.restart.commands";
+    public static String NAMENOE_RESTART_COMMANDS_DEFAULT = null;
+
+
+
 }

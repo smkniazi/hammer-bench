@@ -18,6 +18,7 @@ package io.hops.experiments.results.compiler;
 
 import com.google.common.primitives.Doubles;
 import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
@@ -27,14 +28,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
@@ -79,12 +75,12 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   public static void combineResults(Map<String, Map<Integer, InterleavedAggregate>> hdfsAllWorkLoads, Map<String, Map<Integer, InterleavedAggregate>> hopsfsAllWorkloas, String outpuFolder) throws IOException {
 
     String plot = "set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n";
-    plot += "set output '| ps2pdf - interleaved.pdf'\n";
-    plot += "#set size 1,0.75 \n ";
-    plot += "set ylabel \"ops/sec\" \n";
-    plot += "set xlabel \"Number of Namenodes\" \n";
-    plot += "set format y \"%.0s%c\"\n";
-    plot += "plot ";
+    plot +=  "set output '| ps2pdf - interleaved.pdf'\n";
+    plot +=  "#set size 1,0.75 \n ";
+    plot +=  "set ylabel \"ops/sec\" \n";
+    plot +=  "set xlabel \"Number of Namenodes\" \n";
+    plot +=  "set format y \"%.0s%c\"\n";
+    plot +=  "plot ";
 
     for (String workload : hopsfsAllWorkloas.keySet()) {
       Map<Integer, InterleavedAggregate> hopsWorkloadResult = hopsfsAllWorkloas.get(workload);
@@ -111,7 +107,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         return;
       }
 
-      plot += " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\"  , \\\n";
+      plot +=  " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\"  , \\\n";
       String data = "";
       for (Integer nn : hopsWorkloadResult.keySet()) {
         InterleavedAggregate agg = hopsWorkloadResult.get(nn);
@@ -127,7 +123,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     CompileResults.writeToFile(outpuFolder + "/interleaved.gnuplot", plot, false);
   }
 
-  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, MasterArgsReader args) throws FileNotFoundException, IOException {
+  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, MasterArgsReader args) throws FileNotFoundException, IOException, InterruptedException {
     Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
     System.out.println("Processing the results ");
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
@@ -171,6 +167,60 @@ public class InterleavedBMResultsAggregator extends Aggregator {
             args.getNdbNodesCount(), args.getInterleavedBmWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles);
+
+
+    // failover testing
+    if(args.testFailover()){
+      if(responses.size() != 1){
+        throw new UnsupportedOperationException("Currently we only support failover testing for one slave machine");
+      }
+
+      String prefix = args.getBenchMarkFileSystemName().toString();
+      if(args.getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS){
+        prefix+="-"+args.getNameNodeSelectorPolicy();
+      }
+
+      final String outputFolder = args.getResultsDir();
+      InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response)responses.iterator().next();
+
+
+      StringBuilder sb = new StringBuilder();
+      for(String data : response.getFailOverLog()){
+        sb.append(data).append("\n");
+      }
+
+      String datFile = prefix+"-failover.dat";
+      CompileResults.writeToFile(outputFolder+"/"+datFile, sb.toString(), false);
+
+      
+      StringBuilder plot = new StringBuilder("set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n");
+      plot.append( "set output '| ps2pdf - failover.pdf'\n");
+      plot.append( "#set size 1,0.75 \n ");
+      plot.append( "set ylabel \"ops/sec\" \n");
+      plot.append( "set xlabel \"Time (sec)\" \n");
+      plot.append( "set format y \"%.0s%c\"\n");
+      
+
+      StringBuilder sbx = new StringBuilder();
+      String oldPt = "";
+      for(String data : response.getFailOverLog()){
+
+        if(data.startsWith("#")) {
+          StringTokenizer st = new StringTokenizer(oldPt);
+          long time = Long.parseLong(st.nextToken());
+          long spd = Long.parseLong(st.nextToken());
+          sbx.append("set label 'NN-Restart' at "+time+","+spd+" rotate by 270").append("\n");
+        }
+        oldPt = data;
+      }
+      plot.append(sbx.toString());
+      
+
+      plot.append( "plot '"+datFile+"' with linespoints ls 1");
+      CompileResults.writeToFile(outputFolder+"/"+prefix+"-failover.gnu", plot.toString(), false);
+      
+    }
+
     return result;
   }
 

@@ -280,7 +280,9 @@ public class Master {
             args.getInterleavedFileChangeUserPercentage(),
             args.getInterleavedDirChangeUserPercentage(),
             args.getInterleavedBmDuration(), args.getFileSize(), args.getAppendFileSize(),
-            args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled());
+            args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled(),
+            args.testFailover(), args.getNameNodeRestartCommands(), args.getNameNodeRestartTimePeriod(),
+            args.getFailOverTestDuration(), args.getFailOverTestStartTime());
     sendToAllSlaves(request);
 
     Thread.sleep(args.getInterleavedBmDuration());

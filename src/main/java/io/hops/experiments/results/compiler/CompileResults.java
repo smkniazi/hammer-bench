@@ -179,7 +179,7 @@ public class CompileResults {
             outputDir);
   }
   
-  protected static void writeToFile(String file, String msg, boolean append) throws IOException {
+  public static void writeToFile(String file, String msg, boolean append) throws IOException {
     FileWriter out = new FileWriter(file, append);
     out.write(msg);
     out.close();

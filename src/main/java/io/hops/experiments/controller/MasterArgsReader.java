@@ -27,10 +27,11 @@ import java.util.*;
 
 import io.hops.experiments.coin.MultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
+import sun.security.krb5.Config;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import org.apache.hadoop.conf.Configuration;
 
 /**
  *
@@ -59,11 +60,11 @@ public class MasterArgsReader {
     Properties props = new Properties();
     InputStream input = new FileInputStream(PROP_FILE);
     props.load(input);
-    Enumeration<?> keys = props.propertyNames();
-    while(keys.hasMoreElements()){
-      String key = (String)keys.nextElement();
-      System.out.println("Key "+key+" Value: "+props.getProperty(key));
-    }
+//    Enumeration<?> keys = props.propertyNames();
+//    while(keys.hasMoreElements()){
+//      String key = (String)keys.nextElement();
+//      System.out.println("Key "+key+" Value: "+props.getProperty(key));
+//    }
     return props;
   }
 
@@ -102,7 +103,37 @@ public class MasterArgsReader {
             && (getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS
             && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS)) {
       throw new IllegalStateException("Block report benchmark is only supported for HDFS and HopsFS");
+    }
 
+    if(testFailover()){
+      if(getBenchMarkType() != BenchmarkType.INTERLEAVED){
+        throw new IllegalArgumentException("Failover Testing is only supported for interleaved benchmark");
+      }
+      if(getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS){
+        throw new IllegalArgumentException("Failover Testing is only supported for HDFS and HopsFS.");
+      }
+      if(getSlavesList().size()!=1){
+        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
+      }
+      if(getHadoopUser()==null){
+        throw new IllegalArgumentException("Hadoop user is not set.");
+      }
+      if(getHadoopSbin()==null){
+        throw new IllegalArgumentException("Hadoop sbin folder is not set.");
+      }
+      if(getFailOverNameNodes().size()==0){
+        throw new IllegalArgumentException("Hadoop namenodes are not set.");
+      }
+      if(getNameNodeRestartCommands().size()==0){
+        throw new IllegalArgumentException("Hadoop failover commands are not set properly.");
+      }
+      if(getFailOverTestStartTime() > getFailOverTestDuration()){
+        throw new IllegalArgumentException("Failover start time can not be greater than failover test duration");
+      }
+      if(getInterleavedBmDuration() < (getFailOverTestStartTime()+getFailOverTestDuration())){
+        throw new IllegalArgumentException(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY+" + "+ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY
+                +" should be greater than "+ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
+      }
     }
   }
 
@@ -418,6 +449,77 @@ public class MasterArgsReader {
     return getString(ConfigKeys.CEPH_AUTH_ID_KEY, ConfigKeys.CEPH_AUTH_ID_DEFAULT);
   }
 
+
+  public boolean testFailover(){
+    return getBoolean(ConfigKeys.TEST_FAILOVER, ConfigKeys.TEST_FAILOVER_DEFAULT);
+  }
+
+  public long getNameNodeRestartTimePeriod(){
+    return getLong(ConfigKeys.RESTART_NAMENODE_AFTER_KEY, ConfigKeys.RESTART_NAMENODE_AFTER_DEFAULT);
+  }
+
+  public long getFailOverTestStartTime(){
+    return getLong(ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY, ConfigKeys.FAIL_OVER_TEST_START_TIME_DEFAULT);
+  }
+
+  public long getFailOverTestDuration(){
+    return getLong(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY, ConfigKeys.FAIL_OVER_TEST_DURATION_DEFAULT);
+  }
+
+  public List<String> getFailOverNameNodes(){
+    List<String> namenodesList = new LinkedList<String>();
+    String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES,ConfigKeys.FAILOVER_NAMENODES_DEFAULT);
+    if(namenodes != null){
+      StringTokenizer st = new StringTokenizer(namenodes, ",");
+      while(st.hasMoreElements()){
+        String namenode = st.nextToken();
+        namenodesList.add(namenode);
+      }
+    }
+    return namenodesList;
+  }
+
+  public String getHadoopSbin(){
+    return getString(ConfigKeys.HADOOP_SBIN, ConfigKeys.HADOOP_SBIN_DEFAULT);
+  }
+
+  public String getHadoopUser(){
+    return getString(ConfigKeys.HADOOP_USER,ConfigKeys.HADOOP_USER_DEFAULT);
+  }
+
+
+  public List<List<String>> getNameNodeRestartCommands(){
+    List<List<String>> commandsPerNN = new ArrayList<List<String>>();
+
+    String commandsStr = getString(ConfigKeys.NAMENOE_RESTART_COMMANDS,ConfigKeys.NAMENOE_RESTART_COMMANDS_DEFAULT);
+
+    if(commandsStr!=null) {
+      if (getHadoopSbin() != null) {
+        commandsStr = commandsStr.replaceAll("HADOOP_SBIN", getHadoopSbin());
+      }
+
+      if (getHadoopUser() != null) {
+        commandsStr = commandsStr.replaceAll("HADOOP_USER", getHadoopUser());
+      }
+
+      for(String namenode: getFailOverNameNodes()){
+        String commandTmp = new String(commandsStr);
+        commandTmp = commandTmp.replaceAll("NAMENODE", namenode);
+
+        StringTokenizer st = new StringTokenizer(commandTmp, ",");
+        List<String> commands = new LinkedList<String>();
+        while(st.hasMoreElements()){
+          commands.add(st.nextToken());
+        }
+        commandsPerNN.add(commands);
+        }
+      }
+
+    return commandsPerNN;
+  }
+
+
+
   public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
     dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
@@ -430,11 +532,14 @@ public class MasterArgsReader {
       dfsClientConf.setProperty("dfs.client.failover.proxy.provider.mycluster",props.getProperty("dfs.client.failover.proxy.provider.mycluster"));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
-
       dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
               Long.toString(getNameNodeRefreshRate()));
       dfsClientConf.setProperty(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
               getNameNodeSelectorPolicy());
+      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY,
+              Integer.toString(getInt(ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT)));
+      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,
+              Long.toString(getLong(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT)));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
       System.out.println("Creating config for CephFS");
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());
@@ -473,7 +578,11 @@ public class MasterArgsReader {
   }
 
   private String getString(String key, String defaultVal) {
-    return props.getProperty(key, defaultVal).trim();
+    String val = props.getProperty(key, defaultVal);
+    if(val != null){
+      val.trim();
+    }
+    return val;
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {

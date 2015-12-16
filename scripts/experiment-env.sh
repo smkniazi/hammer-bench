@@ -57,7 +57,7 @@ NumberNdbDataNodes=4                                                      #added
 
 #HopsFS Distribution Parameters
 HopsFS_User=nzo
-NameNodeRpcPort=11001
+NameNodeRpcPort=26801
 HopsFS_Remote_Dist_Folder=/tmp/nzo/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
 
