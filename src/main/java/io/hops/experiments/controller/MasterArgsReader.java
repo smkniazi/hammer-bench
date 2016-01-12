@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.controller;
 
+import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.*;
 
 import io.hops.experiments.coin.MultiFaceCoin;
@@ -50,7 +52,7 @@ public class MasterArgsReader {
     System.out.println("FU");
   }
 
-  public MasterArgsReader(String file) throws FileNotFoundException, IOException {
+  public MasterArgsReader(String file) throws FileNotFoundException, IOException, SQLException {
     props = loadPropFile(file);
     validateArgs();
   }
@@ -68,7 +70,7 @@ public class MasterArgsReader {
     return props;
   }
 
-  private void validateArgs() throws UnknownHostException {
+  private void validateArgs() throws UnknownHostException, SQLException {
 
     // check for the
     if (getRawBmFilesCreationPhaseDuration() <= 0 && getBenchMarkType() == BenchmarkType.RAW) {
@@ -134,6 +136,10 @@ public class MasterArgsReader {
         throw new IllegalArgumentException(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY+" + "+ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY
                 +" should be greater than "+ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
       }
+    }
+
+    if(!isBlockReportingSkipCreations() && getBenchMarkType() == BenchmarkType.BR) {
+      TinyDatanodesHelper.dropTable(getBlockReportingPersistDatabase());
     }
   }
 

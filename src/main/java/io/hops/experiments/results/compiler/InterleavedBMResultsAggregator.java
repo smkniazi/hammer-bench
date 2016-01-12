@@ -41,8 +41,6 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   private Map<String /*workload name*/, Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/>> allWorkloadsResults =
           new HashMap<String, Map<Integer, InterleavedAggregate>>();
 
-//  private Map<Integer/*NN Count*/, InterleavedAggregate/*aggregates*/> allResults =
-//          new HashMap<Integer, InterleavedAggregate>();
   @Override
   public void processRecord(BMResult result) {
     //System.out.println(result);
@@ -130,6 +128,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
+    DescriptiveStatistics opsLatency = new DescriptiveStatistics();
     for (Object obj : responses) {
       if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
         throw new IllegalStateException("Wrong response received from the client");
@@ -139,6 +138,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         failedOps.addValue(response.getTotalFailedOps());
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
+        opsLatency.addValue(response.getAvgOpLatency());
       }
     }
     
@@ -166,7 +166,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
             args.getNdbNodesCount(), args.getInterleavedBmWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
-            (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles);
+            (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles, opsLatency.getMean());
 
 
     // failover testing

@@ -20,6 +20,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import io.hops.experiments.controller.Logger;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -59,7 +60,7 @@ public class TinyDatanodesHelper {
 
   private DatanodeInfo[] excludedDatanodes = null;
 
-  public TinyDatanodesHelper(int slaveId, String databaseConnection){
+  public TinyDatanodesHelper(int slaveId, String databaseConnection) throws SQLException {
     String [] cnn = databaseConnection.split(":");
     this.slaveId = slaveId;
     dataSource = new MysqlDataSource();
@@ -68,6 +69,23 @@ public class TinyDatanodesHelper {
     dataSource.setUser("hop");
     dataSource.setPassword("hop");
     dataSource.setDatabaseName(cnn[2]);
+  }
+
+
+  public static void dropTable(String databaseConnection) throws SQLException {
+    MysqlDataSource dataSource = new MysqlDataSource();
+    dataSource.setURL(databaseConnection);
+    Connection connection = dataSource.getConnection();
+    Statement statement = connection.createStatement();
+    System.out.println("Dropping table bench_blockreporting_datanodes");
+    statement.executeUpdate("Drop table if exists  bench_blockreporting_datanodes");
+    System.out.println("Dropped bench_blockreporting_datanodes table");
+    statement.executeUpdate("CREATE TABLE `bench_blockreporting_datanodes` (" +
+            "  `id` int(11) NOT NULL, " +
+            "  `dn` int(11) NOT NULL, " +
+            "  `data` varchar(1000) NOT NULL, " +
+            "  PRIMARY KEY (`id`,`dn`))");
+    System.out.println("Created bench_blockreporting_datanodes table");
   }
 
 

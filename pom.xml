@@ -40,7 +40,7 @@
     </dependency>
     
     <!-- Hops Dependencies -->
-<!--    <dependency>
+    <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>2.4.0</version>
@@ -52,10 +52,10 @@
       <version>2.4.0</version>
       <type>jar</type>
     </dependency>
--->
+
 
     <!-- HDFS Dependencies -->
-    <dependency>
+<!--    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>2.0.4-alpha</version>
@@ -67,7 +67,7 @@
       <version>2.0.4-alpha</version>
       <type>jar</type>
     </dependency>
-    
+-->    
     
     <!-- CephFS Dependencies -->
 <!--    <dependency>

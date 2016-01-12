@@ -14,6 +14,7 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
+kill_NNs=false
 
 #############################################################################################################################
 run() {
@@ -43,22 +44,26 @@ run() {
   date1=$(date +"%s") 
 #: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-#  echo "*** Starting HopsFS ***"
-#  source $Start_HopsFS_Script
-#  echo "*** Going to sleep a bit so that all datanodes connect to the namenodes ***"
-#  sleep 5
+ if [ $kill_NNs = true ]; then  
+    echo "*** Starting HopsFS ***"
+    source $Start_HopsFS_Script;
+ fi
+  
   echo "*** strating the benchmark ***"
   ssh $HopsFS_User@$ExpMaster mkdir -p $exp_remote_bench_mark_result_dir
   source $exp_start_script $ExpMaster 
   scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_dir/* $currentExpDir/
 
-#  echo "*** shutting down the cluster ***" 
+  echo "*** shutting down the exp nodes ***" 
   source $exp_stop_script           # kills exp
   
   #source sto_rename_delete.sh /test
-  
-#  source $exp_stop_hdfs_script      # kills hdfs
-#  source $kill_java_everywhere      # kills all zombie java processes
+
+ if [ $kill_NNs = true ]; then  
+    source $exp_stop_hdfs_script      # kills hdfs
+    source $kill_java_everywhere;      # kills all zombie java processes
+ fi
+
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
@@ -140,9 +145,14 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                                     ExpSlaves="$ExpSlaves ${BM_Machines_FullList[$e_k]}"
                                 fi
                             done
-
-                            RPC_PORT=$(echo "($NameNodeRpcPort)" | bc)
-                            BOOT_STRAP_NN="hdfs://$Current_Leader_NN:$RPC_PORT"                   
+                            
+                            if [ -z "$NameNodeRpcPort" ]; then
+                               BOOT_STRAP_NN="hdfs://$Current_Leader_NN"                                         
+                            else
+                               RPC_PORT=$(echo "($NameNodeRpcPort)" | bc)
+                               BOOT_STRAP_NN="hdfs://$Current_Leader_NN:$RPC_PORT"                   
+                            fi
+                            
                             currentExpDir="$currentDirBM/$TotalNNCount-NN-$TotalClients-Clients-$BenchMark-BenchMark"
                             mkdir -p  $currentExpDir       
                             run

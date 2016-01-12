@@ -32,6 +32,8 @@ import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
@@ -50,6 +52,7 @@ public class InterleavedBenchmark extends Benchmark {
     AtomicLong operationsFailed = new AtomicLong(0);
     Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
     HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
+    SynchronizedDescriptiveStatistics avgLatency = new SynchronizedDescriptiveStatistics();
     private final int dirsPerDir;
     private final int filesPerDir;
     private final boolean fixedDepthTree;
@@ -115,7 +118,7 @@ public class InterleavedBenchmark extends Benchmark {
         double speed = (operationsCompleted.get() / (double) totalTime) * 1000;
 
         InterleavedBenchmarkCommand.Response response =
-                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, failOverLog);
+                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, avgLatency.getMean(), failOverLog);
         return response;
     }
 
@@ -171,6 +174,10 @@ public class InterleavedBenchmark extends Benchmark {
                 message += format(25, "Completed Ops: " + operationsCompleted + " ");
                 message += format(20, "Failed Ops: " + operationsFailed + " ");
                 message += format(20, "Avg. Speed: " + speedPSec(operationsCompleted.get(), startTime) + " ops/s ");
+//                if(avgLatency.getN() > 0){
+//                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
+//                }
+
 
 //        SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
 //        sorted.addAll(operationsStats.keySet());
@@ -219,6 +226,7 @@ public class InterleavedBenchmark extends Benchmark {
 
             if (success) {
                 operationsCompleted.incrementAndGet();
+                avgLatency.addValue(opExeTime);
                 if (req.isPercentileEnabled()) {
                     synchronized (opsExeTimes) {
                         ArrayList<Long> times = opsExeTimes.get(opType);

@@ -35,8 +35,9 @@ public class InterleavedBMResults extends BMResult {
   private final double failedOps;
   private final Map<BenchmarkOperations,double[][]> percentile;
   private final String workloadName;
+  private final double avgOpLatency;
 
-  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile) {
+  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile,double avgOpLatency) {
     super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
@@ -44,6 +45,7 @@ public class InterleavedBMResults extends BMResult {
     this.failedOps = failedOps;
     this.percentile = percentile;
     this.workloadName = workloadName;
+    this.avgOpLatency = avgOpLatency;
   }
 
   public String getWorkloadName() {
@@ -70,12 +72,17 @@ public class InterleavedBMResults extends BMResult {
     return failedOps;
   }
 
+  public double getAvgOpLatency() {
+    return avgOpLatency;
+  }
+
   @Override
   public String toString() {
 
     String message = "Speed-/sec: " + BenchmarkUtils.round(speed) 
             + " Successful-Ops: " + BenchmarkUtils.round(successfulOps)
             + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
+            + " Avg-Ops-Latency: " + BenchmarkUtils.round(avgOpLatency)
             + " Avg-Test-Duration-sec " + BenchmarkUtils.round(duration)
             + " No of NameNodes: "+super.getNoOfNamenodes();
 
