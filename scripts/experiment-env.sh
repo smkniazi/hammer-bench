@@ -44,7 +44,7 @@ Benchmark_Types=(
             ) #space is delimeter
 
 NN_INCREMENT=1
-EXP_START_INDEX=1
+EXP_START_INDEX=5
 REPEAT_EXP_TIMES=1
 
 
