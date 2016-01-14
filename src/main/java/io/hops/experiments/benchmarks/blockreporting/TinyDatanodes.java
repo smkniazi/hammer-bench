@@ -206,7 +206,8 @@ public class TinyDatanodes {
     ExtendedBlock prevBlock = null;
     for (int jdx = 0; jdx < blocksPerFile; jdx++) {
       LocatedBlock loc =
-              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
+              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes()
+              , INodeId.GRANDFATHER_INODE_ID, null);
       prevBlock = loc.getBlock();
       for (DatanodeInfo dnInfo : loc.getLocations()) {
         int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
@@ -214,7 +215,7 @@ public class TinyDatanodes {
         ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
           ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
         StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
-          datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
+          datanodes[dnIdx].storage.getStorageID(), rdBlocks)};
         datanodeProto.blockReceivedAndDeleted(
                 datanodes[dnIdx].dnRegistration,
                 loc.getBlock().getBlockPoolId(), report);
