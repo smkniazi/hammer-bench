@@ -114,9 +114,9 @@ public class MasterArgsReader {
       if(getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS){
         throw new IllegalArgumentException("Failover Testing is only supported for HDFS and HopsFS.");
       }
-      if(getSlavesList().size()!=1){
-        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
-      }
+//      if(getSlavesList().size()!=1){
+//        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
+//      }
       if(getHadoopUser()==null){
         throw new IllegalArgumentException("Hadoop user is not set.");
       }
