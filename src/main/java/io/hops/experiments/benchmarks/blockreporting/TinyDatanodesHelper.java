@@ -93,9 +93,9 @@ public class TinyDatanodesHelper {
       for (TinyDatanode datanode : datanodes) {
         String info = datanode.dnRegistration.getIpAddr() + "," + datanode
             .dnRegistration
-            .getHostName() + "," + datanode.dnRegistration.getStorageID() +
+            .getHostName() + "," + datanode.storage.getStorageID() +
             "," + datanode.dnRegistration.getXferPort() + "," + datanode
-            .dnRegistration.getInfoPort() + "," + datanode.dnRegistration
+            .dnRegistration.getInfoPort() + "," + datanode.dnRegistration.getInfoSecurePort()+","+datanode.dnRegistration
             .getIpcPort();
 
         statement.addBatch(String.format(SQL_INSERT, slaveId, datanode.dnIdx,
@@ -124,7 +124,8 @@ public class TinyDatanodesHelper {
         String[] dninfo = info.split(",");
         DatanodeID datanodeID = new DatanodeID(dninfo[0], dninfo[1], dninfo[2],
             Integer.valueOf(dninfo[3]), Integer.valueOf(dninfo[4]), Integer
-            .valueOf(dninfo[5]));
+            .valueOf(dninfo[5]), Integer
+                .valueOf(dninfo[6]));
         datanodeInfos.add(new DatanodeInfo(datanodeID));
       }
       statement.close();

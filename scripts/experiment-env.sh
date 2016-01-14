@@ -33,7 +33,7 @@ BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that 
 DFS_CLIENTS_PER_NAMENODE=120                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
                                                    #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
-TINY_DATANODES_PER_NAMENODE=2                      #No of simulated datanodes for benchmarking the blockreporting system
+TINY_DATANODES_PER_NAMENODE=15                      #No of simulated datanodes for benchmarking the blockreporting system
 
 #experiments to run
 #NOTE all experiment related parameters are in master.properties file
@@ -57,8 +57,8 @@ NumberNdbDataNodes=4                                                      #added
 
 #HopsFS Distribution Parameters
 HopsFS_User=nzo
-NameNodeRpcPort=26801
-HopsFS_Remote_Dist_Folder=/tmp/nzo/hopsfs
+NameNodeRpcPort=11001
+HopsFS_Remote_Dist_Folder=/tmp/ref/apache_hadoop_distro/hadoop-2.4.0
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
 
 

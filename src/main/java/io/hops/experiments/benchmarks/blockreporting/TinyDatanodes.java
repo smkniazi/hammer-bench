@@ -31,6 +31,7 @@ import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
+import org.apache.hadoop.hdfs.server.namenode.INodeId;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 import org.apache.hadoop.hdfs.server.protocol.ReceivedDeletedBlockInfo;
 import org.apache.hadoop.hdfs.server.protocol.StorageReceivedDeletedBlocks;
@@ -165,23 +166,30 @@ public class TinyDatanodes {
     @Override
     public Object call() throws Exception {
       // create files
-      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
-              + blocksPerFile + " blocks each.");
-      FileNameGenerator nameGenerator = new FileNameGenerator(baseDir + File.separator + machineName + File.separator + id, filesPerDirectory);
-      String clientName = getClientName(id);
+      try {
+        Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
+                + blocksPerFile + " blocks each.");
+        FileNameGenerator nameGenerator = new FileNameGenerator(baseDir + File.separator + machineName + File.separator + id, filesPerDirectory);
+        String clientName = getClientName(id);
 
-      for (int idx = 0; idx < nrFiles; idx++) {
-        String fileName = nameGenerator.getNextFileName("br");
-        nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
-                new EnumSetWritable<CreateFlag>(
-                EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true,
-                replication, blockSize);
-        ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
-        nameNodeProto.complete(fileName, clientName, lastBlock);
-        filesCreated.incrementAndGet();
-        log();
+        for (int idx = 0; idx < nrFiles; idx++) {
+          String fileName = nameGenerator.getNextFileName("br");
+          nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
+                  new EnumSetWritable<CreateFlag>(
+                          EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true,
+                  replication, blockSize);
+          ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
+          nameNodeProto.complete(fileName, clientName, lastBlock, 0);
+          filesCreated.incrementAndGet();
+          log();
+        }
+        Logger.printMsg("Exiting");
+      }catch(Exception e){
+        Logger.error(e);
+        throw e;
       }
       return null;
+
     }
 
     private void log() {
@@ -200,7 +208,8 @@ public class TinyDatanodes {
     ExtendedBlock prevBlock = null;
     for (int jdx = 0; jdx < blocksPerFile; jdx++) {
       LocatedBlock loc =
-              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
+              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes()
+              , INodeId.GRANDFATHER_INODE_ID, null);
       prevBlock = loc.getBlock();
       for (DatanodeInfo dnInfo : loc.getLocations()) {
         int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
@@ -208,7 +217,7 @@ public class TinyDatanodes {
         ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
           ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
         StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
-          datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
+          datanodes[dnIdx].storage.getStorageID(), rdBlocks)};
         datanodeProto.blockReceivedAndDeleted(
                 datanodes[dnIdx].dnRegistration,
                 loc.getBlock().getBlockPoolId(), report);
