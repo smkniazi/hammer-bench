@@ -30,7 +30,7 @@ DNS_FullList=(`cat datanodes`)
 NNS_FullList=(`cat namenodes`)
 
 BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
-DFS_CLIENTS_PER_NAMENODE=120                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
+DFS_CLIENTS_PER_NAMENODE=200                          #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
                                                    #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
 TINY_DATANODES_PER_NAMENODE=15                      #No of simulated datanodes for benchmarking the blockreporting system
