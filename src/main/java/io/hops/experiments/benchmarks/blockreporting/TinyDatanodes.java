@@ -124,7 +124,7 @@ public class TinyDatanodes {
           Exception {
     filesCreated = new AtomicLong(0);
     filesToCreate = nrFiles;
-    int fileCreationThreads = nrDatanodes * 10;
+    int fileCreationThreads = nrDatanodes * 30;
 
     Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
             + blocksPerFile + " blocks.");

@@ -64,11 +64,7 @@ public class TinyDatanodesHelper {
     String [] cnn = databaseConnection.split(":");
     this.slaveId = slaveId;
     dataSource = new MysqlDataSource();
-    dataSource.setServerName(cnn[0]);
-    dataSource.setPortNumber(Integer.valueOf(cnn[1]));
-    dataSource.setUser("hop");
-    dataSource.setPassword("hop");
-    dataSource.setDatabaseName(cnn[2]);
+    dataSource.setURL(databaseConnection);
   }
 
 
