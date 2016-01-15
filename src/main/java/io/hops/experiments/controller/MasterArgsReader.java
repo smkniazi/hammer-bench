@@ -472,6 +472,12 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY, ConfigKeys.FAIL_OVER_TEST_DURATION_DEFAULT);
   }
 
+  public String getDfsNameService(){
+    return getString(ConfigKeys.DFS_NAMESERVICES, ConfigKeys.DFS_NAMESERVICES_DEFAULT);
+  }
+
+
+
   public List<String> getFailOverNameNodes(){
     List<String> namenodesList = new LinkedList<String>();
     String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES,ConfigKeys.FAILOVER_NAMENODES_DEFAULT);
@@ -534,11 +540,11 @@ public class MasterArgsReader {
     dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
     if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS) {
       System.out.println("Creating config for HDFS");
-      dfsClientConf.setProperty("dfs.ha.namenodes.mycluster",props.getProperty("dfs.ha.namenodes.mycluster"));
+      dfsClientConf.setProperty("dfs.ha.namenodes."+getDfsNameService(),props.getProperty("dfs.ha.namenodes."+getDfsNameService()));
       dfsClientConf.setProperty("dfs.nameservices",props.getProperty("dfs.nameservices"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn1",props.getProperty("dfs.namenode.rpc-address.mycluster.nn1"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn2",props.getProperty("dfs.namenode.rpc-address.mycluster.nn2"));
-      dfsClientConf.setProperty("dfs.client.failover.proxy.provider.mycluster",props.getProperty("dfs.client.failover.proxy.provider.mycluster"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2"));
+      dfsClientConf.setProperty("dfs.client.failover.proxy.provider."+getDfsNameService(),props.getProperty("dfs.client.failover.proxy.provider."+getDfsNameService()));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
       dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
@@ -567,6 +573,14 @@ public class MasterArgsReader {
     } else {
       throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     }
+
+    for(Object key : dfsClientConf.keySet()){
+      String keyStr = (String)key;
+      String val = dfsClientConf.getProperty(keyStr);
+      System.out.println("Master Settings "+keyStr+" --> "+val);
+
+    }
+
     return dfsClientConf;
   }
 

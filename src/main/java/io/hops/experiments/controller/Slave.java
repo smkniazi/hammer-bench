@@ -82,7 +82,6 @@ public class Slave {
               dfsClientConf.set(keyStr, val);
             }
             
-
             benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
 
             sendResponseToMaster(new Handshake.Response());
