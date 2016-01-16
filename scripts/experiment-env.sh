@@ -33,14 +33,14 @@ BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that 
 DFS_CLIENTS_PER_NAMENODE=1                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
                                                    #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
-TINY_DATANODES_PER_NAMENODE=15                      #No of simulated datanodes for benchmarking the blockreporting system
+TINY_DATANODES_PER_NAMENODE=3                      #No of simulated datanodes for benchmarking the blockreporting system
 
 #experiments to run
 #NOTE all experiment related parameters are in master.properties file
 Benchmark_Types=(
             #RAW                                         #Test raw throughput of individual operations
-            INTERLEAVED                                  #Test synthetic workload from spotify 
-            #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
+            #INTERLEAVED                                  #Test synthetic workload from spotify 
+            BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
             ) #space is delimeter
 
 NN_INCREMENT=1
