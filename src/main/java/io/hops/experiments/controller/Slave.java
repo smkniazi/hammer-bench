@@ -83,7 +83,6 @@ public class Slave {
             }
             
             benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
-
             sendResponseToMaster(new Handshake.Response());
         } else {
             throw new IllegalStateException("Hand shake phase. Got unknown request : " + obj);
