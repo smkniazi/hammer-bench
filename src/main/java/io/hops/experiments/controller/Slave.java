@@ -69,19 +69,21 @@ public class Slave {
 
         if (obj instanceof Handshake.Request) {
             handShake = (Handshake.Request) obj;
-            dfsClientConf = new Configuration();
-            for(Object key : handShake.getFsConfig().keySet()){
-              String keyStr = (String)key;
-              String val = handShake.getFsConfig().getProperty(keyStr);
-              dfsClientConf.set(keyStr, val);
-            }
-            
-            benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
             if (handShake.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);
                 Logger.setLoggerPort(handShake.getRemoteLoggingPort());
             }
+            dfsClientConf = new Configuration();
+            for(Object key : handShake.getFsConfig().keySet()){
+              String keyStr = (String)key;
+              String val = handShake.getFsConfig().getProperty(keyStr);
+                Logger.printMsg("Client Settings "+keyStr+" --> "+val);
+              dfsClientConf.set(keyStr, val);
+            }
+            
+
+            benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
 
             sendResponseToMaster(new Handshake.Response());
         } else {
