@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#check for installation of parallel-rsync
 if [ ! -e /usr/bin/pdftk ] ; then
 echo "You do not appear to have installed: pdftk"
 echo "sudo aptitude install pdftk"

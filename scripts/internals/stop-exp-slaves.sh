@@ -19,6 +19,19 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
+
+PSSH=
+PRSYNC=
+OS=$(lsb_release -is)
+if [ $OS == "Ubuntu" ] ; then
+   PRSYNC="/usr/bin/parallel-rsync"
+   PSSH="/usr/bin/parallel-ssh"
+elif [ $OS == "CentOS" ] ; then
+   PRSYNC="/usr/bin/prsync"
+   PSSH="/usr/bin/pssh"
+fi
+
+
 #All Unique Hosts
 All_Hosts=${BM_Machines_FullList[*]}
 
@@ -26,7 +39,7 @@ All_Hosts=${BM_Machines_FullList[*]}
 echo "*** Going to kill slaves on ${BM_Machines_FullList[*]}"
 
 echo "Stopping Slaves on ${BM_Machines_FullList[*]}"
-parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh 
+$PSSH -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/kill-slave.sh 
 
 
 

@@ -19,6 +19,17 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
+PSSH=
+PRSYNC=
+OS=$(lsb_release -is)
+if [ $OS == "Ubuntu" ] ; then
+   PRSYNC="/usr/bin/parallel-rsync"
+   PSSH="/usr/bin/parallel-ssh"
+elif [ $OS == "CentOS" ] ; then
+   PRSYNC="/usr/bin/prsync"
+   PSSH="/usr/bin/pssh"
+fi
+
 
 
 if test -z "$1"
@@ -29,7 +40,7 @@ fi
 
 
 echo "Starting Slaves on ${BM_Machines_FullList[*]}"
-parallel-ssh -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/start-slave.sh 
+$PSSH -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  $HopsFS_Experiments_Remote_Dist_Folder/start-slave.sh 
 
 echo "sleeping for a while to make sure that the slaves have initialized"
 sleep 5

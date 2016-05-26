@@ -19,14 +19,6 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-
-#check for installation of parallel-rsync
-if [ ! -e /usr/bin/parallel-rsync ] ; then
-echo "You do not appear to have installed: parallel-rsync"
-echo "sudo aptitude install pssh"
-exit
-fi
-
 source ./internals/build_experiments.sh 
 
 # deploy the Experiments
