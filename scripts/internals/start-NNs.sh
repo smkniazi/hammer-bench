@@ -16,7 +16,6 @@ elif [ $OS == "CentOS" ] ; then
    PSSH="/usr/bin/pssh"
 fi
 
-
 #All Unique Hosts
 All_Hosts=${All_NNs_In_Current_Exp[*]}
 All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')

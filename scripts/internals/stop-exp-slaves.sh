@@ -19,7 +19,6 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-
 PSSH=
 PRSYNC=
 OS=$(./os-type.sh)
@@ -30,8 +29,6 @@ elif [ $OS == "CentOS" ] ; then
    PRSYNC="/usr/bin/prsync"
    PSSH="/usr/bin/pssh"
 fi
-
-
 #All Unique Hosts
 All_Hosts=${BM_Machines_FullList[*]}
 

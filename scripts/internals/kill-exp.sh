@@ -31,7 +31,6 @@ elif [ $OS == "CentOS" ] ; then
 fi
 
 
-
   echo "Going to kill Master/Slave process on all experiment machines ${BM_Machines_FullList[*]}"
 	#All Unique Hosts
 	All_Hosts=${BM_Machines_FullList[*]}

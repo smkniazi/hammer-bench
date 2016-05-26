@@ -13,7 +13,6 @@ elif [ $OS == "CentOS" ] ; then
    PRSYNC="/usr/bin/prsync"
    PSSH="/usr/bin/pssh"
 fi
-
 #All Unique Hosts
 All_Hosts=${DNS_FullList[*]}
 All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')

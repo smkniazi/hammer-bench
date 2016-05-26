@@ -32,7 +32,6 @@ elif [ $OS == "CentOS" ] ; then
 fi
 
 
-
 #upload Experiments
 
  echo "***   Copying the Experiment to $HopsFS_Experiments_Remote_Dist_Folder  on ${BM_Machines_FullList[*]}***"

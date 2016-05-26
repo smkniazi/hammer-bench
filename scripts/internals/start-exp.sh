@@ -31,7 +31,6 @@ elif [ $OS == "CentOS" ] ; then
 fi
 
 
-
 if test -z "$1"
 then
 	echo "Provide host name where master will be started"
