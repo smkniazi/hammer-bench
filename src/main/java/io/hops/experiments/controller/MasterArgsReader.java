@@ -546,6 +546,10 @@ public class MasterArgsReader {
               Integer.toString(getInt(ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT)));
       dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,
               Long.toString(getLong(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT)));
+      dfsClientConf.setProperty(ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB,
+              Boolean.toString(getBoolean(ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB, ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB_DEFAULT)));
+      dfsClientConf.setProperty(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY,
+              Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
       System.out.println("Creating config for CephFS");
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());

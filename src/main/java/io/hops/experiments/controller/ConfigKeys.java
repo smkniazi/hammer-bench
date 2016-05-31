@@ -253,15 +253,20 @@ public class ConfigKeys {
     public static String DFS_NAMENODE_SELECTOR_POLICY_KEY="dfs.namenode.selector-policy";
     public static String DFS_NAMENODE_SELECTOR_POLICY_DEFAULT="RANDOM_STICKY";
     
-    public static String DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY="dsf.client.refresh.namenode.list";
+    public static String DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY="dfs.client.refresh.namenode.list";
     public static long   DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT=60*60*1000;
 
     public static String DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY="dfs.clinet.max.retires.on.failure";
     public static int   DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT=5;
 
-    public static String DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY="dsf.client.initial.wait.on.retry";
+    public static String DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY="dfs.client.initial.wait.on.retry";
     public static long   DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT=0;
 
+    public static String DFS_STORE_SMALL_FILES_IN_DB =  "dfs.store.small.files.in.db";
+    public static final boolean DFS_STORE_SMALL_FILES_IN_DB_DEFAULT = false;
+
+    public static final String DFS_DB_FILE_MAX_SIZE_KEY = "dfs.database.file.max.size";
+    public static final int DFS_DB_FILE_MAX_SIZE_DEFAULT = 32*1024; // 32KB
 
     //failover test
     public static String TEST_FAILOVER= "test.failover";
