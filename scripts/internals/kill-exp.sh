@@ -21,7 +21,7 @@
 
 PSSH=
 PRSYNC=
-OS=$(lsb_release -is)
+OS=$(./os-type.sh)
 if [ $OS == "Ubuntu" ] ; then
    PRSYNC="/usr/bin/parallel-rsync"
    PSSH="/usr/bin/parallel-ssh"
