@@ -9,7 +9,6 @@ import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import java.io.IOException;
 import java.util.StringTokenizer;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -97,7 +96,6 @@ public class OperationsUtils {
         }
         currentCounter++;
         to = to + "_" + RENAMED + "_" + currentCounter + "_" + "Times";
-
         if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }
