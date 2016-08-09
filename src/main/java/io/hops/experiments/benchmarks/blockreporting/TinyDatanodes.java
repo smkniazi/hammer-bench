@@ -35,6 +35,7 @@ import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 import org.apache.hadoop.hdfs.server.protocol.ReceivedDeletedBlockInfo;
 import org.apache.hadoop.hdfs.server.protocol.StorageReceivedDeletedBlocks;
 import org.apache.hadoop.io.EnumSetWritable;
+import org.apache.hadoop.hdfs.server.namenode.INodeId;
 
 import java.io.File;
 import java.io.IOException;
