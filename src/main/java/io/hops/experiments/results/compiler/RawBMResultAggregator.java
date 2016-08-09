@@ -82,7 +82,9 @@ public class RawBMResultAggregator extends Aggregator{
       return cr;
     }
 
-    for (Integer key : allResults.keySet()) {
+    SortedSet<Integer> sorted = new TreeSet<Integer>(); // Sort my number of NN
+    sorted.addAll(allResults.keySet());
+    for (Integer key : sorted) {
       cr.nnCounts.add(key);
       Map<BenchmarkOperations, RawAggregate> map = allResults.get(key);
       for (BenchmarkOperations op : map.keySet()) {

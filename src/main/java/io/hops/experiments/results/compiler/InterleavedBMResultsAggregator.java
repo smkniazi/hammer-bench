@@ -107,7 +107,9 @@ public class InterleavedBMResultsAggregator extends Aggregator {
 
       plot +=  " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\"  , \\\n";
       String data = "";
-      for (Integer nn : hopsWorkloadResult.keySet()) {
+      SortedSet<Integer> sorted = new TreeSet<Integer>(); // Sort my number of NN
+      sorted.addAll(hopsWorkloadResult.keySet());
+      for (Integer nn : sorted) {
         InterleavedAggregate agg = hopsWorkloadResult.get(nn);
         data += CompileResults.format(nn + "") + CompileResults.format(agg.getSpeed() + "")
                 + CompileResults.format(agg.getMinSpeed() + "") + CompileResults.format(agg.getMaxSpeed() + "")

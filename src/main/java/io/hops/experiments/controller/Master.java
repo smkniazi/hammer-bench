@@ -286,7 +286,7 @@ public class Master {
     sendToAllSlaves(request);
 
     Thread.sleep(args.getInterleavedBmDuration());
-    Collection<Object> responses = receiveFromAllSlaves(20 * 1000 /*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
     InterleavedBMResults result = InterleavedBMResultsAggregator.processInterleavedResults(responses,args);
     printMasterResultMessages(result);
   }
@@ -304,7 +304,7 @@ public class Master {
             args.getFilesPerDir(),args.getRawBmMaxFilesToCreate(),
             args.isFixedDepthTree(), args.getTreeDepth(), 
             args.getBenchMarkFileSystemName(),args.getFsConfig()));
-    Collection<Object> allResponses = receiveFromAllSlaves(10 * 1000 /*sec wait*/);
+    Collection<Object> allResponses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {
       if (!(response instanceof Handshake.Response)) {
@@ -356,7 +356,7 @@ public class Master {
     sendToAllSlaves(request);
 
     Thread.sleep(request.getDurationInMS());
-    Collection<Object> responses = receiveFromAllSlaves(10 * 1000/*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves(60 * 1000/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, args);
     printMasterResultMessages(result);

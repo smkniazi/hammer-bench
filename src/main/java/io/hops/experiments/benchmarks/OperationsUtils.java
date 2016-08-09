@@ -83,7 +83,7 @@ public class OperationsUtils {
         BenchmarkUtils.deleteFile(dfs, path);
       } else if (opType == BenchmarkOperations.RENAME_FILE) {
         String from = filePool.getFileToRename();
-        String to = from + "_rnd";
+        String to = from + "r";
         if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }
