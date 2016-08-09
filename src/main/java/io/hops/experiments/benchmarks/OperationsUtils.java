@@ -8,6 +8,8 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import java.io.IOException;
+import java.util.StringTokenizer;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -83,7 +85,19 @@ public class OperationsUtils {
         BenchmarkUtils.deleteFile(dfs, path);
       } else if (opType == BenchmarkOperations.RENAME_FILE) {
         String from = filePool.getFileToRename();
-        String to = from + "r";
+        int currentCounter = 0;
+        final String RENAMED = "Renamed";
+        String to = from;
+        if (from.contains(RENAMED)) {
+          int index1 = from.lastIndexOf(RENAMED);
+          int index2 = from.lastIndexOf("_");
+          String counter = from.substring(index1 + RENAMED.length() + 1, index2);
+          to = from.substring(0, index1 - 1);
+          currentCounter = Integer.parseInt(counter);
+        }
+        currentCounter++;
+        to = to + "_" + RENAMED + "_" + currentCounter + "_" + "Times";
+
         if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }
