@@ -49,8 +49,13 @@ public class Logger {
     printMsg(msg);
   }
 
+  //send one error per sec. this avoids printing too much to the output of the master
+  static long lastError = 0;
+  static long errorCounter = 0;
   public static synchronized void printMsg(String msg) {
-    if (enableRemoteLogging && msg.length() > 0) {
+    if (enableRemoteLogging && msg.length() > 0 &&
+            ((System.currentTimeMillis() - lastError) > 1000)) {
+      lastError = System.currentTimeMillis();
       try {
         if (socket == null) {
           socket = new DatagramSocket();
@@ -64,12 +69,15 @@ public class Logger {
         DatagramPacket packet = new DatagramPacket(data, data.length,
                 loggerIp, loggerPort);
         socket.send(packet);
-        System.out.println(msg);
+        System.out.println(errorCounter+" errors since last message. New error: "+msg);
+        errorCounter=0;
         os.close();
         outputStream.close();
       } catch (Exception e) { // logging should not crash the client 
         e.printStackTrace();
       }
+    }else{
+      errorCounter++;
     }
   }
 
