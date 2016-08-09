@@ -37,25 +37,31 @@ public class Logger {
   private static boolean enableRemoteLogging = false;
   private static DatagramSocket socket = null;
 
-  public static void error(Exception e) {
-    e.printStackTrace();
-    final int MSG_SIZE = 200; //send small messages
-    String msg = e.getClass().getName() + " " ;
-    int consumed = msg.length();
-    if(e.getMessage().length() > (MSG_SIZE - consumed)){ 
-      msg += e.getMessage().substring(0, (MSG_SIZE - consumed));
-      msg += " ... ";
-    }
-    printMsg(msg);
-  }
-
   //send one error per sec. this avoids printing too much to the output of the master
   static long lastError = 0;
   static long errorCounter = 0;
-  public static synchronized void printMsg(String msg) {
-    if (enableRemoteLogging && msg.length() > 0 &&
-            ((System.currentTimeMillis() - lastError) > 1000)) {
+  public static synchronized void error(Exception e) {
+    e.printStackTrace();
+    if(((System.currentTimeMillis() - lastError) > 1000)){
+      final int MSG_SIZE = 200; //send small messages
+      String msg = e.getClass().getName() + " ";
+      int consumed = msg.length();
+      if (e.getMessage().length() > (MSG_SIZE - consumed)) {
+        msg += e.getMessage().substring(0, (MSG_SIZE - consumed));
+        msg += " ... ";
+      }
+
+      printMsg(errorCounter+" errors since last error. New error is: "+msg);
+      errorCounter=0;
       lastError = System.currentTimeMillis();
+    }else{
+      errorCounter++;
+    }
+
+  }
+
+ public static synchronized void printMsg(String msg) {
+    if (enableRemoteLogging && msg.length() > 0 ) {
       try {
         if (socket == null) {
           socket = new DatagramSocket();
@@ -69,15 +75,12 @@ public class Logger {
         DatagramPacket packet = new DatagramPacket(data, data.length,
                 loggerIp, loggerPort);
         socket.send(packet);
-        System.out.println(errorCounter+" errors since last message. New error: "+msg);
-        errorCounter=0;
+        System.out.println(msg);
         os.close();
         outputStream.close();
       } catch (Exception e) { // logging should not crash the client 
         e.printStackTrace();
       }
-    }else{
-      errorCounter++;
     }
   }
 
