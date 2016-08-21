@@ -78,7 +78,7 @@ public class Slave {
             for(Object key : handShake.getFsConfig().keySet()){
               String keyStr = (String)key;
               String val = handShake.getFsConfig().getProperty(keyStr);
-                Logger.printMsg("Client Settings "+keyStr+" --> "+val);
+              //Logger.printMsg("Client Settings "+keyStr+" --> "+val);
               dfsClientConf.set(keyStr, val);
             }
             

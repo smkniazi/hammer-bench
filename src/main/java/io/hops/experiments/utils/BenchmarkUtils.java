@@ -39,10 +39,10 @@ public class BenchmarkUtils {
     public static FileSystem getDFSClient(Configuration conf) throws IOException {
         FileSystem client = dfsClients.get();
         if (client == null) {
-            System.out.println(Thread.currentThread().getName()  +
-                " Creating new client. Total: "+ ++dfsClientsCount);
             client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
+           System.out.println(Thread.currentThread().getName()  +
+                " Creating new client. Total: "+ ++dfsClientsCount+" New Client is: "+client);
         }else{
             System.out.println("Reusing Existing Client "+client);
         }

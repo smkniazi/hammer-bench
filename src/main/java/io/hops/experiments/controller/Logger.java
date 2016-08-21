@@ -42,7 +42,7 @@ public class Logger {
   static long errorCounter = 0;
   public static synchronized void error(Exception e) {
     e.printStackTrace();
-    if(((System.currentTimeMillis() - lastError) > 1000)){
+    if(((System.currentTimeMillis() - lastError) > 2000)){
       final int MSG_SIZE = 200; //send small messages
       String msg = e.getClass().getName() + " ";
       int consumed = msg.length();

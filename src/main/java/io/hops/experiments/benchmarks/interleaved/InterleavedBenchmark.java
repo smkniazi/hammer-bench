@@ -17,6 +17,18 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.OperationsUtils;
+import io.hops.experiments.benchmarks.common.Benchmark;
+import io.hops.experiments.benchmarks.common.BenchmarkOperations;
+import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
+import io.hops.experiments.coin.MultiFaceCoin;
+import io.hops.experiments.controller.Logger;
+import io.hops.experiments.controller.commands.BenchmarkCommand;
+import io.hops.experiments.controller.commands.WarmUpCommand;
+import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.workload.generator.FilePool;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,21 +37,6 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
-
-import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
-import io.hops.experiments.coin.MultiFaceCoin;
-import io.hops.experiments.controller.Logger;
-import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
-import io.hops.experiments.workload.generator.FilePool;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
-import org.apache.hadoop.conf.Configuration;
-import io.hops.experiments.benchmarks.common.Benchmark;
-import io.hops.experiments.controller.commands.BenchmarkCommand;
-import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-
-import org.apache.hadoop.fs.FileSystem;
 
 /**
  * @author salman
@@ -79,8 +76,9 @@ public class InterleavedBenchmark extends Benchmark {
                     .getFileSize(), namespaceWarmUp.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
             workers.add(worker);
+            executor.invokeAll(workers); // blocking call
+            workers.clear();
         }
-        executor.invokeAll(workers); // blocking call
         return new NamespaceWarmUp.Response();
     }
 

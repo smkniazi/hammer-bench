@@ -80,8 +80,9 @@ public class RawBenchmark extends Benchmark {
       Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
               fileSize, baseDir, dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       workers.add(worker);
+      executor.invokeAll(workers);//call workers one by one
+      workers.clear();
     }
-    executor.invokeAll(workers); // blocking call
     return new NamespaceWarmUp.Response();
   }
 
@@ -137,7 +138,7 @@ public class RawBenchmark extends Benchmark {
         Logger.error(e);
         e.printStackTrace();
         throw e;
-      } 
+      }
       while (true) {
         try {
 

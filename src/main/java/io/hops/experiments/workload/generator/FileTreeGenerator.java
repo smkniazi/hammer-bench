@@ -35,6 +35,7 @@ public class FileTreeGenerator implements FilePool {
   protected List<String> allThreadDirs;
   protected String threadDir;
   private NameSpaceGenerator nameSpaceGenerator;
+  private final int THRESHOLD = 3;
 
   public FileTreeGenerator(String baseDir, int filesPerDir,
           int dirPerDir, int initialTreeDepth) {
@@ -53,9 +54,10 @@ public class FileTreeGenerator implements FilePool {
     }
 
     if (!baseDir.endsWith("/")) {
-      threadDir = baseDir + "/";
+      baseDir = baseDir + "/";
     }
-    threadDir = threadDir + "_" + machineName + "_" + uuid;
+
+    threadDir = baseDir +machineName+"_"+uuid;
 
     String[] comp = PathUtils.getPathNames(threadDir);
 
@@ -98,10 +100,17 @@ public class FileTreeGenerator implements FilePool {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    int renameIndex = rand.nextInt(allThreadFiles.size());
-    String path = allThreadFiles.get(renameIndex);
-    //System.out.println("Rename path "+path);
-    return path;
+
+    for (int i = 0; i < allThreadFiles.size(); i++) {
+      int renameIndex = rand.nextInt(allThreadFiles.size());
+      String path = allThreadFiles.get(renameIndex);
+      if (getPathLength(path) < THRESHOLD) {
+        continue;
+      }
+      //System.out.println("Rename path "+path);
+      return path;
+    }
+    return null;
   }
 
   @Override
@@ -117,9 +126,15 @@ public class FileTreeGenerator implements FilePool {
       return null;
     }
     int deleteIndex = rand.nextInt(allThreadFiles.size());
-    String file = allThreadFiles.remove(deleteIndex);
-    //System.out.println("Delete Path "+file);
-    return file;
+    for (int i = 0; i < allThreadFiles.size(); i++) {
+      String file = allThreadFiles.remove(deleteIndex);
+      if(getPathLength(file) < THRESHOLD){
+        continue;
+      }
+      //System.out.println("Delete Path "+file);
+      return file;
+    }
+    return null;
   }
 
   @Override
@@ -176,21 +191,38 @@ public class FileTreeGenerator implements FilePool {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    int index = rand.nextInt(allThreadFiles.size());
-    String path = allThreadFiles.get(index);
-    //System.out.println("Path "+path);
-    return path;
+
+    for (int i = 0; i < allThreadFiles.size(); i++) {
+      int index = rand.nextInt(allThreadFiles.size());
+      String path = allThreadFiles.get(index);
+      if(getPathLength(path) < THRESHOLD){
+        continue;
+      }
+      //System.out.println("Path "+path);
+      return path;
+    }
+    return null;
+  }
+
+  private int getPathLength(String path){
+    return PathUtils.getPathNames(path).length;
   }
 
   public String getRandomDir() {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    int index = rand.nextInt(allThreadFiles.size());
-    String path = allThreadFiles.get(index);
-    int dirIndex = path.lastIndexOf("/");
-    path = path.substring(0, dirIndex);
-    //System.out.println("Path "+path);
-    return path;
+    for(int i = 0; i < allThreadFiles.size(); i++){
+      int index = rand.nextInt(allThreadFiles.size());
+      String path = allThreadFiles.get(index);
+      int dirIndex = path.lastIndexOf("/");
+      path = path.substring(0, dirIndex);
+      if(getPathLength(path) < THRESHOLD){
+        continue;
+      }
+      //System.out.println("Path "+path);
+      return path;
+    }
+    return null;
   }
 }
