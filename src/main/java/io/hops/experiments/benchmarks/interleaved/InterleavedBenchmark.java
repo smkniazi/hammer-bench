@@ -76,9 +76,9 @@ public class InterleavedBenchmark extends Benchmark {
                     .getFileSize(), namespaceWarmUp.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
             workers.add(worker);
-            executor.invokeAll(workers); // blocking call
-            workers.clear();
         }
+        executor.invokeAll(workers); // blocking call
+        workers.clear();
         return new NamespaceWarmUp.Response();
     }
 

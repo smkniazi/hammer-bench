@@ -33,7 +33,7 @@ import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
-    private static final boolean SERVER_LESS_MODE=true; //only for testing. If enabled then the clients will not
+    private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
     private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
@@ -194,7 +194,8 @@ public class BenchmarkUtils {
 
     private static  void serverLessModeRandomWait(){
         try {
-            Thread.sleep(rand.nextInt(10));
+//            Thread.sleep(rand.nextInt(10));
+            Thread.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
