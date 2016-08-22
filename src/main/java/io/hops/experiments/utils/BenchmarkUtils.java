@@ -20,6 +20,9 @@ package io.hops.experiments.utils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -30,19 +33,26 @@ import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
+    private static final boolean SERVER_LESS_MODE=true; //only for testing. If enabled then the clients will not
+    private static Random rand = new Random(System.currentTimeMillis());
+                                                        // contact NNs
     private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
     private static ThreadLocal<FilePool> filePools = new ThreadLocal<FilePool>();
     
-    private static int filePoolCount = 0;
-    private static int dfsClientsCount = 0;
+    private static AtomicInteger filePoolCount = new AtomicInteger(0);
+    private static AtomicInteger dfsClientsCount = new AtomicInteger(0);
 
     public static FileSystem getDFSClient(Configuration conf) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return null;
+        }
         FileSystem client = dfsClients.get();
         if (client == null) {
             client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
            System.out.println(Thread.currentThread().getName()  +
-                " Creating new client. Total: "+ ++dfsClientsCount+" New Client is: "+client);
+                " Creating new client. Total: "+ dfsClientsCount.incrementAndGet()+" New Client is: "+client);
         }else{
             System.out.println("Reusing Existing Client "+client);
         }
@@ -60,15 +70,19 @@ public class BenchmarkUtils {
             }
             
             filePools.set(filePool);
-            System.out.println("New FilePool created. Total :"+ ++filePoolCount);
+            System.out.println("New FilePool created. Total :"+ filePoolCount.incrementAndGet());
         }else{
-            //System.out.println("Reusing file pool obj");
+            System.out.println("Reusing file pool obj "+filePool);
         }
-        
         return filePool;
     }
     
     public static void createFile(FileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
+
         FSDataOutputStream out = dfs.create(path, replication);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
@@ -79,6 +93,11 @@ public class BenchmarkUtils {
     }
 
     public static void readFile(FileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
+
         FSDataInputStream in = dfs.open(path);
         if (size != 0) {
             for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
@@ -89,34 +108,66 @@ public class BenchmarkUtils {
     }
 
     public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return true;
+        }
         return dfs.rename(from, to);    
     }
 
     public static boolean deleteFile(FileSystem dfs, Path file) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return true;
+        }
         return dfs.delete(file, true);
     }
     
     public static void ls(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
        dfs.listStatus(path);
     }
     
     public static void getInfo(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
        dfs.getFileStatus(path);
     }
     
     public static void chmodPath(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
         dfs.setPermission(path, new FsPermission((short)0777));
     }
     
     public static void mkdirs(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
         dfs.mkdirs(path);
     }
     
-    public static void chown(FileSystem dfs, Path path) throws IOException {     
+    public static void chown(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
         dfs.setOwner(path, System.getProperty("user.name"), System.getProperty("user.name"));
     }
     
     public static void setReplication(FileSystem dfs, Path path) throws IOException {
+        if(SERVER_LESS_MODE){
+            serverLessModeRandomWait();
+            return;
+        }
         dfs.setReplication(path, (short)3);
     }
     
@@ -127,6 +178,11 @@ public class BenchmarkUtils {
     }
 
   public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
+      if(SERVER_LESS_MODE){
+          serverLessModeRandomWait();
+          return;
+      }
+
     FSDataOutputStream out = dfs.append(path);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
@@ -135,4 +191,12 @@ public class BenchmarkUtils {
         }
         out.close();
   }
+
+    private static  void serverLessModeRandomWait(){
+        try {
+            Thread.sleep(rand.nextInt(10));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
