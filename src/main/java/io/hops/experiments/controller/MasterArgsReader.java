@@ -493,6 +493,9 @@ public class MasterArgsReader {
     return getString(ConfigKeys.HADOOP_USER,ConfigKeys.HADOOP_USER_DEFAULT);
   }
 
+  public int getSlaveWarmUpDelay(){
+    return getInt(ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY, ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT);
+  }
 
   public List<List<String>> getNameNodeRestartCommands(){
     List<List<String>> commandsPerNN = new ArrayList<List<String>>();

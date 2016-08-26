@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -40,6 +41,7 @@ public abstract class Benchmark {
   protected final Configuration conf;
   protected final int numThreads;
   protected final ExecutorService executor;
+  private AtomicInteger threadsWarmedUp = new AtomicInteger(0);
 
   public Benchmark(Configuration conf, int numThreads) {
     this.conf = conf;
@@ -126,6 +128,10 @@ public abstract class Benchmark {
         }
       }
       log();
+      threadsWarmedUp.incrementAndGet();
+      while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
+        Thread.sleep(100);
+      }
       return null;
     }
 

@@ -57,7 +57,11 @@ public class FileTreeGenerator implements FilePool {
       baseDir = baseDir + "/";
     }
 
-    threadDir = baseDir +machineName+"_"+uuid;
+    if(baseDir == "/"){
+      threadDir = baseDir + machineName+"_"+uuid;
+    }else{
+      threadDir = baseDir + machineName+"/"+uuid;
+    }
 
     String[] comp = PathUtils.getPathNames(threadDir);
 

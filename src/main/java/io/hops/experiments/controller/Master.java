@@ -105,7 +105,7 @@ public class Master {
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      sendToAllSlaves(new KillSlave());
+      sendToAllSlaves(new KillSlave(), 0/*delay*/);
       System.exit(0);
     }
   }
@@ -234,7 +234,7 @@ public class Master {
             .getBlockReportingMinTimeBeforeNextReport(), args
             .getBlockReportingMaxTimeBeforeNextReport());
 
-    sendToAllSlaves(request);
+    sendToAllSlaves(request, 0/*delay*/);
 
     Collection<Object> responses = receiveFromAllSlaves(Integer.MAX_VALUE);
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
@@ -283,7 +283,7 @@ public class Master {
             args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled(),
             args.testFailover(), args.getNameNodeRestartCommands(), args.getNameNodeRestartTimePeriod(),
             args.getFailOverTestDuration(), args.getFailOverTestStartTime());
-    sendToAllSlaves(request);
+    sendToAllSlaves(request, 0/*delay*/);
 
     Thread.sleep(args.getInterleavedBmDuration());
     Collection<Object> responses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
@@ -334,7 +334,7 @@ public class Master {
               + " warm up " + args.getBenchMarkType());
     }
 
-    sendToAllSlaves(warmUpCommand);
+    sendToAllSlaves(warmUpCommand, args.getSlaveWarmUpDelay()/*delay*/);
 
     Collection<Object> allResponses = receiveFromAllSlaves(args.getWarmUpPhaseWaitTime());
 
@@ -353,7 +353,7 @@ public class Master {
             + request.getDurationInMS() / (double) (1000 * 60) + " mins");
     prompt();
 
-    sendToAllSlaves(request);
+    sendToAllSlaves(request,0/*delay*/);
 
     Thread.sleep(request.getDurationInMS());
     Collection<Object> responses = receiveFromAllSlaves(60 * 1000/*sec wait*/);
@@ -394,11 +394,14 @@ public class Master {
     }
   }
 
-  private void sendToAllSlaves(Object obj) throws IOException {
+  private void sendToAllSlaves(Object obj, int delay) throws IOException {
     if (!slavesConnections.isEmpty()) {
       for (InetAddress slave : slavesConnections.keySet()) {
         SlaveConnection conn = slavesConnections.get(slave);
         conn.sendToSlave(obj);
+        try{
+          Thread.sleep(delay);
+        }catch(InterruptedException e){}
       }
     }
   }

@@ -200,10 +200,10 @@ public class InterleavedBenchmark extends Benchmark {
                 long opExeTime = 0;
                 try {
                     long opStartTime = 0L;
-                    opStartTime = System.currentTimeMillis();
+                    opStartTime = System.nanoTime();
 
                     OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
-                    opExeTime = System.currentTimeMillis() - opStartTime;
+                    opExeTime = System.nanoTime() - opStartTime;
                     retVal = true;
                 } catch (Exception e) {
                     Logger.error(e);
