@@ -82,6 +82,7 @@ public class RawBenchmark extends Benchmark {
       workers.add(worker);
     }
     executor.invokeAll(workers);
+    Logger.printMsg("Completed Warmup Phase");
     workers.clear();
     return new NamespaceWarmUp.Response();
   }

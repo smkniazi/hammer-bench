@@ -26,6 +26,7 @@ import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
+import org.apache.commons.math3.analysis.function.Log;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -78,6 +79,7 @@ public class InterleavedBenchmark extends Benchmark {
             workers.add(worker);
         }
         executor.invokeAll(workers); // blocking call
+        Logger.printMsg("Completed Warmup Phase");
         workers.clear();
         return new NamespaceWarmUp.Response();
     }
