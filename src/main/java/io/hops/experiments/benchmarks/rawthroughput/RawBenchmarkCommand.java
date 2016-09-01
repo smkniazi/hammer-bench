@@ -58,13 +58,15 @@ public class RawBenchmarkCommand {
         private final long totalSuccessfulOps;
         private final long totalFailedOps;
         private final double opsPerSec;
+        private final int nnCount;
 
-        public Response(BenchmarkOperations phase, long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec) {
+        public Response(BenchmarkOperations phase, long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec, int nnCount) {
             this.phase = phase;
             this.runTime = runTime;
             this.totalSuccessfulOps = totalSuccessfulOps;
             this.totalFailedOps = totalFailedOps;
             this.opsPerSec = opsPerSec;
+            this.nnCount = nnCount;
         }
 
         public BenchmarkOperations getPhase() {
@@ -85,6 +87,10 @@ public class RawBenchmarkCommand {
 
         public double getOpsPerSec() {
             return opsPerSec;
+        }
+
+        public int getNnCount() {
+          return nnCount;
         }
     }
 }

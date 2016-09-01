@@ -14,7 +14,8 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
-kill_NNs=false
+kill_NNs=true
+randomize_NNs_list=true
 
 #############################################################################################################################
 run() {
@@ -67,7 +68,25 @@ run() {
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
-  echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
+  cat $currentExpDir/*.txt
+at $currentExpDir/*.txt echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
+}
+
+
+shuffle() {
+   if [ $randomize_NNs_list = true ]; then 
+     local i tmp size max rand
+     # $RANDOM % (i+1) is biased because of the limited range of $RANDOM
+     # Compensate by using a range which is a multiple of the array size.
+     size=${#NNS_FullList[*]}
+     max=$(( 32768 / size * size ))
+
+     for ((i=size-1; i>0; i--)); do
+       while (( (rand=$RANDOM) >= max )); do :; done
+       rand=$(( rand % (i+1) ))
+       tmp=${NNS_FullList[i]} NNS_FullList[i]=${NNS_FullList[rand]} NNS_FullList[rand]=$tmp
+     done
+   fi
 }
 
 
@@ -85,6 +104,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
         
         currentNNIndex=$EXP_START_INDEX
         while [ $currentNNIndex -le ${#NNS_FullList[@]} ]; do
+            shuffle
             Current_Leader_NN=""
             Non_Leader_NNs=""
             All_NNs_In_Current_Exp=""
@@ -114,7 +134,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                 
 
                         currentDirBM="$currentDir/$BenchMark"
-                        mkdir -p $currentOutputDir
+                        mkdir -p $currentDirBM
                             
                             TotalNNCount=$currentNNIndex
                                        
@@ -163,4 +183,5 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
               
 done
 exit
+
 

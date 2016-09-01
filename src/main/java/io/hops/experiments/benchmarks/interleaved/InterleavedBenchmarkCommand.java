@@ -59,6 +59,7 @@ public class InterleavedBenchmarkCommand {
         private long namenodeRestartTimePeriod;
         private long failTestDuration;
         private long failOverTestStartTime;
+        private String namenodeKillerHost;
 
 
         public Request(BigDecimal createPercent, BigDecimal appendPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent, BigDecimal lsDirPercent,
@@ -67,7 +68,8 @@ public class InterleavedBenchmarkCommand {
                        BigDecimal fileChownPercent, BigDecimal dirChownPercent,
                        long duration, long fileSize, long appendSize, short replicationFactor, String baseDir,
                        boolean percentileEnabled, boolean testFailover, List<List<String>> namenodeRestartCommands,
-                       long namenodeRestartTimePeriod, long failTestDuration, long failOverTestStartTime) {
+                       long namenodeRestartTimePeriod, long failTestDuration, long failOverTestStartTime,
+                       String namenodeKillerHost) {
             this.createPercent = createPercent;
             this.appendPercent = appendPercent;
             this.readPercent = readPercent;
@@ -94,6 +96,7 @@ public class InterleavedBenchmarkCommand {
             this.namenodeRestartTimePeriod = namenodeRestartTimePeriod;
             this.failOverTestStartTime = failOverTestStartTime;
             this.failTestDuration = failTestDuration;
+            this.namenodeKillerHost = namenodeKillerHost;
         }
 
         public long getFailTestDuration() {
@@ -200,6 +203,10 @@ public class InterleavedBenchmarkCommand {
             return namenodeRestartTimePeriod;
         }
 
+        public String getNamenodeKillerHost(){
+            return namenodeKillerHost;
+        }
+
         @Override
         public BenchmarkType getBenchMarkType() {
             return BenchmarkType.INTERLEAVED;
@@ -215,9 +222,11 @@ public class InterleavedBenchmarkCommand {
         private final double avgOpLatency;
         private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
         private final List<String> failOverLog;
+        private final int nnCount;
 
         public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
-                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog) {
+                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog,
+                        int nnCount) {
             this.runTime = runTime;
             this.totalSuccessfulOps = totalSuccessfulOps;
             this.totalFailedOps = totalFailedOps;
@@ -225,6 +234,7 @@ public class InterleavedBenchmarkCommand {
             this.opsExeTimes = opsExeTimes;
             this.failOverLog = failOverLog;
             this.avgOpLatency = avgOpLatency;
+            this.nnCount = nnCount;
         }
 
         public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
@@ -254,6 +264,10 @@ public class InterleavedBenchmarkCommand {
 
         public double getAvgOpLatency() {
             return avgOpLatency;
+        }
+
+        public int getNnCount() {
+            return nnCount;
         }
     }
 }

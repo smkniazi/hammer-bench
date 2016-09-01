@@ -42,11 +42,13 @@ public abstract class Benchmark {
   protected final int numThreads;
   protected final ExecutorService executor;
   private AtomicInteger threadsWarmedUp = new AtomicInteger(0);
+  private final BenchMarkFileSystemName fsName;
 
-  public Benchmark(Configuration conf, int numThreads) {
+  public Benchmark(Configuration conf, int numThreads, BenchMarkFileSystemName fsName) {
     this.conf = conf;
     this.numThreads = numThreads;
-    this.executor = Executors.newCachedThreadPool();
+    this.executor = Executors.newFixedThreadPool(numThreads);
+    this.fsName = fsName;
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
@@ -66,10 +68,10 @@ public abstract class Benchmark {
   public static Benchmark getBenchmark(Configuration conf, Handshake.Request handShake) {
     if (handShake.getBenchMarkType() == BenchmarkType.RAW) {
       return new RawBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth());
+              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth(),handShake.getBenchMarkFileSystemName());
     } else if (handShake.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       return new InterleavedBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-               handShake.isFixedDepthTree(), handShake.getTreeDepth());
+               handShake.isFixedDepthTree(), handShake.getTreeDepth(),handShake.getBenchMarkFileSystemName());
     } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
 //        throw new UnsupportedOperationException("BR is commented out as it is only supported for hadoop 2.0.4-alpha");
          return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
@@ -132,6 +134,8 @@ public abstract class Benchmark {
       while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
         Thread.sleep(100);
       }
+
+      System.out.println("WarmedUp");
       return null;
     }
 
@@ -139,8 +143,19 @@ public abstract class Benchmark {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
-        Logger.printMsg("Warmup " + BenchmarkUtils.round(percent) + "% completed");
+        Logger.printMsg("Warmup Phase: " + BenchmarkUtils.round(percent) + "%");
       }
     }
   };
+
+  protected int getAliveNNsCount() throws IOException {
+    FileSystem fs = BenchmarkUtils.getDFSClient(conf);
+    int actualNNCount = 0;
+    try {
+      actualNNCount = BenchmarkUtils.getActiveNameNodesCount(fsName, fs);
+    } catch (Exception e) {
+      Logger.error(e);
+    }
+    return actualNNCount;
+  }
 }

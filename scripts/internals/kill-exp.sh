@@ -19,20 +19,11 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-PSSH=
-PRSYNC=
-OS=$(./os-type.sh)
-if [ $OS == "Ubuntu" ] ; then
-   PRSYNC="/usr/bin/parallel-rsync"
-   PSSH="/usr/bin/parallel-ssh"
-elif [ $OS == "CentOS" ] ; then
-   PRSYNC="/usr/bin/prsync"
-   PSSH="/usr/bin/pssh"
-fi
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PSSH=$($DIR/psshcmd.sh)
+PRSYNC=$($DIR/prsynccmd.sh)
 
-
-
-  echo "Going to kill Master/Slave process on all experiment machines ${BM_Machines_FullList[*]}"
+echo "Going to kill Master/Slave process on all experiment machines ${BM_Machines_FullList[*]}"
 	#All Unique Hosts
 	All_Hosts=${BM_Machines_FullList[*]}
 	All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')

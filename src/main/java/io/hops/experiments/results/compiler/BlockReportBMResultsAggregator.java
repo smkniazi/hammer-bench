@@ -36,11 +36,11 @@ public class BlockReportBMResultsAggregator extends Aggregator{
     BlockReportBMResults brResult = (BlockReportBMResults)result;
     System.out.println(brResult);
     
-    BlockReportAggregate agg = allResults.get(result.getNoOfNamenodes());
+    BlockReportAggregate agg = allResults.get(result.getNoOfAcutallAliveNNs());
 
     if (agg == null) {
       agg = new BlockReportAggregate();
-      allResults.put(brResult.getNoOfNamenodes(), agg);
+      allResults.put(brResult.getNoOfAcutallAliveNNs(), agg);
     }
 
     agg.addSpeed(brResult.getSpeed());
@@ -50,7 +50,16 @@ public class BlockReportBMResultsAggregator extends Aggregator{
     agg.addAvgTimePerPreport(brResult.getAvgTimePerReport());
     agg.addTimeToGetNameNodeToReport(brResult.getAvgTimeToGetNameNodeToReport());
   }
-  
+
+  @Override
+  public boolean validate(BMResult result) {
+    BlockReportBMResults brResult = (BlockReportBMResults)result;
+    if(brResult.getSpeed()>0 && brResult.getNoOfAcutallAliveNNs() == brResult.getNoOfExpectedAliveNNs()){
+      return true;
+    }
+    return false;
+  }
+
   public Map<Integer, BlockReportAggregate> getResults(){
     return allResults;
   }

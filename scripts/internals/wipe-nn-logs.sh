@@ -6,16 +6,9 @@
 
 
 #load config parameters
-PSSH=
-PRSYNC=
-OS=$(./os-type.sh)
-if [ $OS == "Ubuntu" ] ; then
-   PRSYNC="/usr/bin/parallel-rsync"
-   PSSH="/usr/bin/parallel-ssh"
-elif [ $OS == "CentOS" ] ; then
-   PRSYNC="/usr/bin/prsync"
-   PSSH="/usr/bin/pssh"
-fi
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PSSH=$($DIR/psshcmd.sh)
+PRSYNC=$($DIR/prsynccmd.sh)
 
 $PSSH -H "${NNS_FullList[*]}"  -l $HopsFS_User -i rm -rf  "$HopsFS_Remote_Dist_Folder/logs/*"
 

@@ -54,12 +54,15 @@ public class RawBMResultAggregator extends Aggregator{
   @Override
   public void processRecord(BMResult result) {
     RawBMResults rResults = (RawBMResults)result;
+    if(rResults.getSpeed()<=0){
+      return;
+    }
 
-    Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfNamenodes());
+    Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfExpectedAliveNNs());
 
     if (map == null) {
       map = new HashMap<BenchmarkOperations, RawAggregate>();
-      allResults.put(rResults.getNoOfNamenodes(), map);
+      allResults.put(rResults.getNoOfExpectedAliveNNs(), map);
     }
 
     RawAggregate agg = map.get(rResults.getOperationType());
@@ -72,6 +75,18 @@ public class RawBMResultAggregator extends Aggregator{
     agg.addFailedOps(rResults.getFailedOps());
     agg.addSucessfulOps(rResults.getSuccessfulOps());
     agg.addRunDuration(rResults.getDuration());
+  }
+
+  @Override
+  public boolean validate(BMResult result) {
+    RawBMResults rResults = (RawBMResults)result;
+    if(rResults.getSpeed() > 0 && rResults.getNoOfExpectedAliveNNs() == rResults.getNoOfAcutallAliveNNs()){
+      return true;
+    }
+
+    System.err.println("Inconsistent/Wrong results. "+rResults.getOperationType()+" Speed: "+rResults.getSpeed()+
+        " Expected NNs: "+rResults.getNoOfExpectedAliveNNs()+" Actual NNs: "+rResults.getNoOfAcutallAliveNNs());
+    return false;
   }
 
   CompiledResults processAllRecords() {
@@ -95,6 +110,19 @@ public class RawBMResultAggregator extends Aggregator{
           cr.valsMap.put(op, vals);
         }
         vals.add(agg.getSpeed());
+      }
+    }
+    //create histogram
+    for (BenchmarkOperations op : cr.valsMap.keySet()) {
+      List<Double> vals = cr.valsMap.get(op);
+      Double max = new Double(0);
+      for(int i = 0; i < vals.size();i++){
+        if(i > 0){
+          if(vals.get(i) < max){
+            vals.set(i, max);
+          }
+        }
+        max = vals.get(i);
       }
     }
 
@@ -143,10 +171,10 @@ public class RawBMResultAggregator extends Aggregator{
       return;
     }
     
-    if(hopsFsCr.nnCounts.get(0) != 1){
-      System.err.print("The firt element in Hops Exeperimetn should be 1");
-      return;
-    }
+//    if(hopsFsCr.nnCounts.get(0) != 1){
+//      System.err.print("The first element in Hops Exeperiment should be 1");
+//      return;
+//    }
 
     lines(hdfsCr, hopsFsCr, outputFolder);
     histogram(hdfsCr, hopsFsCr, outputFolder);
@@ -217,7 +245,7 @@ public class RawBMResultAggregator extends Aggregator{
       
       plotCommand += " newhistogram \""+op.toString().replace("_", "\\n")+"\", ";
       plotCommand += "\'"+op+".dat\' ";
-      plotCommand += " using \"SingleNN\":xtic(1) not  lc rgb '#1f78b4', "; 
+      plotCommand += " using \"SingleNN\":xtic(1) not  lc rgb '#d73027', ";
       for(Integer i : hopsFsCr.nnCounts){
         plotCommand += "'' u \""+i+"-NN\" "+col+getColor(colorIndex++)+" , ";
       }
@@ -243,7 +271,8 @@ public class RawBMResultAggregator extends Aggregator{
     //String[] colorMap = {"#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9" };
     //String[] colorMap = {"#a6cee3", "#b2df8a", "#33a02c" , "#fb9a99", "#e31a1c", "#fdbf6f" , "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
    // String[] colorMap = {"#d73027","#f46d43","#fdae61","#1a9850", "#66bd63", "#a6d96a"};
-    String[] colorMap = {"#d73027","#f46d43","#fdae61"};
+     String[] colorMap = {"#1a9850", "#66bd63", "#a6d96a"};
+    //String[] colorMap = {"#d73027","#f46d43","#fdae61"};
     //String[] colorMap = {"#fef0d9","#fdd49e","#fdbb84","#fc8d59","#e34a33","#b30000"};
     return " lc rgb '"+ colorMap[index % colorMap.length]+"' ";
   }
@@ -306,6 +335,7 @@ public class RawBMResultAggregator extends Aggregator{
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
+    DescriptiveStatistics noOfAliveNNs = new DescriptiveStatistics();
     for (Object obj : responses) {
       if (!(obj instanceof RawBenchmarkCommand.Response)
               || (obj instanceof RawBenchmarkCommand.Response
@@ -317,10 +347,12 @@ public class RawBMResultAggregator extends Aggregator{
         failedOps.addValue(response.getTotalFailedOps());
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
+        noOfAliveNNs.addValue(response.getNnCount());
       }
     }
 
     RawBMResults result = new RawBMResults(args.getNamenodeCount(),
+            (int)Math.floor(noOfAliveNNs.getMean()),
             args.getNdbNodesCount(),
             request.getPhase(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))),
