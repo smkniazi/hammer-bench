@@ -60,6 +60,9 @@ HopsFS_User=nzo
 NameNodeRpcPort=26801
 HopsFS_Remote_Dist_Folder=/tmp/nzo/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
+#full path to java
+JAVA_BIN=java
+
 
 
 
