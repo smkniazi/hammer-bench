@@ -3,18 +3,9 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-PSSH=
-PRSYNC=
-OS=$(./os-type.sh)
-if [ $OS == "Ubuntu" ] ; then
-   PRSYNC="/usr/bin/parallel-rsync"
-   PSSH="/usr/bin/parallel-ssh"
-elif [ $OS == "CentOS" ] ; then
-   PRSYNC="/usr/bin/prsync"
-   PSSH="/usr/bin/pssh"
-fi
-
-
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PSSH=$(internals/psshcmd.sh)
+PRSYNC=$(internals/prsynccmd.sh)
 
 #All Unique Hosts
 All_Hosts=${All_NNs_In_Current_Exp[*]}

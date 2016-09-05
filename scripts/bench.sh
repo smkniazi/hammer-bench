@@ -14,7 +14,7 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
-kill_NNs=false
+kill_NNs=true
 randomize_NNs_list=true
 
 #############################################################################################################################
@@ -43,7 +43,7 @@ run() {
   sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file
  
   date1=$(date +"%s") 
-: <<'END'
+#: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
  if [ $kill_NNs = true ]; then  
     echo "*** Starting HopsFS ***"
@@ -65,7 +65,7 @@ run() {
     source $kill_java_everywhere;      # kills all zombie java processes
  fi
 
-END
+#END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
   echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."

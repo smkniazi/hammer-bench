@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 os=$(grep  "^NAME=" "/etc/os-release" | cut -d'=' -f 2 | cut -d '"' -f 2)
 if [ "$os" == "Ubuntu" ]; then
  echo "Ubuntu"
