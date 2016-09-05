@@ -5,9 +5,8 @@
 
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-PSSH=$(internals/psshcmd.sh)
-PRSYNC=$(internals/prsynccmd.sh)
-
+SH=$($DIR/psshcmd.sh)
+PRSYNC=$($DIR/prsynccmd.sh)
 
 #All Unique Hosts
 All_Hosts=${All_NNs_In_Current_Exp[*]}

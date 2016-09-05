@@ -20,9 +20,8 @@
 # A password-less sign-on should be setup prior to calling this script
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-PSSH=$(internals/psshcmd.sh)
-PRSYNC=$(internals/prsynccmd.sh)
-
+PSSH=$($DIR/psshcmd.sh)
+PRSYNC=$($DIR/prsynccmd.sh)
 
 echo "Going to kill Master/Slave process on all experiment machines ${BM_Machines_FullList[*]}"
 	#All Unique Hosts
