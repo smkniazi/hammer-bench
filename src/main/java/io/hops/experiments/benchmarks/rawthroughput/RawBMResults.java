@@ -34,8 +34,8 @@ public class RawBMResults extends BMResult {
   private final double failedOps;
   private final BenchmarkOperations operationType;
 
-  public RawBMResults(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkOperations operationType, double speed, double duration, double successfulOps, double failedOps) {
-    super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.RAW);
+  public RawBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes, BenchmarkOperations operationType, double speed, double duration, double successfulOps, double failedOps) {
+    super(noOfExpectedNNs, noOfActualAliveNNs, noOfNDBDataNodes, BenchmarkType.RAW);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
@@ -70,7 +70,8 @@ public class RawBMResults extends BMResult {
                 " Successful-Ops: " + BenchmarkUtils.round(successfulOps)
             + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
             + " Avg-Test-Duration-sec " + BenchmarkUtils.round(duration)
-            + " No of NameNodes "+super.getNoOfNamenodes();
+            + " No of Expected NNs "+super.getNoOfExpectedAliveNNs()
+            + " No of Actual Alive NNs "+super.getNoOfAcutallAliveNNs();
     return message;
   }
 

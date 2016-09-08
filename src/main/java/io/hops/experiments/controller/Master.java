@@ -242,6 +242,7 @@ public class Master {
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics avgTimePerReport = new DescriptiveStatistics();
     DescriptiveStatistics avgTimeTogetANewNameNode = new DescriptiveStatistics();
+    DescriptiveStatistics noOfNNs = new DescriptiveStatistics();
 
     for (Object obj : responses) {
       if (!(obj instanceof BlockReportingBenchmarkCommand.Response)) {
@@ -253,10 +254,12 @@ public class Master {
         speed.addValue(response.getSpeed());
         avgTimePerReport.addValue(response.getAvgTimePerReport());
         avgTimeTogetANewNameNode.addValue(response.getAvgTimeTogetNewNameNode());
+        noOfNNs.addValue(response.getNnCount());
       }
     }
 
     BlockReportBMResults result = new BlockReportBMResults(args.getNamenodeCount(),
+            (int)Math.floor(noOfNNs.getMean()),
             args.getNdbNodesCount(),
             speed.getSum(), successfulOps.getSum(),
             failedOps.getSum(), avgTimePerReport.getMean(), avgTimeTogetANewNameNode.getMean());

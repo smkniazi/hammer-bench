@@ -13,4 +13,6 @@ import io.hops.experiments.benchmarks.BMResult;
 public abstract class Aggregator {
     
   public abstract void processRecord(BMResult result);
+
+  public abstract boolean validate(BMResult result);
 }

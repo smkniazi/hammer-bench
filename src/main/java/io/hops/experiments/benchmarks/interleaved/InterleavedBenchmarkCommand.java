@@ -215,9 +215,11 @@ public class InterleavedBenchmarkCommand {
         private final double avgOpLatency;
         private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
         private final List<String> failOverLog;
+        private final int nnCount;
 
         public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
-                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog) {
+                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog,
+                        int nnCount) {
             this.runTime = runTime;
             this.totalSuccessfulOps = totalSuccessfulOps;
             this.totalFailedOps = totalFailedOps;
@@ -225,6 +227,7 @@ public class InterleavedBenchmarkCommand {
             this.opsExeTimes = opsExeTimes;
             this.failOverLog = failOverLog;
             this.avgOpLatency = avgOpLatency;
+            this.nnCount = nnCount;
         }
 
         public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
@@ -254,6 +257,10 @@ public class InterleavedBenchmarkCommand {
 
         public double getAvgOpLatency() {
             return avgOpLatency;
+        }
+
+        public int getNnCount() {
+            return nnCount;
         }
     }
 }

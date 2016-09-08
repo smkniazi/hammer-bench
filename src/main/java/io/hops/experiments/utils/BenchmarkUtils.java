@@ -17,9 +17,12 @@
  */
 package io.hops.experiments.utils;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -177,20 +180,34 @@ public class BenchmarkUtils {
       return round / 100;
     }
 
-  public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
-      if(SERVER_LESS_MODE){
-          serverLessModeRandomWait();
-          return;
-      }
+    public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
+        if (SERVER_LESS_MODE) {
+            serverLessModeRandomWait();
+            return;
+        }
 
-    FSDataOutputStream out = dfs.append(path);
+        FSDataOutputStream out = dfs.append(path);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
                 out.writeInt(1);
             }
         }
         out.close();
-  }
+    }
+
+    public static int getActiveNameNodesCount(BenchMarkFileSystemName fsName, FileSystem dfs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        //it only works for HopsFS
+        if(fsName == BenchMarkFileSystemName.HopsFS ){
+            Class filesystem = dfs.getClass();
+            Method method =  filesystem.getMethod("getNameNodesCount");
+            Object ret = method.invoke(dfs);
+            return (Integer) ret;
+        } else if(fsName == BenchMarkFileSystemName.HDFS ){
+            return 1;
+        } else{
+           throw new UnsupportedOperationException("Implement get namenode count for other filesystems");
+        }
+    }
 
     private static  void serverLessModeRandomWait(){
         try {

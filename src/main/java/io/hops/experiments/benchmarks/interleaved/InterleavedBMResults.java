@@ -37,8 +37,8 @@ public class InterleavedBMResults extends BMResult {
   private final String workloadName;
   private final double avgOpLatency;
 
-  public InterleavedBMResults(int noOfNameNodes, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile,double avgOpLatency) {
-    super(noOfNameNodes, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
+  public InterleavedBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile,double avgOpLatency) {
+    super(noOfExpectedNNs, noOfActualAliveNNs, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
@@ -84,7 +84,8 @@ public class InterleavedBMResults extends BMResult {
             + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
             + " Avg-Ops-Latency: " + BenchmarkUtils.round(avgOpLatency)
             + " Avg-Test-Duration-sec " + BenchmarkUtils.round(duration)
-            + " No of NameNodes: "+super.getNoOfNamenodes();
+            + " No of Expected NNs : "+super.getNoOfExpectedAliveNNs()
+            + " No of Actual Alive NNs : "+super.getNoOfAcutallAliveNNs();
 
     return message;
   }

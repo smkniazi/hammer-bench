@@ -17,6 +17,7 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.OperationsUtils;
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
@@ -35,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -58,8 +60,9 @@ public class InterleavedBenchmark extends Benchmark {
 
     public InterleavedBenchmark(Configuration conf, int numThreads,
                                 int inodesPerDir, int filesPerDir,
-                                boolean fixedDepthTree, int treeDepth) {
-        super(conf, numThreads);
+                                boolean fixedDepthTree, int treeDepth,
+                                BenchMarkFileSystemName fsName) {
+        super(conf, numThreads,fsName);
         this.dirsPerDir = inodesPerDir;
         this.filesPerDir = filesPerDir;
         this.fixedDepthTree = fixedDepthTree;
@@ -110,6 +113,7 @@ public class InterleavedBenchmark extends Benchmark {
             failOverTester.stop();
             failOverLog = failOverTester.getFailoverLog();
         }
+
         long totalTime = System.currentTimeMillis() - startTime;
 
 
@@ -118,7 +122,7 @@ public class InterleavedBenchmark extends Benchmark {
         double speed = (operationsCompleted.get() / (double) totalTime) * 1000;
 
         InterleavedBenchmarkCommand.Response response =
-                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, avgLatency.getMean(), failOverLog);
+                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, avgLatency.getMean(), failOverLog,getAliveNNsCount());
         return response;
     }
 

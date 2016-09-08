@@ -53,17 +53,26 @@ public class InterleavedBMResultsAggregator extends Aggregator {
       allWorkloadsResults.put(workloadName, workloadResults);
     }
 
-    InterleavedAggregate agg = workloadResults.get(ilResult.getNoOfNamenodes());
+    InterleavedAggregate agg = workloadResults.get(ilResult.getNoOfAcutallAliveNNs());
 
     if (agg == null) {
       agg = new InterleavedAggregate();
-      workloadResults.put(ilResult.getNoOfNamenodes(), agg);
+      workloadResults.put(ilResult.getNoOfAcutallAliveNNs(), agg);
     }
 
     agg.addSpeed(ilResult.getSpeed());
     agg.addFailedOps(ilResult.getFailedOps());
     agg.addSucessfulOps(ilResult.getSuccessfulOps());
     agg.addRunDuration(ilResult.getDuration());
+  }
+
+  @Override
+  public boolean validate(BMResult result) {
+    InterleavedBMResults ilResult = (InterleavedBMResults) result;
+    if (ilResult.getSpeed() > 0 && ilResult.getNoOfAcutallAliveNNs() == ilResult.getNoOfExpectedAliveNNs()) {
+      return true;
+    }
+    return false;
   }
 
   public Map<String, Map<Integer, InterleavedAggregate>> getResults() {
@@ -105,7 +114,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         return;
       }
 
-      plot +=  " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\"  , \\\n";
+      plot +=  " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\" \n";
       String data = "";
       SortedSet<Integer> sorted = new TreeSet<Integer>(); // Sort my number of NN
       sorted.addAll(hopsWorkloadResult.keySet());
@@ -131,6 +140,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
     DescriptiveStatistics opsLatency = new DescriptiveStatistics();
+    DescriptiveStatistics noOfNNs = new DescriptiveStatistics();
     for (Object obj : responses) {
       if (!(obj instanceof InterleavedBenchmarkCommand.Response)) {
         throw new IllegalStateException("Wrong response received from the client");
@@ -141,6 +151,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
         opsLatency.addValue(response.getAvgOpLatency());
+        noOfNNs.addValue(response.getNnCount());
       }
     }
     
@@ -166,6 +177,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     }
 
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
+            (int)Math.floor(noOfNNs.getMean()),
             args.getNdbNodesCount(), args.getInterleavedBmWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles, opsLatency.getMean());
@@ -216,7 +228,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         oldPt = data;
       }
       plot.append(sbx.toString());
-      
+
 
       plot.append( "plot '"+datFile+"' with linespoints ls 1");
       CompileResults.writeToFile(outputFolder+"/"+prefix+"-failover.gnu", plot.toString(), false);

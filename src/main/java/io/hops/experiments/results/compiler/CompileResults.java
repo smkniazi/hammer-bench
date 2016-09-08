@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,14 +130,51 @@ public class CompileResults {
           System.out.println("Wrong binary file " + file);
           System.exit(0);
         } else {
+          if(!validateResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults)){
+           System.err.println("Ignoring the results. The tests seem to have failed. " + file);
+            return;
+          }
+        }
+      }
+    } catch (EOFException e) {
+    }
+
+    //go the begenning of the file.
+    ois.close();
+    fin.close();
+    fin = new FileInputStream(file);
+    ois = new ObjectInputStream(fin);
+
+    try {
+      while ((obj = ois.readObject()) != null) {
+        if (!(obj instanceof BMResult)) {
+          System.out.println("Wrong binary file " + file);
+          System.exit(0);
+        } else {
           processResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults);
         }
       }
     } catch (EOFException e) {
-    } finally {
-      ois.close();
     }
+    ois.close();
+    fin.close();
+  }
 
+  private  boolean validateResult(BMResult result,
+          RawBMResultAggregator rawAggregatredResults,
+          InterleavedBMResultsAggregator interleavedAggregatedResults,
+          BlockReportBMResultsAggregator blockReportAggregatedResults) {
+    if (result instanceof RawBMResults) {
+      return rawAggregatredResults.validate((RawBMResults) result);
+    } else if (result instanceof InterleavedBMResults) {
+      return interleavedAggregatedResults.validate((InterleavedBMResults) result);
+    } else if (result instanceof BlockReportBMResults) {
+      return blockReportAggregatedResults.validate((BlockReportBMResults) result);
+    } else {
+      System.err.println("Wrong type of recode read.");
+      System.exit(0);
+      return false;
+    }
   }
 
   private void processResult(BMResult result,

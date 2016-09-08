@@ -49,7 +49,7 @@ public class BlockReportingBenchmark extends Benchmark {
   private final BenchMarkFileSystemName fsName;
 
   public BlockReportingBenchmark(Configuration conf, int numThreads, int slaveID, BenchMarkFileSystemName fsName) {
-    super(conf, numThreads);
+    super(conf, numThreads,fsName);
     this.slaveId = slaveID;
     this.fsName = fsName;
   }
@@ -93,9 +93,10 @@ public class BlockReportingBenchmark extends Benchmark {
     executor.invokeAll(workers, request.getBlockReportBenchMarkDuration(), TimeUnit.MILLISECONDS);
     double speed = currentSpeed();
     datanodes.printStats();
+
     return new BlockReportingBenchmarkCommand.Response(successfulOps.get(),
             failedOps.get(), speed, brElapsedTimes.getMean(),
-            getNewNameNodeElapsedTime.getMean());
+            getNewNameNodeElapsedTime.getMean(),getAliveNNsCount());
   }
 
   private class Reporter implements Callable {
