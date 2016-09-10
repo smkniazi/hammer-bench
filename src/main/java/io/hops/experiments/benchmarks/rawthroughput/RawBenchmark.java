@@ -105,6 +105,9 @@ public class RawBenchmark extends Benchmark {
       workers.add(worker);
     }
     setMeasurementVariables(duration);
+
+    Logger.resetTimer();
+
     executor.invokeAll(workers);// blocking call
     long phaseFinishTime = System.currentTimeMillis();
     long actualExecutionTime = (phaseFinishTime - phaseStartTime);

@@ -180,6 +180,11 @@ public class BenchmarkUtils {
       return round / 100;
     }
 
+    public static String format(int spaces, String string) {
+        String format = "%1$-" + spaces + "s";
+        return String.format(format, string);
+    }
+
     public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
         if (SERVER_LESS_MODE) {
             serverLessModeRandomWait();

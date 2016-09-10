@@ -16,6 +16,8 @@
  */
 package io.hops.experiments.controller;
 
+import io.hops.experiments.utils.BenchmarkUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -58,6 +60,10 @@ public class Logger {
       errorCounter++;
     }
 
+  }
+
+  public static void resetTimer(){
+    lastmsg.set(System.currentTimeMillis());
   }
 
  public static synchronized void printMsg(String msg) {
@@ -133,7 +139,7 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(recvPacket.getAddress().getHostName() + " -> " + msg);
+          System.out.println(BenchmarkUtils.format(20,recvPacket.getAddress().getHostName()) + " -> " + msg);
           is.close();
           in.close();
           recvPacket = null;

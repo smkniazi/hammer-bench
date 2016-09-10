@@ -108,6 +108,8 @@ public class InterleavedBenchmark extends Benchmark {
                     req.getNamenodeRestartTimePeriod());
         }
 
+        Logger.resetTimer();
+
         executor.invokeAll(workers); // blocking call
         if (req.isTestFailover()) {
             failOverTester.stop();
@@ -175,9 +177,9 @@ public class InterleavedBenchmark extends Benchmark {
             String message = "";
             if (Logger.canILog()) {
 
-                message += format(25, "Completed Ops: " + operationsCompleted + " ");
-                message += format(20, "Failed Ops: " + operationsFailed + " ");
-                message += format(20, "Avg. Speed: " + speedPSec(operationsCompleted.get(), startTime) + " ops/s ");
+                message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
+                message += BenchmarkUtils.format(20, "Failed Ops: " + operationsFailed + " ");
+                message += BenchmarkUtils.format(20, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
 //                if(avgLatency.getN() > 0){
 //                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
 //                }
@@ -246,11 +248,6 @@ public class InterleavedBenchmark extends Benchmark {
             }
 
         }
-    }
-
-    protected String format(int spaces, String string) {
-        String format = "%1$-" + spaces + "s";
-        return String.format(format, string);
     }
 
     private double speedPSec(long ops, long startTime) {
