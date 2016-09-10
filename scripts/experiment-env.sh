@@ -24,13 +24,14 @@ HopsFS_Src_Folder=../
 HopsFS_Experiments_Remote_Dist_Folder=/tmp/hops-benchmark-jars
 HopsFS_Rebuild_Exp_Src=false
 HopsFS_Upload_Exp=true
+CPU_AFFINITY=21-23
 
 #Machines
 DNS_FullList=(`cat datanodes`) 
 NNS_FullList=(`cat namenodes`)
 
 BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
-DFS_CLIENTS_PER_NAMENODE=200                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
+DFS_CLIENTS_PER_NAMENODE=900                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
                                                    #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
 TINY_DATANODES_PER_NAMENODE=5                      #No of simulated datanodes for benchmarking the blockreporting system
@@ -61,7 +62,7 @@ NameNodeRpcPort=26801
 HopsFS_Remote_Dist_Folder=/tmp/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
 #full path to java
-JAVA_BIN=/tmp/hopsfs/Java/bin/java
+JAVA_BIN=java
 
 
 

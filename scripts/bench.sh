@@ -68,7 +68,8 @@ run() {
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
-  echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
+  cat $currentExpDir/*.txt
+at $currentExpDir/*.txt echo "ExpTime $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."
 }
 
 

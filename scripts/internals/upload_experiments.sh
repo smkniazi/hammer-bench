@@ -39,5 +39,6 @@ PRSYNC=$($DIR/prsynccmd.sh)
 	cp ./slave.properties $temp_folder/
 
         sed -i 's|JAVA_BIN|'$JAVA_BIN'|g' $temp_folder/*.sh
+        sed -i 's|CPU_AFFINITY=.*|CPU_AFFINITY='$CPU_AFFINITY'|g' $temp_folder/*.sh
 
 	$PRSYNC -arzv -H "${BM_Machines_FullList[*]}" --user $HopsFS_User     $temp_folder/   $HopsFS_Experiments_Remote_Dist_Folder  
