@@ -178,8 +178,8 @@ public class InterleavedBenchmark extends Benchmark {
             if (Logger.canILog()) {
 
                 message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
-                message += BenchmarkUtils.format(20, "Failed Ops: " + operationsFailed + " ");
-                message += BenchmarkUtils.format(20, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
+                message += BenchmarkUtils.format(25, "Failed Ops: " + operationsFailed + " ");
+                message += BenchmarkUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
 //                if(avgLatency.getN() > 0){
 //                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
 //                }
