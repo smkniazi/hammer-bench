@@ -80,6 +80,8 @@ public class RawBMResultAggregator extends Aggregator{
     if(rResults.getSpeed() > 0 && rResults.getNoOfExpectedAliveNNs() == rResults.getNoOfAcutallAliveNNs()){
       return true;
     }
+    System.err.println("Inconsistent/Wrong results. Speed: "+rResults.getSpeed()+" Expected NNs: "+rResults
+        .getNoOfExpectedAliveNNs()+" Actual NNs: "+rResults.getNoOfAcutallAliveNNs());
     return false;
   }
 

@@ -22,6 +22,9 @@ import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.results.compiler.RawBMResultAggregator.CompiledResults;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,23 +41,45 @@ import java.util.List;
  * @author salman
  */
 public class CompileResults {
+  @Option(name = "-hdfs", usage = "Location of result files for HDFS")
+  private static String hdfsInputDir = "/non-existant-path" ;
+
+  @Option(name = "-hopsFS", usage = "Location of result files for HopsFS")
+  private static String hopsInputDir = "/non-existant-path" ;
+
+  @Option(name = "-output", usage = "Location of output dir")
+  private static String outputDir = "/non-existant-path" ;
+
+  @Option(name = "-force", usage = "Also take in to account failed experiments")
+  private static boolean force = false;
 
   public static void main(String argv[]) throws FileNotFoundException, IOException, ClassNotFoundException {
-
-    if (argv.length != 3) {
-      System.err.println("Usage CompileResults hdfsResults hopsResults outputDir");
-      System.exit(0);
-    }
-
-    File outputDir = new File(argv[2]);
-    if (!outputDir.exists()) {
-      outputDir.mkdirs();
-    }
-
-    new CompileResults().doShit(argv[0], argv[1], argv[2]);
+    new CompileResults().doShit(argv);
   }
 
-  private void doShit(String hdfsInputDir, String hopsInputDir, String outputDir) throws FileNotFoundException, IOException, ClassNotFoundException {
+  private void parseArgs(String[] args) {
+    CmdLineParser parser = new CmdLineParser(this);
+    parser.setUsageWidth(80);
+    try {
+      // parse the arguments.
+      parser.parseArgument(args);
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      parser.printUsage(System.err);
+      System.err.println();
+      System.exit(-1);
+    }
+
+
+  }
+  private void doShit(String[] argv) throws FileNotFoundException, IOException, ClassNotFoundException {
+    parseArgs(argv);
+
+    File dir = new File(outputDir );
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+
     RawBMResultAggregator hdfsRawAggregatredResults = new RawBMResultAggregator();
     InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults = new InterleavedBMResultsAggregator();
     BlockReportBMResultsAggregator hdfsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
@@ -132,7 +157,9 @@ public class CompileResults {
         } else {
           if(!validateResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults)){
            System.err.println("Ignoring the results. The tests seem to have failed. " + file);
-            return;
+           if(!force) {
+             return;
+           }
           }
         }
       }

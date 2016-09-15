@@ -47,7 +47,7 @@ public abstract class Benchmark {
   public Benchmark(Configuration conf, int numThreads, BenchMarkFileSystemName fsName) {
     this.conf = conf;
     this.numThreads = numThreads;
-    this.executor = Executors.newCachedThreadPool();
+    this.executor = Executors.newFixedThreadPool(numThreads);
     this.fsName = fsName;
   }
 
