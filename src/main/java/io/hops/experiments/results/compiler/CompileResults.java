@@ -156,8 +156,9 @@ public class CompileResults {
           System.exit(0);
         } else {
           if(!validateResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults)){
-           System.err.println("Ignoring the results. The tests seem to have failed. " + file);
+            System.err.println(file+" Contains Invalid/Inconsistant results");
            if(!force) {
+             System.err.println(file+" Will be ignored. ");
              return;
            }
           }

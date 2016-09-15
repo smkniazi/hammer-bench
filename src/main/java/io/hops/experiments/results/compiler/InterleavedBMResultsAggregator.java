@@ -45,6 +45,9 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   public void processRecord(BMResult result) {
     //System.out.println(result);
     InterleavedBMResults ilResult = (InterleavedBMResults) result;
+    if(ilResult.getSpeed()<=0){
+      return;
+    }
 
     String workloadName = ilResult.getWorkloadName();
     Map<Integer, InterleavedAggregate> workloadResults = allWorkloadsResults.get(workloadName);
@@ -53,11 +56,11 @@ public class InterleavedBMResultsAggregator extends Aggregator {
       allWorkloadsResults.put(workloadName, workloadResults);
     }
 
-    InterleavedAggregate agg = workloadResults.get(ilResult.getNoOfAcutallAliveNNs());
+    InterleavedAggregate agg = workloadResults.get(ilResult.getNoOfExpectedAliveNNs());
 
     if (agg == null) {
       agg = new InterleavedAggregate();
-      workloadResults.put(ilResult.getNoOfAcutallAliveNNs(), agg);
+      workloadResults.put(ilResult.getNoOfExpectedAliveNNs(), agg);
     }
 
     agg.addSpeed(ilResult.getSpeed());
@@ -72,6 +75,8 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     if (ilResult.getSpeed() > 0 && ilResult.getNoOfAcutallAliveNNs() == ilResult.getNoOfExpectedAliveNNs()) {
       return true;
     }
+    System.err.println("Inconsistent/Wrong results.  Speed: "+ilResult.getSpeed()+
+        " Expected NNs: "+ilResult.getNoOfExpectedAliveNNs()+" Actual NNs: "+ilResult.getNoOfAcutallAliveNNs());
     return false;
   }
 

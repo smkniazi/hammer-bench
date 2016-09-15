@@ -54,12 +54,15 @@ public class RawBMResultAggregator extends Aggregator{
   @Override
   public void processRecord(BMResult result) {
     RawBMResults rResults = (RawBMResults)result;
+    if(rResults.getSpeed()<=0){
+      return;
+    }
 
-    Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfAcutallAliveNNs());
+    Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfExpectedAliveNNs());
 
     if (map == null) {
       map = new HashMap<BenchmarkOperations, RawAggregate>();
-      allResults.put(rResults.getNoOfAcutallAliveNNs(), map);
+      allResults.put(rResults.getNoOfExpectedAliveNNs(), map);
     }
 
     RawAggregate agg = map.get(rResults.getOperationType());
@@ -80,8 +83,9 @@ public class RawBMResultAggregator extends Aggregator{
     if(rResults.getSpeed() > 0 && rResults.getNoOfExpectedAliveNNs() == rResults.getNoOfAcutallAliveNNs()){
       return true;
     }
-    System.err.println("Inconsistent/Wrong results. Speed: "+rResults.getSpeed()+" Expected NNs: "+rResults
-        .getNoOfExpectedAliveNNs()+" Actual NNs: "+rResults.getNoOfAcutallAliveNNs());
+
+    System.err.println("Inconsistent/Wrong results. "+rResults.getOperationType()+" Speed: "+rResults.getSpeed()+
+        " Expected NNs: "+rResults.getNoOfExpectedAliveNNs()+" Actual NNs: "+rResults.getNoOfAcutallAliveNNs());
     return false;
   }
 
@@ -154,10 +158,10 @@ public class RawBMResultAggregator extends Aggregator{
       return;
     }
     
-    if(hopsFsCr.nnCounts.get(0) != 1){
-      System.err.print("The firt element in Hops Exeperimetn should be 1");
-      return;
-    }
+//    if(hopsFsCr.nnCounts.get(0) != 1){
+//      System.err.print("The first element in Hops Exeperiment should be 1");
+//      return;
+//    }
 
     lines(hdfsCr, hopsFsCr, outputFolder);
     histogram(hdfsCr, hopsFsCr, outputFolder);
