@@ -139,7 +139,7 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(BenchmarkUtils.format(25,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          System.out.println(BenchmarkUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
           is.close();
           in.close();
           recvPacket = null;

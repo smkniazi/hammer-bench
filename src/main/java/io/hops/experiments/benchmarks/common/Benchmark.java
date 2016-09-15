@@ -134,6 +134,8 @@ public abstract class Benchmark {
       while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
         Thread.sleep(100);
       }
+
+      System.out.println("WarmedUp");
       return null;
     }
 
@@ -141,7 +143,7 @@ public abstract class Benchmark {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
-        Logger.printMsg("Warmup " + BenchmarkUtils.round(percent) + "% completed");
+        Logger.printMsg("Warmup Phase: " + BenchmarkUtils.round(percent) + "%");
       }
     }
   };

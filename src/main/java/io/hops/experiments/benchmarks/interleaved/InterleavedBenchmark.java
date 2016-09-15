@@ -82,7 +82,7 @@ public class InterleavedBenchmark extends Benchmark {
             workers.add(worker);
         }
         executor.invokeAll(workers); // blocking call
-        Logger.printMsg("Completed Warmup Phase");
+        Logger.printMsg("Finished. Warmup Phase: 100%.");
         workers.clear();
         return new NamespaceWarmUp.Response();
     }
@@ -150,8 +150,6 @@ public class InterleavedBenchmark extends Benchmark {
                     req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent(),
                     req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent(),
                     req.getFileChownPercent(), req.getDirChownPercent());
-            String filePath = null;
-
             while (true) {
                 try {
                     if ((System.currentTimeMillis() - startTime) > duration) {
@@ -219,6 +217,7 @@ public class InterleavedBenchmark extends Benchmark {
                 updateStats(opType, retVal, opExeTime);
             } else {
                 Logger.printMsg("Could not perform operation " + opType + ". Got Null from the file pool");
+//                System.exit(-1);
             }
         }
 

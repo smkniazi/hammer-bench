@@ -16,6 +16,8 @@
  */
 package io.hops.experiments.workload.generator;
 
+import io.hops.experiments.controller.Logger;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -53,11 +55,12 @@ public class FileTreeGenerator implements FilePool {
       machineName = "Client_Machine+" + rand.nextInt();
     }
 
+    baseDir = baseDir.trim();
     if (!baseDir.endsWith("/")) {
       baseDir = baseDir + "/";
     }
 
-    if(baseDir == "/"){
+    if(baseDir.compareTo("/")==0){
       threadDir = baseDir + machineName+"_"+uuid;
     }else{
       threadDir = baseDir + machineName+"/"+uuid;
@@ -192,19 +195,20 @@ public class FileTreeGenerator implements FilePool {
   }
 
   private String getRandomFile() {
-    if (allThreadFiles.isEmpty()) {
-      return null;
+    if (!allThreadFiles.isEmpty()) {
+      for (int i = 0; i < allThreadFiles.size(); i++) {
+        int index = rand.nextInt(allThreadFiles.size());
+        String path = allThreadFiles.get(index);
+        if (getPathLength(path) < THRESHOLD) {
+          continue;
+        }
+//        System.out.println("Path "+path);
+        return path;
+      }
     }
 
-    for (int i = 0; i < allThreadFiles.size(); i++) {
-      int index = rand.nextInt(allThreadFiles.size());
-      String path = allThreadFiles.get(index);
-      if(getPathLength(path) < THRESHOLD){
-        continue;
-      }
-      //System.out.println("Path "+path);
-      return path;
-    }
+    System.err.println("Unable to getRandomFile from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
+    Logger.printMsg("Error: Unable to getRandomFile from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
     return null;
   }
 
@@ -213,20 +217,23 @@ public class FileTreeGenerator implements FilePool {
   }
 
   public String getRandomDir() {
-    if (allThreadFiles.isEmpty()) {
-      return null;
-    }
-    for(int i = 0; i < allThreadFiles.size(); i++){
-      int index = rand.nextInt(allThreadFiles.size());
-      String path = allThreadFiles.get(index);
-      int dirIndex = path.lastIndexOf("/");
-      path = path.substring(0, dirIndex);
-      if(getPathLength(path) < THRESHOLD){
-        continue;
+    if (!allThreadFiles.isEmpty()) {
+      for (int i = 0; i < allThreadFiles.size(); i++) {
+        int index = rand.nextInt(allThreadFiles.size());
+        String path = allThreadFiles.get(index);
+        int dirIndex = path.lastIndexOf("/");
+        path = path.substring(0, dirIndex);
+        if (getPathLength(path) < THRESHOLD) {
+          continue;
+        }
+//        System.out.println("Path "+path);
+        return path;
       }
-      //System.out.println("Path "+path);
-      return path;
     }
+
+    System.err.println("Unable to getRandomDir from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
+    Logger.printMsg("Error: Unable to getRandomDir from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
     return null;
   }
 }
+

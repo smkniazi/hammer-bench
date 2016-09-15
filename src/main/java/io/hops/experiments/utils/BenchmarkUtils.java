@@ -73,7 +73,7 @@ public class BenchmarkUtils {
             }
             
             filePools.set(filePool);
-            System.out.println("New FilePool created. Total :"+ filePoolCount.incrementAndGet());
+            System.out.println("New FilePool " +filePool+" created. Total :"+ filePoolCount.incrementAndGet());
         }else{
             System.out.println("Reusing file pool obj "+filePool);
         }
@@ -201,25 +201,30 @@ public class BenchmarkUtils {
     }
 
     public static int getActiveNameNodesCount(BenchMarkFileSystemName fsName, FileSystem dfs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (SERVER_LESS_MODE) {
+            serverLessModeRandomWait();
+            return 0;
+        }
+
         //it only works for HopsFS
-        if(fsName == BenchMarkFileSystemName.HopsFS ){
+        if (fsName == BenchMarkFileSystemName.HopsFS) {
             Class filesystem = dfs.getClass();
-            Method method =  filesystem.getMethod("getNameNodesCount");
+            Method method = filesystem.getMethod("getNameNodesCount");
             Object ret = method.invoke(dfs);
             return (Integer) ret;
-        } else if(fsName == BenchMarkFileSystemName.HDFS ){
+        } else if (fsName == BenchMarkFileSystemName.HDFS) {
             return 1;
-        } else{
-           throw new UnsupportedOperationException("Implement get namenode count for other filesystems");
+        } else {
+            throw new UnsupportedOperationException("Implement get namenode count for other filesystems");
         }
     }
 
     private static  void serverLessModeRandomWait(){
-        try {
+//        try {
 //            Thread.sleep(rand.nextInt(10));
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//            Thread.sleep(1);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 }
