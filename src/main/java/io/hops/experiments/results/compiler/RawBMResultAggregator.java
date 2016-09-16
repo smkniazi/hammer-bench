@@ -112,6 +112,19 @@ public class RawBMResultAggregator extends Aggregator{
         vals.add(agg.getSpeed());
       }
     }
+    //create histogram
+    for (BenchmarkOperations op : cr.valsMap.keySet()) {
+      List<Double> vals = cr.valsMap.get(op);
+      Double max = new Double(0);
+      for(int i = 0; i < vals.size();i++){
+        if(i > 0){
+          if(vals.get(i) < max){
+            vals.set(i, max);
+          }
+        }
+        max = vals.get(i);
+      }
+    }
 
     //create histogram
     for (BenchmarkOperations op : cr.valsMap.keySet()) {
