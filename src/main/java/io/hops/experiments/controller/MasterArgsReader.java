@@ -114,9 +114,9 @@ public class MasterArgsReader {
       if(getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS){
         throw new IllegalArgumentException("Failover Testing is only supported for HDFS and HopsFS.");
       }
-      if(getSlavesList().size()!=1){
-        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
-      }
+//      if(getSlavesList().size()!=1){
+//        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
+//      }
       if(getHadoopUser()==null){
         throw new IllegalArgumentException("Hadoop user is not set.");
       }
@@ -470,6 +470,10 @@ public class MasterArgsReader {
 
   public long getFailOverTestDuration(){
     return getLong(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY, ConfigKeys.FAIL_OVER_TEST_DURATION_DEFAULT);
+  }
+
+  public String getNamenodeKillerHost(){
+    return getString(ConfigKeys.NAMENOE_KILLER_HOST_KEY, ConfigKeys.NAMENOE_KILLER_HOST_DEFAULT);
   }
 
   public List<String> getFailOverNameNodes(){

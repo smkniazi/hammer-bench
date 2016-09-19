@@ -51,8 +51,7 @@ public abstract class Aggregate {
   }
 
   public double getSpeed() {
-    return BenchmarkUtils.round(speed.getMax());
-//    return BenchmarkUtils.round(speed.getMin());
+    return BenchmarkUtils.round(speed.getMean());
   }
 
   public double getMaxSpeed() {

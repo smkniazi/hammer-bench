@@ -188,57 +188,57 @@ public class InterleavedBMResultsAggregator extends Aggregator {
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles, opsLatency.getMean());
 
 
-    // failover testing
-    if(args.testFailover()){
-      if(responses.size() != 1){
-        throw new UnsupportedOperationException("Currently we only support failover testing for one slave machine");
-      }
-
-      String prefix = args.getBenchMarkFileSystemName().toString();
-      if(args.getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS){
-        prefix+="-"+args.getNameNodeSelectorPolicy();
-      }
-
-      final String outputFolder = args.getResultsDir();
-      InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response)responses.iterator().next();
-
-
-      StringBuilder sb = new StringBuilder();
-      for(String data : response.getFailOverLog()){
-        sb.append(data).append("\n");
-      }
-
-      String datFile = prefix+"-failover.dat";
-      CompileResults.writeToFile(outputFolder+"/"+datFile, sb.toString(), false);
-
-      
-      StringBuilder plot = new StringBuilder("set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n");
-      plot.append( "set output '| ps2pdf - failover.pdf'\n");
-      plot.append( "#set size 1,0.75 \n ");
-      plot.append( "set ylabel \"ops/sec\" \n");
-      plot.append( "set xlabel \"Time (sec)\" \n");
-      plot.append( "set format y \"%.0s%c\"\n");
-      
-
-      StringBuilder sbx = new StringBuilder();
-      String oldPt = "";
-      for(String data : response.getFailOverLog()){
-
-        if(data.startsWith("#")) {
-          StringTokenizer st = new StringTokenizer(oldPt);
-          long time = Long.parseLong(st.nextToken());
-          long spd = Long.parseLong(st.nextToken());
-          sbx.append("set label 'NN-Restart' at "+time+","+spd+" rotate by 270").append("\n");
-        }
-        oldPt = data;
-      }
-      plot.append(sbx.toString());
-
-
-      plot.append( "plot '"+datFile+"' with linespoints ls 1");
-      CompileResults.writeToFile(outputFolder+"/"+prefix+"-failover.gnu", plot.toString(), false);
-      
-    }
+//    // failover testing
+//    if(args.testFailover()){
+//      if(responses.size() != 1){
+//        throw new UnsupportedOperationException("Currently we only support failover testing for one slave machine");
+//      }
+//
+//      String prefix = args.getBenchMarkFileSystemName().toString();
+//      if(args.getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS){
+//        prefix+="-"+args.getNameNodeSelectorPolicy();
+//      }
+//
+//      final String outputFolder = args.getResultsDir();
+//      InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response)responses.iterator().next();
+//
+//
+//      StringBuilder sb = new StringBuilder();
+//      for(String data : response.getFailOverLog()){
+//        sb.append(data).append("\n");
+//      }
+//
+//      String datFile = prefix+"-failover.dat";
+//      CompileResults.writeToFile(outputFolder+"/"+datFile, sb.toString(), false);
+//
+//
+//      StringBuilder plot = new StringBuilder("set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n");
+//      plot.append( "set output '| ps2pdf - failover.pdf'\n");
+//      plot.append( "#set size 1,0.75 \n ");
+//      plot.append( "set ylabel \"ops/sec\" \n");
+//      plot.append( "set xlabel \"Time (sec)\" \n");
+//      plot.append( "set format y \"%.0s%c\"\n");
+//
+//
+//      StringBuilder sbx = new StringBuilder();
+//      String oldPt = "";
+//      for(String data : response.getFailOverLog()){
+//
+//        if(data.startsWith("#")) {
+//          StringTokenizer st = new StringTokenizer(oldPt);
+//          long time = Long.parseLong(st.nextToken());
+//          long spd = Long.parseLong(st.nextToken());
+//          sbx.append("set label 'NN-Restart' at "+time+","+spd+" rotate by 270").append("\n");
+//        }
+//        oldPt = data;
+//      }
+//      plot.append(sbx.toString());
+//
+//
+//      plot.append( "plot '"+datFile+"' with linespoints ls 1");
+//      CompileResults.writeToFile(outputFolder+"/"+prefix+"-failover.gnu", plot.toString(), false);
+//
+//    }
 
     return result;
   }

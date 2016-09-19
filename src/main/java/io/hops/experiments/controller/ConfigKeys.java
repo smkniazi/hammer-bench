@@ -294,6 +294,9 @@ public class ConfigKeys {
     public static String NAMENOE_RESTART_COMMANDS= "failover.nn.restart.commands";
     public static String NAMENOE_RESTART_COMMANDS_DEFAULT = null;
 
+    public static String NAMENOE_KILLER_HOST_KEY= "namenode.killer";
+    public static String NAMENOE_KILLER_HOST_DEFAULT = null;
+
     public static final String MASTER_SLAVE_WARMUP_DELAY_KEY= "master.slave.warmup.delay";
     public static final int MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT = 0;
 }

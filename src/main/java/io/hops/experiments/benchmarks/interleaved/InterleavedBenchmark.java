@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -103,9 +105,13 @@ public class InterleavedBenchmark extends Benchmark {
         FailOverMonitor failOverTester = null;
         List<String> failOverLog = null;
         if (req.isTestFailover()) {
+            boolean canIKillNamenodes = InetAddress.getLocalHost().getHostName().compareTo(req.getNamenodeKillerHost()) == 0;
+            if(canIKillNamenodes){
+                Logger.printMsg("Responsible for killing/restarting namenodes");
+            }
             failOverTester = startFailoverTestDeamon(req.getNamenodeRestartCommands(),
                     req.getFailTestDuration(), req.getFailOverTestStartTime(),
-                    req.getNamenodeRestartTimePeriod());
+                    req.getNamenodeRestartTimePeriod(), canIKillNamenodes);
         }
 
         Logger.resetTimer();
@@ -255,8 +261,8 @@ public class InterleavedBenchmark extends Benchmark {
         return BenchmarkUtils.round(opsPerMSec * 1000);
     }
 
-    FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP) {
-        FailOverMonitor worker = new FailOverMonitor(commands, failoverTestDuration, failoverTestStartTime, namenodeRestartTP);
+    FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP, boolean canIKillNamenodes) {
+        FailOverMonitor worker = new FailOverMonitor(commands, failoverTestDuration, failoverTestStartTime, namenodeRestartTP, canIKillNamenodes);
         Thread t = new Thread(worker);
         t.start();
         return worker;
@@ -270,16 +276,18 @@ public class InterleavedBenchmark extends Benchmark {
         long namenodeRestartTP;
         long failoverTestDuration;
         long failoverStartTime;
+        boolean canIKillNNs;
 
         public FailOverMonitor(List<List<String>> commands,
                                long failoverTestDuration, long failoverTestStartTime,
-                               long namenodeRestartTP) {
+                               long namenodeRestartTP, boolean canIKillNNs) {
             this.allCommands = commands;
             this.namenodeRestartTP = namenodeRestartTP;
             this.stop = false;
             this.failoverStartTime = failoverTestStartTime;
             this.failoverTestDuration = failoverTestDuration;
             this.log = new LinkedList<String>();
+            this.canIKillNNs = canIKillNNs;
         }
 
         @Override
@@ -299,17 +307,20 @@ public class InterleavedBenchmark extends Benchmark {
                 }
 
                 log.add(tick + " " + speed);
-                Logger.printMsg("Time: " + tick + " sec. Speed:" + speed + " ops p/s");
+                Logger.printMsg("Time: " + tick + " sec. Speed: " + speed);
 
 
-                if (((System.currentTimeMillis() - startTime) > failoverStartTime)) {
-                    if ((startTime + failoverStartTime + failoverTestDuration) > System.currentTimeMillis()) {
-                        if (System.currentTimeMillis() - lastFailOver > namenodeRestartTP) {
-                            int index = (rrIndex++) % allCommands.size();
-                            List<String> nnCommands = allCommands.get(index);
-                            new Thread(new FailOverCommandExecutor(nnCommands)).start();
-                            lastFailOver = System.currentTimeMillis();
-                            log.add("#NameNode Restart Initiated");
+                if (canIKillNNs) {
+                    if (((System.currentTimeMillis() - startTime) > failoverStartTime)) {
+                        if ((startTime + failoverStartTime + failoverTestDuration) > System.currentTimeMillis()) {
+                            if (System.currentTimeMillis() - lastFailOver > namenodeRestartTP) {
+                                int index = (rrIndex++) % allCommands.size();
+                                List<String> nnCommands = allCommands.get(index);
+                                new Thread(new FailOverCommandExecutor(nnCommands)).start();
+                                lastFailOver = System.currentTimeMillis();
+                                log.add("#NameNode Restart Initiated");
+                                Logger.printMsg("#NameNode Restart Initiated");
+                            }
                         }
                     }
                 }
@@ -360,7 +371,6 @@ class FailOverCommandExecutor implements Runnable {
             if (command.contains("kill")) { //[s] for some reason NameNode does not start soon after it is killed. TODO: fix it
                 Thread.sleep(1000);
             }
-            Logger.printMsg("Command Executed");
         } catch (IOException e) {
             e.printStackTrace();
             Logger.printMsg("Exception During Restarting the NameNode Command " + command + "   Ex: " + e.toString());

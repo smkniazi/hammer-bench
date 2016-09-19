@@ -88,7 +88,7 @@ public class Master {
 
       removeExistingResultsFiles();
       
-      startRemoteLogger();
+      startRemoteLogger(args.getSlavesList().size());
 
       connectSlaves();
 
@@ -110,8 +110,8 @@ public class Master {
     }
   }
 
-  private void startRemoteLogger() {
-    Logger.LogListener listener = new Logger.LogListener(args.getRemoteLogginPort());
+  private void startRemoteLogger(int maxSlaves) {
+    Logger.LogListener listener = new Logger.LogListener(args.getRemoteLogginPort(),maxSlaves);
     Thread thread = new Thread(listener);
     thread.start();
     System.out.println("Logger started.");
@@ -285,7 +285,7 @@ public class Master {
             args.getInterleavedBmDuration(), args.getFileSize(), args.getAppendFileSize(),
             args.getReplicationFactor(), args.getBaseDir(), args.isPercentileEnabled(),
             args.testFailover(), args.getNameNodeRestartCommands(), args.getNameNodeRestartTimePeriod(),
-            args.getFailOverTestDuration(), args.getFailOverTestStartTime());
+            args.getFailOverTestDuration(), args.getFailOverTestStartTime(), args.getNamenodeKillerHost());
     sendToAllSlaves(request, 0/*delay*/);
 
     Thread.sleep(args.getInterleavedBmDuration());
@@ -481,7 +481,7 @@ public class Master {
     System.out.print((char) 27 + "[0m");
   }
 
-  private void blueColoredText(String msg) {
+  public static void blueColoredText(String msg) {
     System.out.println((char) 27 + "[36m" + msg);
     System.out.print((char) 27 + "[0m");
   }

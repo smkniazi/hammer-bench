@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +72,7 @@ public class CalculatePercentiles {
     }
     System.out.println("Starting to process raw data ");
     processResponses(responses, dst , prefix );
+    System.exit(0);
   }
 
   private void processResponses(List<InterleavedBenchmarkCommand.Response> responses, String path, String workloadName) throws IOException, InterruptedException {
@@ -78,7 +81,9 @@ public class CalculatePercentiles {
     toProcess.add(BenchmarkOperations.CREATE_FILE);
     toProcess.add(BenchmarkOperations.READ_FILE);
     toProcess.add(BenchmarkOperations.LS_DIR);
+    toProcess.add(BenchmarkOperations.LS_FILE);
     toProcess.add(BenchmarkOperations.DIR_INFO);
+    toProcess.add(BenchmarkOperations.FILE_INFO);
 
     //gather data for calculating percentiles
     Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimesList = new HashMap<BenchmarkOperations, ArrayList<Long>>();
@@ -104,16 +109,23 @@ public class CalculatePercentiles {
         System.out.println("\n\nProcessing ...  " + opType);
         ArrayList<Long> opAllExeTimes = allOpsExecutionTimesList.get(opType);
         double[] toDouble = Doubles.toArray(opAllExeTimes);
-        double delta = 1;
-        int rows = (int) Math.ceil((double) (100) / delta);
-        double[][] percentile = new double[rows][2];
-        int index = 0;
         List workers = new ArrayList<CalcPercentiles>();
         Map<Double,Double> percentileMap = new ConcurrentHashMap<Double,Double>();
-        for (double percen = delta; percen <= 100.0; percen += delta, index++) {
+
+        for (double percen = 10; percen <= 90.0; percen += 10) {
           workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
         }
-        
+
+        for (double percen = 91; percen <= 99; percen += 1) {
+          workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
+        }
+
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99));
+
+        for (double percen = 99.1; percen <= 100.0; percen += 0.1) {
+          workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
+        }
+
         executor.invokeAll(workers); //block untill all points are calculated
 
         allOpsPercentiles.put(opType, percentileMap);
@@ -140,7 +152,8 @@ public class CalculatePercentiles {
        double value = p.evaluate(data, point);
        if(values.get(point) == null){
          values.put(point, value);
-         System.out.println(" Percentile " + point + " Value: " + value);
+         NumberFormat formatter = new DecimalFormat("#0.0");
+         System.out.println(" Percentile " + formatter.format(point) + " Value: " + formatter.format(value)+" ns "+formatter.format(value/1000000.0)+" ms ");
        }else{
          throw new IllegalStateException("Dont calculate same data point twice");
        }
@@ -162,6 +175,7 @@ public class CalculatePercentiles {
     gnuplotFileTxt.append("#set yrange [0:1]\n\n\n");
     gnuplotFileTxt.append("plot ");
 
+    NumberFormat formatter = new DecimalFormat("#0.0");
     StringBuilder dataFile = null;
     for (BenchmarkOperations opType : allOpsPercentiles.keySet()) {
       dataFile = new StringBuilder();
@@ -171,13 +185,18 @@ public class CalculatePercentiles {
       SortedSet<Double> sortedKeys = new TreeSet<Double>();
       sortedKeys.addAll(percentileMap.keySet());
       
-      dataFile.append("0 0\n");
-      
+      dataFile.append("#mano-sec micro-sec milli-sec key\n");
+      dataFile.append("0 0 0 0\n");
+
       for(Double key: sortedKeys){
         Double value = percentileMap.get(key);
-        dataFile.append(value);
+        dataFile.append(formatter.format(key));
         dataFile.append(" ");
-        dataFile.append(key);
+        dataFile.append(formatter.format(value));
+        dataFile.append(" ");
+        dataFile.append(formatter.format(value/1000)); // micro
+        dataFile.append(" ");
+        dataFile.append(formatter.format(value/1000000)); // ms
         dataFile.append("\n");
       }
       
@@ -186,7 +205,7 @@ public class CalculatePercentiles {
       gnuplotFileTxt.append(" \"").append(filesPrefix).append("-").append(opType).append(".dat").append("\" ");
       String title = opType.toString();
       title = title.replace("_", " ");
-      gnuplotFileTxt.append(" using 1:2 title ").append("\"").append(title).append("\"");
+      gnuplotFileTxt.append(" using 4:1 title ").append("\"").append(title).append("\"");
       gnuplotFileTxt.append(" with lines  , \\\n");
     }
 

@@ -59,6 +59,7 @@ public class InterleavedBenchmarkCommand {
         private long namenodeRestartTimePeriod;
         private long failTestDuration;
         private long failOverTestStartTime;
+        private String namenodeKillerHost;
 
 
         public Request(BigDecimal createPercent, BigDecimal appendPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent, BigDecimal lsDirPercent,
@@ -67,7 +68,8 @@ public class InterleavedBenchmarkCommand {
                        BigDecimal fileChownPercent, BigDecimal dirChownPercent,
                        long duration, long fileSize, long appendSize, short replicationFactor, String baseDir,
                        boolean percentileEnabled, boolean testFailover, List<List<String>> namenodeRestartCommands,
-                       long namenodeRestartTimePeriod, long failTestDuration, long failOverTestStartTime) {
+                       long namenodeRestartTimePeriod, long failTestDuration, long failOverTestStartTime,
+                       String namenodeKillerHost) {
             this.createPercent = createPercent;
             this.appendPercent = appendPercent;
             this.readPercent = readPercent;
@@ -94,6 +96,7 @@ public class InterleavedBenchmarkCommand {
             this.namenodeRestartTimePeriod = namenodeRestartTimePeriod;
             this.failOverTestStartTime = failOverTestStartTime;
             this.failTestDuration = failTestDuration;
+            this.namenodeKillerHost = namenodeKillerHost;
         }
 
         public long getFailTestDuration() {
@@ -198,6 +201,10 @@ public class InterleavedBenchmarkCommand {
 
         public long getNamenodeRestartTimePeriod() {
             return namenodeRestartTimePeriod;
+        }
+
+        public String getNamenodeKillerHost(){
+            return namenodeKillerHost;
         }
 
         @Override

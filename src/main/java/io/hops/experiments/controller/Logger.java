@@ -25,6 +25,10 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -117,9 +121,12 @@ public class Logger {
 
     private int port;
     private boolean running = true;
+    private Map<String, Double> speedMap = new HashMap<String, Double>();
+    private final int maxSlaves;
 
-    public LogListener(int port) {
+    public LogListener(int port, int maxSlaves) {
       this.port = port;
+      this.maxSlaves = maxSlaves;
     }
 
     @Override
@@ -140,6 +147,7 @@ public class Logger {
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
           System.out.println(BenchmarkUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          continuousAggSpeed(recvPacket.getAddress().getHostName(), msg);
           is.close();
           in.close();
           recvPacket = null;
@@ -150,6 +158,26 @@ public class Logger {
         }
       }
     }
+
+    public synchronized void continuousAggSpeed(String address, String msg){
+      String token = "Speed: ";
+      if(msg.contains(token)){
+        int index = msg.lastIndexOf(token);
+        String speedStr = msg.substring(index+token.length());
+        Double speed = Double.parseDouble(speedStr);
+        speedMap.put(address, speed);
+      }
+
+      if(speedMap.size() == maxSlaves ){
+        double aggSpeed = 0;
+        for(Double speed: speedMap.values()){
+          aggSpeed += speed;
+        }
+        Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
+        speedMap.clear();
+      }
+
+ }
 
     public void stop() {
       this.running = false;
