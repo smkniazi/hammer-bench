@@ -249,7 +249,10 @@ public class ConfigKeys {
     
     public static String FS_DEFAULTFS_KEY = "fs.defaultFS";
     public static String FS_DEFAULTFS_DEFAULT = "";
-    
+
+    public static String DFS_NAMESERVICES = "dfs.nameservices";
+    public static String DFS_NAMESERVICES_DEFAULT = "mycluster";
+
     public static String DFS_NAMENODE_SELECTOR_POLICY_KEY="dfs.namenode.selector-policy";
     public static String DFS_NAMENODE_SELECTOR_POLICY_DEFAULT="RANDOM_STICKY";
     

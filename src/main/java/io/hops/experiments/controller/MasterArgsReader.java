@@ -531,18 +531,20 @@ public class MasterArgsReader {
     return commandsPerNN;
   }
 
-
+  public String getDfsNameService(){
+    return getString(ConfigKeys.DFS_NAMESERVICES, ConfigKeys.DFS_NAMESERVICES_DEFAULT);
+  }
 
   public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
     dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
     if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS) {
       System.out.println("Creating config for HDFS");
-      dfsClientConf.setProperty("dfs.ha.namenodes.mycluster",props.getProperty("dfs.ha.namenodes.mycluster"));
+      dfsClientConf.setProperty("dfs.ha.namenodes."+getDfsNameService(),props.getProperty("dfs.ha.namenodes."+getDfsNameService()));
       dfsClientConf.setProperty("dfs.nameservices",props.getProperty("dfs.nameservices"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn1",props.getProperty("dfs.namenode.rpc-address.mycluster.nn1"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address.mycluster.nn2",props.getProperty("dfs.namenode.rpc-address.mycluster.nn2"));
-      dfsClientConf.setProperty("dfs.client.failover.proxy.provider.mycluster",props.getProperty("dfs.client.failover.proxy.provider.mycluster"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1"));
+      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2"));
+      dfsClientConf.setProperty("dfs.client.failover.proxy.provider."+getDfsNameService(),props.getProperty("dfs.client.failover.proxy.provider."+getDfsNameService()));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
       dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
