@@ -167,12 +167,14 @@ public class TinyDatanodes {
       // create files
 //      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
 //              + blocksPerFile + " blocks each.");
-      String base ="";
+      String clientDir ="";
       if(!baseDir.trim().endsWith("/")){
-        base =  baseDir+File.separator;
+        clientDir =  baseDir+File.separator;
+      }else{
+        clientDir = baseDir;
       }
-      base = base + machineName+"_"+id+File.separator+id;
-      FileNameGenerator nameGenerator = new FileNameGenerator(base, filesPerDirectory);
+      clientDir = clientDir + machineName+"_"+id+File.separator+id;
+      FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
       String clientName = getClientName(id);
 
       for (int idx = 0; idx < nrFiles; idx++) {
