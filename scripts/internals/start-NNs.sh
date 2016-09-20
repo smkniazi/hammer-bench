@@ -15,5 +15,6 @@ All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 echo "Starting NN on ${All_Unique_Hosts[*]}"
 $PSSH -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/sbin/hadoop-daemon.sh --script hdfs start namenode
 
+$PSSH -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/hop_conf/scripts/set-nn-cpu-affinity.sh                                                                                                                     
 
 
