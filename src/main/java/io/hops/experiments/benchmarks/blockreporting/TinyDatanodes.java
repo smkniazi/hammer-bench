@@ -124,7 +124,7 @@ public class TinyDatanodes {
           Exception {
     filesCreated = new AtomicLong(0);
     filesToCreate = nrFiles;
-    int fileCreationThreads = nrDatanodes * 100;
+    int fileCreationThreads = nrDatanodes * 30;
 
     Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
             + blocksPerFile + " blocks.");
@@ -167,8 +167,11 @@ public class TinyDatanodes {
       // create files
 //      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
 //              + blocksPerFile + " blocks each.");
-      String base = (baseDir.trim().endsWith("/")?baseDir.trim():baseDir.trim()+File.separator)
-          +machineName+"_"+id+File.separator+id;
+      String base ="";
+      if(!baseDir.trim().endsWith("/")){
+        base =  baseDir+File.separator;
+      }
+      base = base + machineName+"_"+id+File.separator+id;
       FileNameGenerator nameGenerator = new FileNameGenerator(base, filesPerDirectory);
       String clientName = getClientName(id);
 
