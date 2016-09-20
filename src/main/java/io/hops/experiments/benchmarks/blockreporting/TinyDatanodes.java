@@ -171,15 +171,18 @@ public class TinyDatanodes {
       String clientName = getClientName(id);
 
       for (int idx = 0; idx < nrFiles; idx++) {
-        String fileName = nameGenerator.getNextFileName("br");
-        nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
-                new EnumSetWritable<CreateFlag>(
-                EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true,
-                replication, blockSize);
-        ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
-        nameNodeProto.complete(fileName, clientName, lastBlock);
-        filesCreated.incrementAndGet();
-        log();
+        try {
+          String fileName = nameGenerator.getNextFileName("br");
+          nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
+              new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true, replication,
+              blockSize);
+          ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
+          nameNodeProto.complete(fileName, clientName, lastBlock);
+          filesCreated.incrementAndGet();
+          log();
+        } catch (Exception e){
+          Logger.error(e);
+        }
       }
       return null;
     }
