@@ -25,6 +25,7 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
+import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
@@ -102,20 +103,26 @@ public class TinyDatanode implements Comparable<String> {
     nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
         new DatanodeID(DNS.getDefaultIP("default"),
-            DNS.getDefaultHost("default", "default"), "", getNodePort(dnIdx),
+            DNS.getDefaultHost("default", "default"),
+                DataNode.generateUuid(), getNodePort(dnIdx),
             DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
+            DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
             DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
-        new DataStorage(nsInfo, ""), new ExportedBlockKeys(),
+        new DataStorage(nsInfo), new ExportedBlockKeys(),
         VersionInfo.getVersion());
-    dnRegistration.setStorageID(createNewStorageId(dnRegistration.getXferPort(), dnIdx));
+    //dnRegistration.setStorageID(createNewStorageId(dnRegistration.getXferPort(), dnIdx));
     // register datanode
     for(BlockReportingNameNodeHandle nn : namenodes) {
       dnRegistration = nn.getDataNodeRPC().registerDatanode(dnRegistration);
     }
     //first block reports
-    storage = new DatanodeStorage(dnRegistration.getStorageID());
+    storage = new DatanodeStorage(DatanodeStorage.generateUuid());
+    final StorageBlockReport[] reports = {
+            new StorageBlockReport(storage,
+                    new BlockListAsLongs(null, null).getBlockListAsLongs())
+    };
     if(!isDataNodePopulated) {
-      firstBlockReport(new BlockListAsLongs(null, null).getBlockListAsLongs());
+      firstBlockReport(reports);
     }
   }
 
@@ -126,15 +133,13 @@ public class TinyDatanode implements Comparable<String> {
   void sendHeartbeat() throws Exception {
     // register datanode
     // TODO:FEDERATION currently a single block pool is supported
-    StorageReport[] rep =
-        {new StorageReport(dnRegistration.getStorageID(), false, DF_CAPACITY,
-            DF_USED, DF_CAPACITY - DF_USED, DF_USED)};
-
+    StorageReport[] rep = { new StorageReport(storage, false,
+            DF_CAPACITY, DF_USED, DF_CAPACITY - DF_USED, DF_USED) };
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
         .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes) {
-      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep, 0, 0, 0)
-              .getCommands();
+      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep,
+              0L, 0L, 0, 0, 0).getCommands();
       if (cmds != null) {
         for (DatanodeCommand cmd : cmds) {
           if (LOG.isDebugEnabled()) {
@@ -162,47 +167,43 @@ public class TinyDatanode implements Comparable<String> {
     for (int idx = blocks.size() - 1; idx >= nrBlocks; idx--) {
       blocks.set(idx, new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0));
     }
-    blockReportList =
-        new BlockListAsLongs(blocks, null).getBlockListAsLongs();
 
+    blockReportList = new BlockListAsLongs(blocks, null).getBlockListAsLongs();
 
     //first block report
-    if(isDataNodePopulated){
-      firstBlockReport(blockReportList);
-    }
+//    if(isDataNodePopulated){
+//      firstBlockReport(reports);
+//    }
     
     Logger.printMsg("Datanode # "+this.dnIdx+" has generated a block report of size "+blocks.size());
   }
 
   long[] blockReport() throws Exception {
-    return blockReport(blockReportList);
-  }
 
-  private long[] blockReport(long[] blocksReport) throws Exception {
+    final StorageBlockReport[] reports = {
+            new StorageBlockReport(storage, blockReportList)
+    };
+
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
         .getNameNodeToReportTo();
 
     long start = Time.now();
-    blockReport(nameNodeToReportTo, blocksReport);
+    blockReport(nameNodeToReportTo, reports);
     long end = Time.now();
     return new long[]{start - start1,  end - start};
   }
 
-  private void firstBlockReport(long[] blocksReport) throws Exception {
+  private void firstBlockReport(StorageBlockReport[] reports) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
         .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes){
-      blockReport(nn.getDataNodeRPC(), blocksReport);
+      blockReport(nn.getDataNodeRPC(), reports);
     }
   }
 
-  private void blockReport(DatanodeProtocol nameNodeToReportTo, long[]
-      blocksReport) throws IOException {
-    StorageBlockReport[] report =
-        {new StorageBlockReport(storage, blocksReport)};
-    nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),
-        report);
+  private void blockReport(DatanodeProtocol nameNodeToReportTo, StorageBlockReport[] reports) throws IOException {
+    nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),reports);
   }
 
   @Override
