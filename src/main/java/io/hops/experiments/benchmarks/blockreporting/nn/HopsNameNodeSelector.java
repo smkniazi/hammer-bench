@@ -180,7 +180,7 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
 
       Class dpClass = datanodeProto.getClass();
       Class paramTypes[] = new Class<?>[1];
-      paramTypes[0] = Long.class;
+      paramTypes[0] = Long.TYPE;
       Method method = dpClass.getMethod("getNextNamenodeToSendBlockReport",paramTypes);
       Object args[] = new Object[1];
       args[0] =  blocksCount;
