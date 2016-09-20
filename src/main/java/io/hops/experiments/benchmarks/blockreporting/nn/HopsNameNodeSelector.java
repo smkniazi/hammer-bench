@@ -173,13 +173,18 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
       return getHandle(address);
     }
 
-    public BlockReportingNameNodeHandle getNameNodeToReportTo() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+    public BlockReportingNameNodeHandle getNameNodeToReportTo(long blocksCount) throws NoSuchMethodException,
+        IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
       BlockReportingNameNodeHandle leaderHandle =  getLeader();
       DatanodeProtocol datanodeProto = leaderHandle.getDataNodeRPC();
 
       Class dpClass = datanodeProto.getClass();
-      Method method = dpClass.getMethod("getNextNamenodeToSendBlockReport");
-      Object ann = method.invoke(datanodeProto);
+      Class paramTypes[] = new Class<?>[1];
+      paramTypes[0] = Long.class;
+      Method method = dpClass.getMethod("getNextNamenodeToSendBlockReport",paramTypes);
+      Object args[] = new Object[1];
+      args[0] =  blocksCount;
+      Object ann = method.invoke(datanodeProto, args);
       InetSocketAddress address = getAnnIp(ann);
       System.out.println("Sending BlockReport to "+address);
       return getHandle(address);
@@ -204,9 +209,9 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
   }
 
   @Override
-  public DatanodeProtocol getNameNodeToReportTo() throws Exception {
+  public DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws Exception {
 
-    BlockReportingNameNodeHandle handle = hopsNameNodesHandles.getNameNodeToReportTo();
+    BlockReportingNameNodeHandle handle = hopsNameNodesHandles.getNameNodeToReportTo(blocksCount);
 
     String nnip = handle.getHostName();
     synchronized (stats) {

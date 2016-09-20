@@ -181,7 +181,7 @@ public class TinyDatanode implements Comparable<String> {
   private long[] blockReport(long[] blocksReport) throws Exception {
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
-        .getNameNodeToReportTo();
+        .getNameNodeToReportTo(blocksReport.length);
 
     long start = Time.now();
     blockReport(nameNodeToReportTo, blocksReport);

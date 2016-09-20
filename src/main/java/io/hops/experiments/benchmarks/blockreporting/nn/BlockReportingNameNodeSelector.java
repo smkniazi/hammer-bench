@@ -38,7 +38,7 @@ public interface BlockReportingNameNodeSelector {
 
   BlockReportingNameNodeHandle getLeader() throws Exception;
 
-  DatanodeProtocol getNameNodeToReportTo() throws Exception;
+  DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws Exception;
 
   List<BlockReportingNameNodeHandle> getNameNodes() throws Exception;
 
