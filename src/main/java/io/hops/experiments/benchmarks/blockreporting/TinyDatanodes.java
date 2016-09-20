@@ -124,7 +124,7 @@ public class TinyDatanodes {
           Exception {
     filesCreated = new AtomicLong(0);
     filesToCreate = nrFiles;
-    int fileCreationThreads = nrDatanodes * 30;
+    int fileCreationThreads = nrDatanodes * 100;
 
     Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
             + blocksPerFile + " blocks.");
@@ -165,9 +165,11 @@ public class TinyDatanodes {
     @Override
     public Object call() throws Exception {
       // create files
-      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
-              + blocksPerFile + " blocks each.");
-      FileNameGenerator nameGenerator = new FileNameGenerator(baseDir + File.separator + machineName + File.separator + id, filesPerDirectory);
+//      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
+//              + blocksPerFile + " blocks each.");
+      String base = (baseDir.trim().endsWith("/")?baseDir.trim():baseDir.trim()+File.separator)
+          +machineName+"_"+id+File.separator+id;
+      FileNameGenerator nameGenerator = new FileNameGenerator(base, filesPerDirectory);
       String clientName = getClientName(id);
 
       for (int idx = 0; idx < nrFiles; idx++) {
