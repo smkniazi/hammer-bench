@@ -160,23 +160,25 @@ public class Logger {
     }
 
     public synchronized void continuousAggSpeed(String address, String msg){
-      String token = "Speed: ";
-      if(msg.contains(token)){
-        int index = msg.lastIndexOf(token);
-        String speedStr = msg.substring(index+token.length());
-        Double speed = Double.parseDouble(speedStr);
-        speedMap.put(address, speed);
-      }
-
-      if(speedMap.size() == maxSlaves ){
-        double aggSpeed = 0;
-        for(Double speed: speedMap.values()){
-          aggSpeed += speed;
+      try{
+        String token = "Speed: ";
+        if(msg.contains(token)){
+          int index = msg.lastIndexOf(token);
+          String speedStr = msg.substring(index+token.length());
+          Double speed = Double.parseDouble(speedStr);
+          speedMap.put(address, speed);
         }
-        Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
-        speedMap.clear();
-      }
 
+        if(speedMap.size() == maxSlaves ){
+          double aggSpeed = 0;
+          for(Double speed: speedMap.values()){
+            aggSpeed += speed;
+          }
+          Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
+          speedMap.clear();
+        }
+      }catch(NumberFormatException e){
+      }
  }
 
     public void stop() {

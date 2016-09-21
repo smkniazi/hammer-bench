@@ -124,7 +124,7 @@ public class TinyDatanodes {
           Exception {
     filesCreated = new AtomicLong(0);
     filesToCreate = nrFiles;
-    int fileCreationThreads = nrDatanodes * 30;
+    int fileCreationThreads = nrDatanodes * 100;
 
     Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
             + blocksPerFile + " blocks.");
@@ -194,6 +194,10 @@ public class TinyDatanodes {
       return null;
     }
 
+    private String getClientName(int idx) {
+      return "blockreporting-client-" + machineName + "_" + idx;
+    }
+
     private void log() {
       if (Logger.canILog()) {
         double percent = ((double)filesCreated.get() / (double)filesToCreate) * 100;
@@ -209,19 +213,24 @@ public class TinyDatanodes {
           throws IOException, SQLException {
     ExtendedBlock prevBlock = null;
     for (int jdx = 0; jdx < blocksPerFile; jdx++) {
-      LocatedBlock loc =
-              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
-      prevBlock = loc.getBlock();
-      for (DatanodeInfo dnInfo : loc.getLocations()) {
-        int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
-        datanodes[dnIdx].addBlock(loc.getBlock().getLocalBlock());
-        ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
-          ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
-        StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
-          datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
-        datanodeProto.blockReceivedAndDeleted(
-                datanodes[dnIdx].dnRegistration,
-                loc.getBlock().getBlockPoolId(), report);
+      LocatedBlock loc = null;
+      try {
+        loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
+        prevBlock = loc.getBlock();
+        for (DatanodeInfo dnInfo : loc.getLocations()) {
+          int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
+          datanodes[dnIdx].addBlock(loc.getBlock().getLocalBlock());
+          ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
+                  ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
+          StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
+                  datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
+          datanodeProto.blockReceivedAndDeleted(
+                  datanodes[dnIdx].dnRegistration,
+                  loc.getBlock().getBlockPoolId(), report);
+        }
+      }catch (IndexOutOfBoundsException e){
+        System.out.println("Located block "+Arrays.toString(loc.getLocations()));
+        System.out.println("Excluded Nodes are "+Arrays.toString(helper.getExcludedDatanodes()));
       }
     }
     return prevBlock;
@@ -234,9 +243,7 @@ public class TinyDatanodes {
     return dn.blockReport();
   }
 
-  private String getClientName(int idx) {
-    return "blockreporting-client-" + machineName + "_" + idx;
-  }
+
 
   void printStats() throws IOException {
     Logger.printMsg("Reports " + nameNodeSelector.getReportsStats().toString());
