@@ -27,6 +27,7 @@ import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
+import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
@@ -60,9 +61,8 @@ public class TinyDatanode implements Comparable<String> {
   NamespaceInfo nsInfo;
   DatanodeRegistration dnRegistration;
   DatanodeStorage storage; //only one storage
-  ArrayList<Block> blocks;
+  ArrayList<BlockListAsLongs.BlockReportReplica> blocks;
   int nrBlocks; // actual number of blocks
-  long[] blockReportList;
   int dnIdx;
 
   /**
@@ -81,8 +81,8 @@ public class TinyDatanode implements Comparable<String> {
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int
       blockCapacity) throws IOException {
     this.dnIdx = dnIdx;
-    this.blocks = new ArrayList<Block>(
-        Collections.nCopies(blockCapacity, (Block) null));
+    this.blocks = new ArrayList<BlockListAsLongs.BlockReportReplica>(
+        Collections.nCopies(blockCapacity, (BlockListAsLongs.BlockReportReplica) null));
     this.nrBlocks = 0;
     this.nameNodeSelector = nameNodeSelector;
   }
@@ -118,8 +118,7 @@ public class TinyDatanode implements Comparable<String> {
     //first block reports
     storage = new DatanodeStorage(DatanodeStorage.generateUuid());
     final StorageBlockReport[] reports = {
-            new StorageBlockReport(storage,
-                    new BlockListAsLongs(null, null).getBlockListAsLongs())
+            new StorageBlockReport(storage, BlockListAsLongs.EMPTY)
     };
     if(!isDataNodePopulated) {
       firstBlockReport(reports);
@@ -139,7 +138,7 @@ public class TinyDatanode implements Comparable<String> {
         .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes) {
       DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep,
-              0L, 0L, 0, 0, 0).getCommands();
+              0L, 0L, 0, 0, 0, null).getCommands();
       if (cmds != null) {
         for (DatanodeCommand cmd : cmds) {
           if (LOG.isDebugEnabled()) {
@@ -157,7 +156,7 @@ public class TinyDatanode implements Comparable<String> {
       }
       return false;
     }
-    blocks.set(nrBlocks, blk);
+    blocks.set(nrBlocks, new BlockListAsLongs.BlockReportReplica(blk));
     nrBlocks++;
     return true;
   }
@@ -165,10 +164,9 @@ public class TinyDatanode implements Comparable<String> {
   void formBlockReport(boolean isDataNodePopulated) throws Exception {
     // fill remaining slots with blocks that do not exist
     for (int idx = blocks.size() - 1; idx >= nrBlocks; idx--) {
-      blocks.set(idx, new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0));
+      blocks.set(idx, new BlockListAsLongs.BlockReportReplica(new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0)));
     }
 
-    blockReportList = new BlockListAsLongs(blocks, null).getBlockListAsLongs();
 
     //first block report
 //    if(isDataNodePopulated){
@@ -181,7 +179,7 @@ public class TinyDatanode implements Comparable<String> {
   long[] blockReport() throws Exception {
 
     final StorageBlockReport[] reports = {
-            new StorageBlockReport(storage, blockReportList)
+            new StorageBlockReport(storage, BlockListAsLongs.encode(blocks))
     };
 
     long start1 = Time.now();
@@ -203,7 +201,8 @@ public class TinyDatanode implements Comparable<String> {
   }
 
   private void blockReport(DatanodeProtocol nameNodeToReportTo, StorageBlockReport[] reports) throws IOException {
-    nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),reports);
+    nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),
+        reports, new BlockReportContext(1, 0, System.nanoTime()));
   }
 
   @Override

@@ -177,7 +177,7 @@ public class TinyDatanodes {
         nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
                 new EnumSetWritable<CreateFlag>(
                 EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true,
-                replication, blockSize);
+                replication, blockSize, null);
         ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
           nameNodeProto.complete(fileName, clientName, lastBlock, 0);
         filesCreated.incrementAndGet();
