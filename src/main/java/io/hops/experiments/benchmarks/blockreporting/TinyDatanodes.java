@@ -229,6 +229,7 @@ public class TinyDatanodes {
                   loc.getBlock().getBlockPoolId(), report);
         }
       }catch (IndexOutOfBoundsException e){
+        System.out.println(e);
         System.out.println("Located block "+Arrays.toString(loc.getLocations()));
         System.out.println("Excluded Nodes are "+Arrays.toString(helper.getExcludedDatanodes()));
       }
