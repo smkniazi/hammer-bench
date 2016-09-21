@@ -141,6 +141,7 @@ public class BlockReportingBenchmark extends Benchmark {
           }
         } catch (Exception e) {
           failedOps.incrementAndGet();
+          System.out.println(e);
           Logger.error(e);
         }
       }
