@@ -14,7 +14,7 @@ All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
 
-if [ ${#errors[@]} -eq 0 ]; then
+if [ ${#DNS_FullList[@]} -eq 0 ]; then
     echo "No datanodes to stop"
 else
     echo "Starting DNs on ${All_Unique_Hosts[*]}"

@@ -13,10 +13,10 @@ All_Unique_Hosts=$(echo "${All_Hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
 
-if [ ${#errors[@]} -eq 0 ]; then
+if [ ${#DNS_FullList[@]} -eq 0 ]; then
     echo "No datanodes to start "
 else
     echo "Starting DNs on ${All_Unique_Hosts[*]}"
-    $PSSH -ssh -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/sbin/hadoop-daemon.sh --script hdfs start datanode 
+    $PSSH -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/sbin/hadoop-daemon.sh --script hdfs start datanode 
 fi
 

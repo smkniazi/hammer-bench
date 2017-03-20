@@ -24,7 +24,7 @@ HopsFS_Src_Folder=../
 HopsFS_Experiments_Remote_Dist_Folder=/tmp/hops-benchmark-jars
 HopsFS_Rebuild_Exp_Src=false
 HopsFS_Upload_Exp=true
-CPU_AFFINITY=21-23
+CPU_AFFINITY=1-23
 
 #Machines
 DNS_FullList=(`cat datanodes`) 

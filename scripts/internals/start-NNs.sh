@@ -18,3 +18,4 @@ $PSSH -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folde
 $PSSH -H "${All_Unique_Hosts[*]}"  -l $HopsFS_User -i  $HopsFS_Remote_Dist_Folder/hop_conf/scripts/set-nn-cpu-affinity.sh                                                                                                                     
 
 
+
