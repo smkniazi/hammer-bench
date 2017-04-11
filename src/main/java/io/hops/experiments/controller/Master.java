@@ -44,6 +44,7 @@ import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import io.hops.experiments.controller.config.ConfigKeys;
 import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.results.compiler.InterleavedBMResultsAggregator;
 import io.hops.experiments.results.compiler.RawBMResultAggregator;
@@ -440,7 +441,7 @@ public class Master {
     if(!filePath.endsWith("/")){
       filePath += "/";
     }
-    filePath += Configuration.ConfigKeys.BINARY_RESULT_FILE_NAME;
+    filePath += ConfigKeys.BINARY_RESULT_FILE_NAME;
     printMasterLogMessages("Writing results to "+filePath);
     FileOutputStream fout = new FileOutputStream(filePath);
     ObjectOutputStream oos = new ObjectOutputStream(fout);
@@ -454,7 +455,7 @@ public class Master {
     if(!filePath.endsWith("/")){
       filePath += "/";
     }
-    filePath += Configuration.ConfigKeys.TEXT_RESULT_FILE_NAME;
+    filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
     printMasterLogMessages("Writing results to "+filePath);
     FileWriter out = new FileWriter(filePath, false);
     for (BMResult result : results) {
@@ -482,7 +483,7 @@ public class Master {
     if(!filePath.endsWith("/")){
       filePath += "/";
     }
-    filePath += Configuration.ConfigKeys.TEXT_RESULT_FILE_NAME;
+    filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
     
     printMasterLogMessages("Reading results from "+filePath);
     BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -513,7 +514,7 @@ public class Master {
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
           printMasterLogMessages("SEND " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
-          socket.setSendBufferSize(Configuration.ConfigKeys.BUFFER_SIZE);
+          socket.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
           ObjectOutputStream sendToSlave = new ObjectOutputStream(socket.getOutputStream());
           sendToSlave.writeObject(obj);
         } catch (Exception e) {
@@ -528,7 +529,7 @@ public class Master {
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
           socket.setSoTimeout(timeout);
-          socket.setReceiveBufferSize(Configuration.ConfigKeys.BUFFER_SIZE);
+          socket.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
           ObjectInputStream recvFromSlave = new ObjectInputStream(socket.getInputStream());
           Object obj = recvFromSlave.readObject();
           printMasterLogMessages("RECVD " + obj.getClass().getCanonicalName() + " from " + socket.getInetAddress());

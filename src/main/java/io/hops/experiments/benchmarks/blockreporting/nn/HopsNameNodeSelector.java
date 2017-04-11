@@ -17,6 +17,7 @@
 package io.hops.experiments.benchmarks.blockreporting.nn;
 
 import com.google.common.collect.Maps;
+import io.hops.experiments.controller.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
@@ -142,7 +143,7 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
     private BlockReportingNameNodeHandle getHandle(InetSocketAddress address) throws IOException {
       if (!protocolsMap.containsKey(address)) {
         System.out.println("Creating a handle for "+address.getAddress().getHostName()+":"+address.getPort());
-        config.set(io.hops.experiments.controller.config.Configuration.ConfigKeys.FS_DEFAULTFS_KEY, "hdfs://" + address.getAddress().getHostName()+":"+address.getPort());
+        config.set(ConfigKeys.FS_DEFAULTFS_KEY, "hdfs://" + address.getAddress().getHostName()+":"+address.getPort());
         NameNodeProxies.ProxyAndInfo<ClientProtocol> proxyInfo =
                 NameNodeProxies.createProxy(config, FileSystem.getDefaultUri(config), ClientProtocol.class);
         ClientProtocol cpInt = proxyInfo.getProxy();

@@ -19,6 +19,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
+import io.hops.experiments.controller.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.hadoop.conf.Configuration;
@@ -76,7 +77,7 @@ public class TinyDatanodes {
     this.replication = (short) replication;
     this.blockSize = blockSize;
     this.datanodes = new TinyDatanode[nrDatanodes];
-    conf.set(io.hops.experiments.controller.config.Configuration.ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, "ROUND_ROBIN");
+    conf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, "ROUND_ROBIN");
 
     nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
             .getDefaultUri(conf));

@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.benchmarks;
 
+import io.hops.experiments.controller.config.ConfigKeys;
 import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.utils.BenchmarkUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -78,9 +79,9 @@ public class MoveThenDelete {
 
   private org.apache.hadoop.conf.Configuration createHdfsConf() {
     org.apache.hadoop.conf.Configuration dfsClientConf = new org.apache.hadoop.conf.Configuration();
-    dfsClientConf.set(Configuration.ConfigKeys.FS_DEFAULTFS_KEY, args.getNameNodeRpcAddress());
-    dfsClientConf.set(Configuration.ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, Long.toString(args.getNameNodeRefreshRate()));
-    dfsClientConf.set(Configuration.ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, args.getNameNodeSelectorPolicy());
+    dfsClientConf.set(ConfigKeys.FS_DEFAULTFS_KEY, args.getNameNodeRpcAddress());
+    dfsClientConf.set(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, Long.toString(args.getNameNodeRefreshRate()));
+    dfsClientConf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, args.getNameNodeSelectorPolicy());
     return dfsClientConf;
   }
 }
