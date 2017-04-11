@@ -16,14 +16,12 @@
  */
 package io.hops.experiments.results.compiler;
 
-import com.google.common.primitives.Doubles;
 import io.hops.experiments.benchmarks.BMResult;
-import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.ConfigKeys;
-import io.hops.experiments.controller.MasterArgsReader;
+import io.hops.experiments.controller.Configuration;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -137,7 +135,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     CompileResults.writeToFile(outpuFolder + "/interleaved.gnuplot", plot, false);
   }
 
-  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, MasterArgsReader args) throws FileNotFoundException, IOException, InterruptedException {
+  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, Configuration args) throws FileNotFoundException, IOException, InterruptedException {
     Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
     System.out.println("Processing the results ");
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();

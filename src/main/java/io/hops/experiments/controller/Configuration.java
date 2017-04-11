@@ -18,10 +18,8 @@ package io.hops.experiments.controller;
 
 import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -29,7 +27,6 @@ import java.util.*;
 
 import io.hops.experiments.coin.MultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import sun.security.krb5.Config;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -39,20 +36,20 @@ import java.math.RoundingMode;
  *
  * @author salman
  */
-public class MasterArgsReader {
+public class Configuration implements Serializable {
 
   private List<InetAddress> listOfSlaves = null;
   private List<String> nameNodeList = null;
   private Properties props = null;
 
-  private MasterArgsReader() {
+  private Configuration() {
   }
 
   public static void printHelp() {
     System.out.println("FU");
   }
 
-  public MasterArgsReader(String file) throws FileNotFoundException, IOException, SQLException {
+  public Configuration(String file) throws FileNotFoundException, IOException, SQLException {
     props = loadPropFile(file);
     validateArgs();
   }
@@ -97,8 +94,8 @@ public class MasterArgsReader {
               getInterleavedBmSetReplicationPercentage(),
               getInterleavedBmGetFileInfoPercentage(),
               getInterleavedBmGetDirInfoPercentage(),
-              getInterleavedFileChangeUserPercentage(),
-              getInterleavedDirChangeUserPercentage());
+              getInterleavedBmFileChangeOwnerPercentage(),
+              getInterleavedBmDirChangeOwnerPercentage());
     }
 
     if (getBenchMarkType() == BenchmarkType.BR
@@ -411,7 +408,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedFileChangeUserPercentage() {
+  public BigDecimal getInterleavedBmFileChangeOwnerPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_DEFAULT);
   }
 
@@ -419,7 +416,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedDirChangeUserPercentage() {
+  public BigDecimal getInterleavedBmDirChangeOwnerPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT);
   }
 

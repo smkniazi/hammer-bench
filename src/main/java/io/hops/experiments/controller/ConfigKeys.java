@@ -197,7 +197,7 @@ public class ConfigKeys {
     public static String FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   FILE_SIZE_IN_Bytes_DEFAULT = 0;
     
-    public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "file.size";
+    public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "append.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
     
     public static String DIR_PER_DIR_KEY= "dir.per.dir";

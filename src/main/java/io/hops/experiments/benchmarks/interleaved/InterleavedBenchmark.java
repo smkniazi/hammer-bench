@@ -91,33 +91,36 @@ public class InterleavedBenchmark extends Benchmark {
 
     @Override
     protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-        InterleavedBenchmarkCommand.Request req = (InterleavedBenchmarkCommand.Request) command;
+        io.hops.experiments.controller.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
 
-        duration = req.getDuration();
+        duration = config.getInterleavedBmDuration();
         System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
         List workers = new ArrayList<Worker>();
         for (int i = 0; i < numThreads; i++) {
-            Callable worker = new Worker(req);
+            Callable worker = new Worker(config);
             workers.add(worker);
         }
         startTime = System.currentTimeMillis();
 
         FailOverMonitor failOverTester = null;
         List<String> failOverLog = null;
-        if (req.isTestFailover()) {
-            boolean canIKillNamenodes = InetAddress.getLocalHost().getHostName().compareTo(req.getNamenodeKillerHost()) == 0;
+        if (config.testFailover()) {
+            boolean canIKillNamenodes = InetAddress.getLocalHost().getHostName().compareTo(config.getNamenodeKillerHost()) == 0;
             if(canIKillNamenodes){
                 Logger.printMsg("Responsible for killing/restarting namenodes");
             }
-            failOverTester = startFailoverTestDeamon(req.getNamenodeRestartCommands(),
-                    req.getFailTestDuration(), req.getFailOverTestStartTime(),
-                    req.getNamenodeRestartTimePeriod(), canIKillNamenodes);
+            failOverTester = startFailoverTestDeamon(
+                    config.getNameNodeRestartCommands(),
+                    config.getFailOverTestDuration(),
+                    config.getFailOverTestStartTime(),
+                    config.getNameNodeRestartTimePeriod(),
+                    canIKillNamenodes);
         }
 
         Logger.resetTimer();
 
         executor.invokeAll(workers); // blocking call
-        if (req.isTestFailover()) {
+        if (config.testFailover()) {
             failOverTester.stop();
             failOverLog = failOverTester.getFailoverLog();
         }
@@ -138,24 +141,34 @@ public class InterleavedBenchmark extends Benchmark {
 
         private FileSystem dfs;
         private FilePool filePool;
-        private InterleavedBenchmarkCommand.Request req;
         private MultiFaceCoin coin;
+        private io.hops.experiments.controller.Configuration config = null;
 
-        public Worker(InterleavedBenchmarkCommand.Request req) throws IOException {
-            this.req = req;
+        public Worker(io.hops.experiments.controller.Configuration config) throws IOException {
+          this.config = config;
         }
 
         @Override
         public Object call() throws Exception {
             dfs = BenchmarkUtils.getDFSClient(conf);
-            filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(),
+            filePool = BenchmarkUtils.getFilePool(conf, config.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
-            coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
-                    req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
-                    req.getLsFilePercent(), req.getLsDirPercent(),
-                    req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent(),
-                    req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent(),
-                    req.getFileChownPercent(), req.getDirChownPercent());
+            coin = new MultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
+                    config.getInterleavedBmAppendFilePercentage(),
+                    config.getInterleavedBmReadFilesPercentage(),
+                    config.getInterleavedBmRenameFilesPercentage(),
+                    config.getInterleavedBmDeleteFilesPercentage(),
+                    config.getInterleavedBmLsFilePercentage(),
+                    config.getInterleavedBmLsDirPercentage(),
+                    config.getInterleavedBmChmodFilesPercentage(),
+                    config.getInterleavedBmChmodDirsPercentage(),
+                    config.getInterleavedBmMkdirPercentage(),
+                    config.getInterleavedBmSetReplicationPercentage(),
+                    config.getInterleavedBmGetFileInfoPercentage(),
+                    config.getInterleavedBmGetDirInfoPercentage(),
+                    config.getInterleavedBmFileChangeOwnerPercentage(),
+                    config.getInterleavedBmDirChangeOwnerPercentage()
+            );
             while (true) {
                 try {
                     if ((System.currentTimeMillis() - startTime) > duration) {
@@ -166,7 +179,7 @@ public class InterleavedBenchmark extends Benchmark {
 
                     performOperation(op);
 
-                    if (!req.isTestFailover()) {
+                    if (!config.testFailover()) {
                         log();
                     }
 
@@ -198,7 +211,7 @@ public class InterleavedBenchmark extends Benchmark {
 //
 //            double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
 //            String msg = op + ": [" + percent + "%] ";
-//            message += format(op.toString().length() + 14, msg);
+//            message += BenchmarkUtils.format(op.toString().length() + 14, msg);
 //          }
 //        }
                 Logger.printMsg(message);
@@ -214,7 +227,8 @@ public class InterleavedBenchmark extends Benchmark {
                     long opStartTime = 0L;
                     opStartTime = System.nanoTime();
 
-                    OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
+                    OperationsUtils.performOp(dfs, opType, filePool, path, config.getReplicationFactor(),
+                           config.getFileSize(), config.getAppendFileSize());
                     opExeTime = System.nanoTime() - opStartTime;
                     retVal = true;
                 } catch (Exception e) {
@@ -238,7 +252,7 @@ public class InterleavedBenchmark extends Benchmark {
             if (success) {
                 operationsCompleted.incrementAndGet();
                 avgLatency.addValue(opExeTime);
-                if (req.isPercentileEnabled()) {
+                if (config.isPercentileEnabled()) {
                     synchronized (opsExeTimes) {
                         ArrayList<Long> times = opsExeTimes.get(opType);
                         if (times == null) {
