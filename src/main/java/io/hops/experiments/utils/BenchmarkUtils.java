@@ -185,6 +185,20 @@ public class BenchmarkUtils {
         return String.format(format, string);
     }
 
+    public static boolean isTwoDecimalPlace(double val) {
+        if (val == 0 || val == ((int) val)) {
+            return true;
+        } else {
+            String valStr = Double.toString(val);
+            int i = valStr.lastIndexOf('.');
+            if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
         if (SERVER_LESS_MODE) {
             serverLessModeRandomWait();

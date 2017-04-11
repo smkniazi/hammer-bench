@@ -16,8 +16,8 @@
  */
 package io.hops.experiments.benchmarks;
 
-import io.hops.experiments.controller.config.ConfigKeys;
-import io.hops.experiments.controller.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.Configuration;
 import io.hops.experiments.utils.BenchmarkUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

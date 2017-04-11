@@ -16,7 +16,7 @@
  */
 package io.hops.experiments.controller;
 
-import io.hops.experiments.controller.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.utils.BenchmarkUtils;
 
 import java.io.ByteArrayInputStream;

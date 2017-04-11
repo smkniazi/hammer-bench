@@ -19,7 +19,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
-import io.hops.experiments.controller.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.hadoop.conf.Configuration;

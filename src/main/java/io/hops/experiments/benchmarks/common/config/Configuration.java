@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.hops.experiments.controller.config;
+package io.hops.experiments.benchmarks.common.config;
 
 import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
@@ -25,8 +25,9 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 
-import io.hops.experiments.coin.MultiFaceCoin;
+import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
+import io.hops.experiments.utils.BenchmarkUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -84,7 +85,7 @@ public class Configuration implements Serializable {
 
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages
-      new MultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
+      new InterleavedMultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
               getInterleavedBmAppendFilePercentage(),
               getInterleavedBmReadFilesPercentage(),
               getInterleavedBmRenameFilesPercentage(),
@@ -602,12 +603,12 @@ public class Configuration implements Serializable {
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
-    if (!isTwoDecimalPlace(defaultVal)) {
+    if (!BenchmarkUtils.isTwoDecimalPlace(defaultVal)) {
       throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported. Value " + defaultVal + " key: " + key);
     }
 
     double userVal = Double.parseDouble(props.getProperty(key, Double.toString(defaultVal)));
-    if (!isTwoDecimalPlace(userVal)) {
+    if (!BenchmarkUtils.isTwoDecimalPlace(userVal)) {
       throw new IllegalArgumentException("Wrong user value. Only one decimal place is supported. Value " + userVal + " key: " + key);
     }
 
@@ -615,17 +616,5 @@ public class Configuration implements Serializable {
     return new BigDecimal(userVal, new MathContext(4, RoundingMode.HALF_UP));
   }
 
-  private boolean isTwoDecimalPlace(double val) {
-    if (val == 0 || val == ((int) val)) {
-      return true;
-    } else {
-      String valStr = Double.toString(val);
-      int i = valStr.lastIndexOf('.');
-      if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
+
 }

@@ -17,7 +17,7 @@
 package io.hops.experiments.benchmarks.blockreporting.nn;
 
 import com.google.common.collect.Maps;
-import io.hops.experiments.controller.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;

@@ -21,7 +21,7 @@ import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
-import io.hops.experiments.coin.MultiFaceCoin;
+import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
@@ -88,7 +88,7 @@ public class InterleavedBenchmark extends Benchmark {
 
     @Override
     protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-        io.hops.experiments.controller.config.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
+        io.hops.experiments.benchmarks.common.config.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
 
         duration = config.getInterleavedBmDuration();
         System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
@@ -138,10 +138,10 @@ public class InterleavedBenchmark extends Benchmark {
 
         private FileSystem dfs;
         private FilePool filePool;
-        private MultiFaceCoin coin;
-        private io.hops.experiments.controller.config.Configuration config = null;
+        private InterleavedMultiFaceCoin coin;
+        private io.hops.experiments.benchmarks.common.config.Configuration config = null;
 
-        public Worker(io.hops.experiments.controller.config.Configuration config) throws IOException {
+        public Worker(io.hops.experiments.benchmarks.common.config.Configuration config) throws IOException {
           this.config = config;
         }
 
@@ -150,7 +150,7 @@ public class InterleavedBenchmark extends Benchmark {
             dfs = BenchmarkUtils.getDFSClient(conf);
             filePool = BenchmarkUtils.getFilePool(conf, config.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
-            coin = new MultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
+            coin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
                     config.getInterleavedBmAppendFilePercentage(),
                     config.getInterleavedBmReadFilesPercentage(),
                     config.getInterleavedBmRenameFilesPercentage(),

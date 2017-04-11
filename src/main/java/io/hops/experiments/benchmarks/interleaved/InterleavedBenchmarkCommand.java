@@ -17,7 +17,7 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.controller.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.Configuration;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.controller.config;
+package io.hops.experiments.benchmarks.common.config;
 
 /**
  *
@@ -193,7 +193,11 @@ public class ConfigKeys {
 
     public static String REPLICATION_FACTOR_KEY = "replication.factor";
     public static short  REPLICATION_FACTOR_DEFAULT = 3;
-    
+
+    //format list of tuples
+    //[(size,percentage),(size,percentage)]
+    //[(1024,10),(2048,90)]
+    //all percentages should add to 100
     public static String FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   FILE_SIZE_IN_Bytes_DEFAULT = 0;
     

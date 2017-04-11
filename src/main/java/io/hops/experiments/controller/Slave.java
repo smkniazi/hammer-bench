@@ -27,7 +27,7 @@ import java.net.UnknownHostException;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.KillSlave;
-import io.hops.experiments.controller.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import java.net.ServerSocket;

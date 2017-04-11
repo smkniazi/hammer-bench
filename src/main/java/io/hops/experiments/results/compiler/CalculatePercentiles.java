@@ -7,7 +7,7 @@ package io.hops.experiments.results.compiler;
 import com.google.common.primitives.Doubles;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
-import io.hops.experiments.controller.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
