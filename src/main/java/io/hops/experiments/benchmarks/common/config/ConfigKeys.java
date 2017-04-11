@@ -199,7 +199,7 @@ public class ConfigKeys {
     //[(1024,10),(2048,90)]
     //all percentages should add to 100
     public static String FILE_SIZE_IN_Bytes_KEY= "file.size";
-    public static long   FILE_SIZE_IN_Bytes_DEFAULT = 0;
+    public static String FILE_SIZE_IN_Bytes_DEFAULT = "[(0,100)]";
     
     public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "append.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;

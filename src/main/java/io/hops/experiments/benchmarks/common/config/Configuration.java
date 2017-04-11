@@ -333,8 +333,8 @@ public class Configuration implements Serializable {
     return getShort(ConfigKeys.REPLICATION_FACTOR_KEY, ConfigKeys.REPLICATION_FACTOR_DEFAULT);
   }
 
-  public long getFileSize() {
-    return getLong(ConfigKeys.FILE_SIZE_IN_Bytes_KEY, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
+  public String getFileSizeDistribution() {
+    return getString(ConfigKeys.FILE_SIZE_IN_Bytes_KEY, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
   }
 
   public long getAppendFileSize() {

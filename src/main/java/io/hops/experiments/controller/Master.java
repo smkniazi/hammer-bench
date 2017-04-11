@@ -287,7 +287,7 @@ public class Master {
     printMasterLogMessages("Starting Hand Shake Protocol");
     prompt();
     sendHandshakeToAllSlaves(
-            new Handshake.Request(config.getSlaveNumThreads(), config.getFileSize(), config.getAppendFileSize(),
+            new Handshake.Request(config.getSlaveNumThreads(), config.getFileSizeDistribution(), config.getAppendFileSize(),
             config.getReplicationFactor(), config.getBenchMarkType(),
             config.getBaseDir(),
             config.isEnableRemoteLogging(), config.getRemoteLogginPort(),
@@ -313,7 +313,7 @@ public class Master {
     if (config.getBenchMarkType() == BenchmarkType.INTERLEAVED
             || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
-              config.getFileSize(), config.getAppendFileSize(),
+              config.getFileSizeDistribution(), config.getAppendFileSize(),
               config.getBaseDir());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
       warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(), config.getBlockReportingNumOfBlocksPerReport(), config

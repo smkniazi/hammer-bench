@@ -17,6 +17,7 @@
 package io.hops.experiments.benchmarks.common;
 
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
@@ -88,18 +89,20 @@ public abstract class Benchmark {
     private FilePool filePool;
     private final int filesToCreate;
     private final short replicationFactor;
-    private final long fileSize;
+    private final String fileSizeDistribution;
+    private final FileSizeMultiFaceCoin fileSizeCoin;
     private final String baseDir;
     private final int dirsPerDir;
     private final int filesPerDir;
     private final boolean fixedDepthTree;
     private final int treeDepth;
 
-    public BaseWarmUp(int filesToCreate, short replicationFactor, long fileSize, 
+    public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
             String baseDir, int dirsPerDir, int filesPerDir,
             boolean fixedDepthTree, int treeDepth) throws IOException {
       this.filesToCreate = filesToCreate;
-      this.fileSize = fileSize;
+      this.fileSizeDistribution = fileSizeDistribution;
+      this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
       this.dirsPerDir = dirsPerDir;
@@ -120,9 +123,9 @@ public abstract class Benchmark {
           filePath = filePool.getFileToCreate();
           BenchmarkUtils
                   .createFile(dfs, new Path(filePath), replicationFactor,
-                  fileSize);
+                  fileSizeCoin.getFileSize());
           filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSize);
+          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSizeCoin.getFileSize());
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
         } catch (Exception e) {

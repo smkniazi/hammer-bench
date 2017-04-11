@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
@@ -50,7 +51,7 @@ public class RawBenchmark extends Benchmark {
   private final long maxFilesToCreate;
   private String baseDir;
   private short replicationFactor;
-  private long fileSize;
+  private String fileSizeDistribution;
   private long appendSize;
   private final int dirsPerDir;
   private final int filesPerDir;
@@ -73,13 +74,13 @@ public class RawBenchmark extends Benchmark {
           throws IOException, InterruptedException {
     NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
     this.replicationFactor = namespaceWarmUp.getReplicationFactor();
-    this.fileSize = namespaceWarmUp.getFileSize();
+    this.fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
     this.appendSize = namespaceWarmUp.getAppendSize();
     this.baseDir = namespaceWarmUp.getBaseDir();
     List workers = new ArrayList<BaseWarmUp>();
     for (int i = 0; i < numThreads; i++) {
       Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
-              fileSize, baseDir, dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
+              fileSizeDistribution, baseDir, dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       workers.add(worker);
     }
     executor.invokeAll(workers);
@@ -128,10 +129,12 @@ public class RawBenchmark extends Benchmark {
     private FileSystem dfs;
     private FilePool filePool;
     private String baseDir;
+    private FileSizeMultiFaceCoin fileSizeCoin;
 
     public Generic(String baseDir, BenchmarkOperations opType) throws IOException {
       this.baseDir = baseDir;
       this.opType = opType;
+      this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
     }
 
     @Override
@@ -158,7 +161,7 @@ public class RawBenchmark extends Benchmark {
             return null;
           }
           
-          OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor,fileSize, appendSize);
+          OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, fileSizeCoin.getFileSize(), appendSize);
           
           successfulOps.incrementAndGet();
 

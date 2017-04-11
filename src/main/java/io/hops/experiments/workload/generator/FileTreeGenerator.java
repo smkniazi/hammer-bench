@@ -20,10 +20,7 @@ import io.hops.experiments.controller.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  *
@@ -42,8 +39,8 @@ public class FileTreeGenerator implements FilePool {
   public FileTreeGenerator(String baseDir, int filesPerDir,
           int dirPerDir, int initialTreeDepth) {
 
-    this.allThreadFiles = new LinkedList<String>();
-    this.allThreadDirs = new LinkedList<String>();
+    this.allThreadFiles = new ArrayList<String>(1000000);
+    this.allThreadDirs = new ArrayList<String>(1000000);
     this.rand = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
 
@@ -226,7 +223,7 @@ public class FileTreeGenerator implements FilePool {
         if (getPathLength(path) < THRESHOLD) {
           continue;
         }
-//        System.out.println("Path "+path);
+//        System.out.println("Path "+path+ " after retires: "+i);
         return path;
       }
     }

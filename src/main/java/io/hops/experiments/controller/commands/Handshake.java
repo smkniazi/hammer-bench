@@ -33,7 +33,7 @@ public class Handshake implements Serializable {
 
     private int slaveId;
     private final int numThreads;
-    private final long fileSize;
+    private final String fileSizeDistribution;
     private final long appendSize;
     private final short replicationFactor;
     private BenchmarkType benchMarkType;
@@ -48,7 +48,7 @@ public class Handshake implements Serializable {
     private final BenchMarkFileSystemName benchMarkFileSystemName;
     private final Properties fsConfig;
 
-    public Request(int numThreads, long fileSize, long appendSize, short replicationFactor,
+    public Request(int numThreads, String fileSizeDistribution, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
             boolean enableRemoteLogging, int remoteLoggingPort,
             int dirPerDir, int filesPerDir,
@@ -57,7 +57,7 @@ public class Handshake implements Serializable {
             int treeDepth, BenchMarkFileSystemName fsName,
             Properties fsConfig) {
       this.numThreads = numThreads;
-      this.fileSize = fileSize;
+      this.fileSizeDistribution = fileSizeDistribution;
       this.appendSize = appendSize;
       this.benchMarkType = benchMarkType;
       this.replicationFactor = replicationFactor;
@@ -102,8 +102,8 @@ public class Handshake implements Serializable {
       return numThreads;
     }
 
-    public long getFileSize() {
-      return fileSize;
+    public String getFileSizeDistribution() {
+      return fileSizeDistribution;
     }
 
     public BenchmarkType getBenchMarkType() {
