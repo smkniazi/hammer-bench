@@ -27,7 +27,6 @@ import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
-import org.apache.commons.math3.analysis.function.Log;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,9 +35,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -91,7 +88,7 @@ public class InterleavedBenchmark extends Benchmark {
 
     @Override
     protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-        io.hops.experiments.controller.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
+        io.hops.experiments.controller.config.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
 
         duration = config.getInterleavedBmDuration();
         System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
@@ -142,9 +139,9 @@ public class InterleavedBenchmark extends Benchmark {
         private FileSystem dfs;
         private FilePool filePool;
         private MultiFaceCoin coin;
-        private io.hops.experiments.controller.Configuration config = null;
+        private io.hops.experiments.controller.config.Configuration config = null;
 
-        public Worker(io.hops.experiments.controller.Configuration config) throws IOException {
+        public Worker(io.hops.experiments.controller.config.Configuration config) throws IOException {
           this.config = config;
         }
 

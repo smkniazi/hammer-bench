@@ -16,11 +16,11 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.controller.ConfigKeys;
 import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.results.compiler.RawBMResultAggregator.CompiledResults;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -32,7 +32,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,8 +88,8 @@ public class CompileResults {
     BlockReportBMResultsAggregator hopsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
 
     
-    List<File> hdfsResulsFiles = findFiles(hdfsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
-    List<File> hopsResulsFiles = findFiles(hopsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
+    List<File> hdfsResulsFiles = findFiles(hdfsInputDir, Configuration.ConfigKeys.BINARY_RESULT_FILE_NAME);
+    List<File> hopsResulsFiles = findFiles(hopsInputDir, Configuration.ConfigKeys.BINARY_RESULT_FILE_NAME);
     System.out.println("Processing HDFS Files");
     parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults);
     System.out.println("Processing Hops Files");

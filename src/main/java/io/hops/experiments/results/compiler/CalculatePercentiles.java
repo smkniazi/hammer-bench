@@ -5,10 +5,9 @@
 package io.hops.experiments.results.compiler;
 
 import com.google.common.primitives.Doubles;
-import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
-import io.hops.experiments.controller.ConfigKeys;
+
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +28,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import io.hops.experiments.controller.config.Configuration;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
@@ -44,7 +45,7 @@ public class CalculatePercentiles {
   
   private void doShit(String src, String dst, String prefix, int noOfThreads) throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException {
     this.executor = Executors.newFixedThreadPool(noOfThreads);
-    List<File> files = CompileResults.findFiles(src, ConfigKeys.RAW_RESPONSE_FILE_EXT);
+    List<File> files = CompileResults.findFiles(src, Configuration.ConfigKeys.RAW_RESPONSE_FILE_EXT);
     List<InterleavedBenchmarkCommand.Response> responses = new ArrayList<InterleavedBenchmarkCommand.Response>();
     
     for (File file : files) {

@@ -20,8 +20,7 @@ import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
-import io.hops.experiments.controller.ConfigKeys;
-import io.hops.experiments.controller.Configuration;
+import io.hops.experiments.controller.config.Configuration;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -170,7 +169,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
           filePath += "/";
         }
         InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
-        filePath += "ResponseRawData"+responseCount+++ConfigKeys.RAW_RESPONSE_FILE_EXT;
+        filePath += "ResponseRawData"+responseCount+++ Configuration.ConfigKeys.RAW_RESPONSE_FILE_EXT;
         System.out.println("Writing Rwaw results to " + filePath);
         FileOutputStream fout = new FileOutputStream(filePath);
         ObjectOutputStream oos = new ObjectOutputStream(fout);

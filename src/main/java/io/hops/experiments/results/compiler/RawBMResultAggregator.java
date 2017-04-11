@@ -20,7 +20,7 @@ import io.hops.experiments.benchmarks.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
-import io.hops.experiments.controller.Configuration;
+import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.utils.BenchmarkUtils;
 
 import java.io.IOException;

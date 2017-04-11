@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.controller;
 
+import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.utils.BenchmarkUtils;
 
 import java.io.ByteArrayInputStream;
@@ -25,10 +26,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -140,7 +139,7 @@ public class Logger {
       while (running) {
         DatagramPacket recvPacket = null;
         try {
-          byte[] recvData = new byte[ConfigKeys.BUFFER_SIZE];
+          byte[] recvData = new byte[Configuration.ConfigKeys.BUFFER_SIZE];
           recvPacket = new DatagramPacket(recvData, recvData.length);
           socket.receive(recvPacket);
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);

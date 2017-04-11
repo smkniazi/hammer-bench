@@ -17,11 +17,10 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.controller.Configuration;
+import io.hops.experiments.controller.config.Configuration;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

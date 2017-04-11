@@ -31,7 +31,6 @@ import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Set;
 
 /**
  *
@@ -114,7 +113,7 @@ public class Slave {
     }
 
     private Object receiveRequestFromMaster() throws IOException, ClassNotFoundException {
-        connectionWithMaster.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
+        connectionWithMaster.setReceiveBufferSize(io.hops.experiments.controller.config.Configuration.ConfigKeys.BUFFER_SIZE);
         ObjectInputStream recvFromMaster =  new ObjectInputStream(connectionWithMaster.getInputStream());
         Object obj = recvFromMaster.readObject();
         if (obj instanceof KillSlave) {
@@ -126,7 +125,7 @@ public class Slave {
     private void sendResponseToMaster(Object obj) throws IOException {
         System.out.println("Sending response to master ... ");
         long startTime = System.currentTimeMillis();
-        connectionWithMaster.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
+        connectionWithMaster.setSendBufferSize(io.hops.experiments.controller.config.Configuration.ConfigKeys.BUFFER_SIZE);
         ObjectOutputStream sendToMaster = new ObjectOutputStream(connectionWithMaster.getOutputStream());
         sendToMaster.writeObject(obj);
         System.out.println("Sent response to master. Time: "+(System.currentTimeMillis() - startTime)+" ms");
