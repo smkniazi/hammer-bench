@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.hops.experiments.coin;
+package io.hops.experiments.benchmarks.interleaved.coin;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author salman
  */
-public class MultiFaceCoin {
+public class InterleavedMultiFaceCoin {
 
   private BigDecimal create;
   private BigDecimal append;
@@ -54,10 +54,10 @@ public class MultiFaceCoin {
   //1000 face dice
   ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
-  public MultiFaceCoin(BigDecimal create, BigDecimal append, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile,
-          BigDecimal lsDir, BigDecimal chmodFiles, BigDecimal chmodDirs, BigDecimal mkdirs,
-          BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo,
-          BigDecimal fileChown, BigDecimal dirChown) {
+  public InterleavedMultiFaceCoin(BigDecimal create, BigDecimal append, BigDecimal read, BigDecimal rename, BigDecimal delete, BigDecimal lsFile,
+                                  BigDecimal lsDir, BigDecimal chmodFiles, BigDecimal chmodDirs, BigDecimal mkdirs,
+                                  BigDecimal setReplication, BigDecimal fileInfo, BigDecimal dirInfo,
+                                  BigDecimal fileChown, BigDecimal dirChown) {
     this.create = create;
     this.append = append;
     this.read = read;

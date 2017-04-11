@@ -17,10 +17,10 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
+import io.hops.experiments.benchmarks.common.config.Configuration;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,172 +32,14 @@ import java.util.List;
 public class InterleavedBenchmarkCommand {
 
     public static class Request implements BenchmarkCommand.Request {
+        private Configuration config;
 
-        private BigDecimal createPercent;
-        private BigDecimal appendPercent;
-        private BigDecimal readPercent;
-        private BigDecimal renamePercent;
-        private BigDecimal deletePercent;
-        private BigDecimal lsFilePercent;
-        private BigDecimal lsDirPercent;
-        private BigDecimal chmodFilePercent;
-        private BigDecimal chmodDirsPercent;
-        private BigDecimal mkdirPercent;
-        private BigDecimal setReplicationPercent;
-        private BigDecimal fileInfoPercent;
-        private BigDecimal dirInfoPercent;
-        private BigDecimal fileChownPercent;
-        private BigDecimal dirChownPercent;
-        private long duration;
-        private long fileSize;
-        private long appendSize;
-        private short replicationFactor;
-        private String baseDir;
-        private boolean percentileEnabled;
-        private boolean testFailover;
-        private List<List<String>> namenodeRestartCommands;
-        private long namenodeRestartTimePeriod;
-        private long failTestDuration;
-        private long failOverTestStartTime;
-
-
-        public Request(BigDecimal createPercent, BigDecimal appendPercent, BigDecimal readPercent, BigDecimal renamePercent, BigDecimal deletePercent, BigDecimal lsFilePercent, BigDecimal lsDirPercent,
-                       BigDecimal chmodFilesPercent, BigDecimal chmodDirsPercent, BigDecimal mkdirPercent,
-                       BigDecimal setReplicationPercent, BigDecimal fileInfoPercent, BigDecimal dirInfoPercent,
-                       BigDecimal fileChownPercent, BigDecimal dirChownPercent,
-                       long duration, long fileSize, long appendSize, short replicationFactor, String baseDir,
-                       boolean percentileEnabled, boolean testFailover, List<List<String>> namenodeRestartCommands,
-                       long namenodeRestartTimePeriod, long failTestDuration, long failOverTestStartTime) {
-            this.createPercent = createPercent;
-            this.appendPercent = appendPercent;
-            this.readPercent = readPercent;
-            this.renamePercent = renamePercent;
-            this.deletePercent = deletePercent;
-            this.lsFilePercent = lsFilePercent;
-            this.lsDirPercent = lsDirPercent;
-            this.chmodFilePercent = chmodFilesPercent;
-            this.chmodDirsPercent = chmodDirsPercent;
-            this.mkdirPercent = mkdirPercent;
-            this.setReplicationPercent = setReplicationPercent;
-            this.fileInfoPercent = fileInfoPercent;
-            this.dirInfoPercent = dirInfoPercent;
-            this.fileChownPercent = fileChownPercent;
-            this.dirChownPercent = dirChownPercent;
-            this.duration = duration;
-            this.fileSize = fileSize;
-            this.appendSize = appendSize;
-            this.replicationFactor = replicationFactor;
-            this.baseDir = baseDir;
-            this.percentileEnabled = percentileEnabled;
-            this.testFailover = testFailover;
-            this.namenodeRestartCommands = namenodeRestartCommands;
-            this.namenodeRestartTimePeriod = namenodeRestartTimePeriod;
-            this.failOverTestStartTime = failOverTestStartTime;
-            this.failTestDuration = failTestDuration;
+        public Request(Configuration config) {
+          this.config = config;
         }
 
-        public long getFailTestDuration() {
-            return failTestDuration;
-        }
-
-        public long getFailOverTestStartTime() {
-            return failOverTestStartTime;
-        }
-
-        public boolean isPercentileEnabled() {
-            return percentileEnabled;
-        }
-
-        public BigDecimal getCreatePercent() {
-            return createPercent;
-        }
-
-        public BigDecimal getReadPercent() {
-            return readPercent;
-        }
-
-        public BigDecimal getRenamePercent() {
-            return renamePercent;
-        }
-
-        public BigDecimal getDeletePercent() {
-            return deletePercent;
-        }
-
-        public BigDecimal getLsFilePercent() {
-            return lsFilePercent;
-        }
-
-        public BigDecimal getLsDirPercent() {
-            return lsDirPercent;
-        }
-
-        public BigDecimal getChmodFilePercent() {
-            return chmodFilePercent;
-        }
-
-        public BigDecimal getChmodDirsPercent() {
-            return chmodDirsPercent;
-        }
-
-        public long getDuration() {
-            return duration;
-        }
-
-        public long getFileSize() {
-            return fileSize;
-        }
-
-        public short getReplicationFactor() {
-            return replicationFactor;
-        }
-
-        public String getBaseDir() {
-            return baseDir;
-        }
-
-        public BigDecimal getMkdirPercent() {
-            return mkdirPercent;
-        }
-
-        public BigDecimal getSetReplicationPercent() {
-            return setReplicationPercent;
-        }
-
-        public BigDecimal getFileInfoPercent() {
-            return fileInfoPercent;
-        }
-
-        public BigDecimal getDirInfoPercent() {
-            return dirInfoPercent;
-        }
-
-        public BigDecimal getAppendPercent() {
-            return appendPercent;
-        }
-
-        public long getAppendSize() {
-            return appendSize;
-        }
-
-        public BigDecimal getFileChownPercent() {
-            return fileChownPercent;
-        }
-
-        public BigDecimal getDirChownPercent() {
-            return dirChownPercent;
-        }
-
-        public boolean isTestFailover() {
-            return testFailover;
-        }
-
-        public List<List<String>> getNamenodeRestartCommands() {
-            return namenodeRestartCommands;
-        }
-
-        public long getNamenodeRestartTimePeriod() {
-            return namenodeRestartTimePeriod;
+        public Configuration getConfig(){
+            return config;
         }
 
         @Override
@@ -215,9 +57,11 @@ public class InterleavedBenchmarkCommand {
         private final double avgOpLatency;
         private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
         private final List<String> failOverLog;
+        private final int nnCount;
 
         public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
-                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog) {
+                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog,
+                        int nnCount) {
             this.runTime = runTime;
             this.totalSuccessfulOps = totalSuccessfulOps;
             this.totalFailedOps = totalFailedOps;
@@ -225,6 +69,7 @@ public class InterleavedBenchmarkCommand {
             this.opsExeTimes = opsExeTimes;
             this.failOverLog = failOverLog;
             this.avgOpLatency = avgOpLatency;
+            this.nnCount = nnCount;
         }
 
         public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
@@ -254,6 +99,10 @@ public class InterleavedBenchmarkCommand {
 
         public double getAvgOpLatency() {
             return avgOpLatency;
+        }
+
+        public int getNnCount() {
+            return nnCount;
         }
     }
 }

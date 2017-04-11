@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.coin;
+package io.hops.experiments.benchmarks.interleaved.coin;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,11 +29,11 @@ import java.math.BigDecimal;
  *
  * @author salman
  */
-public class CoinTest {
+public class InterleavedMultifaceCoinTest {
     public static void main(String [] argv) throws FileNotFoundException, IOException{
       
       
-        MultiFaceCoin coin = new MultiFaceCoin(
+        InterleavedMultiFaceCoin coin = new InterleavedMultiFaceCoin(
                 new BigDecimal(5),
                 new BigDecimal(5),
                 new BigDecimal(10),

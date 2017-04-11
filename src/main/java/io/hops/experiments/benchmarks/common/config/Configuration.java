@@ -14,22 +14,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.hops.experiments.controller;
+package io.hops.experiments.benchmarks.common.config;
 
 import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 
-import io.hops.experiments.coin.MultiFaceCoin;
+import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import sun.security.krb5.Config;
+import io.hops.experiments.utils.BenchmarkUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -39,20 +37,20 @@ import java.math.RoundingMode;
  *
  * @author salman
  */
-public class MasterArgsReader {
+public class Configuration implements Serializable {
 
   private List<InetAddress> listOfSlaves = null;
   private List<String> nameNodeList = null;
   private Properties props = null;
 
-  private MasterArgsReader() {
+  private Configuration() {
   }
 
   public static void printHelp() {
     System.out.println("FU");
   }
 
-  public MasterArgsReader(String file) throws FileNotFoundException, IOException, SQLException {
+  public Configuration(String file) throws FileNotFoundException, IOException, SQLException {
     props = loadPropFile(file);
     validateArgs();
   }
@@ -87,7 +85,7 @@ public class MasterArgsReader {
 
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages
-      new MultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
+      new InterleavedMultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
               getInterleavedBmAppendFilePercentage(),
               getInterleavedBmReadFilesPercentage(),
               getInterleavedBmRenameFilesPercentage(),
@@ -97,8 +95,8 @@ public class MasterArgsReader {
               getInterleavedBmSetReplicationPercentage(),
               getInterleavedBmGetFileInfoPercentage(),
               getInterleavedBmGetDirInfoPercentage(),
-              getInterleavedFileChangeUserPercentage(),
-              getInterleavedDirChangeUserPercentage());
+              getInterleavedBmFileChangeOwnerPercentage(),
+              getInterleavedBmDirChangeOwnerPercentage());
     }
 
     if (getBenchMarkType() == BenchmarkType.BR
@@ -411,7 +409,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_FILE_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedFileChangeUserPercentage() {
+  public BigDecimal getInterleavedBmFileChangeOwnerPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_FILE_CHANGE_USER_PERCENTAGE_DEFAULT);
   }
 
@@ -419,7 +417,7 @@ public class MasterArgsReader {
     return getLong(ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_KEY, ConfigKeys.RAW_DIR_CHANGE_USER_PHASE_DURATION_DEFAULT);
   }
 
-  public BigDecimal getInterleavedDirChangeUserPercentage() {
+  public BigDecimal getInterleavedBmDirChangeOwnerPercentage() {
     return getBigDecimal(ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY, ConfigKeys.INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT);
   }
 
@@ -476,7 +474,9 @@ public class MasterArgsReader {
     return getString(ConfigKeys.DFS_NAMESERVICES, ConfigKeys.DFS_NAMESERVICES_DEFAULT);
   }
 
-
+  public String getNamenodeKillerHost(){
+    return getString(ConfigKeys.NAMENOE_KILLER_HOST_KEY, ConfigKeys.NAMENOE_KILLER_HOST_DEFAULT);
+  }
 
   public List<String> getFailOverNameNodes(){
     List<String> namenodesList = new LinkedList<String>();
@@ -532,8 +532,6 @@ public class MasterArgsReader {
 
     return commandsPerNN;
   }
-
-
 
   public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
@@ -613,12 +611,12 @@ public class MasterArgsReader {
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
-    if (!isTwoDecimalPlace(defaultVal)) {
+    if (!BenchmarkUtils.isTwoDecimalPlace(defaultVal)) {
       throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported. Value " + defaultVal + " key: " + key);
     }
 
     double userVal = Double.parseDouble(props.getProperty(key, Double.toString(defaultVal)));
-    if (!isTwoDecimalPlace(userVal)) {
+    if (!BenchmarkUtils.isTwoDecimalPlace(userVal)) {
       throw new IllegalArgumentException("Wrong user value. Only one decimal place is supported. Value " + userVal + " key: " + key);
     }
 
@@ -626,17 +624,5 @@ public class MasterArgsReader {
     return new BigDecimal(userVal, new MathContext(4, RoundingMode.HALF_UP));
   }
 
-  private boolean isTwoDecimalPlace(double val) {
-    if (val == 0 || val == ((int) val)) {
-      return true;
-    } else {
-      String valStr = Double.toString(val);
-      int i = valStr.lastIndexOf('.');
-      if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
+
 }

@@ -58,14 +58,16 @@ public class BlockReportingBenchmarkCommand {
     private final double speed;
     private final double avgTimePerReport;
     private final double avgTimeTogetNewNameNode;
+    private final int nnCount;
 
     public Response(int successfulOps, int failedOps, double speed,
-        double avgTimePerReport, double avgTimeTogetNewNameNode) {
+        double avgTimePerReport, double avgTimeTogetNewNameNode, int nnCount) {
       this.successfulOps = successfulOps;
       this.failedOps = failedOps;
       this.speed = speed;
       this.avgTimePerReport = avgTimePerReport;
       this.avgTimeTogetNewNameNode = avgTimeTogetNewNameNode;
+      this.nnCount = nnCount;
     }
 
     public int getSuccessfulOps() {
@@ -86,6 +88,10 @@ public class BlockReportingBenchmarkCommand {
 
     public double getAvgTimeTogetNewNameNode() {
       return avgTimeTogetNewNameNode;
+    }
+
+    public int getNnCount() {
+      return nnCount;
     }
   }
 }

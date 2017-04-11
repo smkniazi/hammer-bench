@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.controller;
+package io.hops.experiments.benchmarks.common.config;
 
 /**
  *
@@ -193,11 +193,15 @@ public class ConfigKeys {
 
     public static String REPLICATION_FACTOR_KEY = "replication.factor";
     public static short  REPLICATION_FACTOR_DEFAULT = 3;
-    
+
+    //format list of tuples
+    //[(size,percentage),(size,percentage)]
+    //[(1024,10),(2048,90)]
+    //all percentages should add to 100
     public static String FILE_SIZE_IN_Bytes_KEY= "file.size";
     public static long   FILE_SIZE_IN_Bytes_DEFAULT = 0;
     
-    public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "file.size";
+    public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "append.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
     
     public static String DIR_PER_DIR_KEY= "dir.per.dir";
@@ -250,7 +254,6 @@ public class ConfigKeys {
     public static String FS_DEFAULTFS_KEY = "fs.defaultFS";
     public static String FS_DEFAULTFS_DEFAULT = "";
 
-
     public static String DFS_NAMESERVICES = "dfs.nameservices";
     public static String DFS_NAMESERVICES_DEFAULT = "mycluster";
 
@@ -297,6 +300,9 @@ public class ConfigKeys {
 
     public static String NAMENOE_RESTART_COMMANDS= "failover.nn.restart.commands";
     public static String NAMENOE_RESTART_COMMANDS_DEFAULT = null;
+
+    public static String NAMENOE_KILLER_HOST_KEY= "namenode.killer";
+    public static String NAMENOE_KILLER_HOST_DEFAULT = null;
 
     public static final String MASTER_SLAVE_WARMUP_DELAY_KEY= "master.slave.warmup.delay";
     public static final int MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT = 0;

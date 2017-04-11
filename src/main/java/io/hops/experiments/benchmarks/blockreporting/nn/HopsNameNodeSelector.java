@@ -16,9 +16,8 @@
  */
 package io.hops.experiments.benchmarks.blockreporting.nn;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.hops.experiments.controller.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
@@ -33,7 +32,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.hadoop.fs.FileSystem;
@@ -173,13 +171,18 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
       return getHandle(address);
     }
 
-    public BlockReportingNameNodeHandle getNameNodeToReportTo() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+    public BlockReportingNameNodeHandle getNameNodeToReportTo(long blocksCount) throws NoSuchMethodException,
+        IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
       BlockReportingNameNodeHandle leaderHandle =  getLeader();
       DatanodeProtocol datanodeProto = leaderHandle.getDataNodeRPC();
 
       Class dpClass = datanodeProto.getClass();
-      Method method = dpClass.getMethod("getNextNamenodeToSendBlockReport");
-      Object ann = method.invoke(datanodeProto);
+      Class paramTypes[] = new Class<?>[1];
+      paramTypes[0] = Long.TYPE;
+      Method method = dpClass.getMethod("getNextNamenodeToSendBlockReport",paramTypes);
+      Object args[] = new Object[1];
+      args[0] =  blocksCount;
+      Object ann = method.invoke(datanodeProto, args);
       InetSocketAddress address = getAnnIp(ann);
       System.out.println("Sending BlockReport to "+address);
       return getHandle(address);
@@ -204,9 +207,9 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
   }
 
   @Override
-  public DatanodeProtocol getNameNodeToReportTo() throws Exception {
+  public DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws Exception {
 
-    BlockReportingNameNodeHandle handle = hopsNameNodesHandles.getNameNodeToReportTo();
+    BlockReportingNameNodeHandle handle = hopsNameNodesHandles.getNameNodeToReportTo(blocksCount);
 
     String nnip = handle.getHostName();
     synchronized (stats) {

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
@@ -58,8 +59,8 @@ public class RawBenchmark extends Benchmark {
   
   public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, 
           int filesPerDir, long maxFilesToCreate,
-          boolean fixedDepthTree, int treeDepth) {
-    super(conf, numThreads);
+          boolean fixedDepthTree, int treeDepth, BenchMarkFileSystemName fsName) {
+    super(conf, numThreads, fsName);
     this.dirsPerDir = dirsPerDir;
     this.filesPerDir = filesPerDir;
     this.maxFilesToCreate = maxFilesToCreate;
@@ -82,7 +83,8 @@ public class RawBenchmark extends Benchmark {
       workers.add(worker);
     }
     executor.invokeAll(workers);
-    Logger.printMsg("Completed Warmup Phase");
+    Logger.printMsg("Finished. Warmup Phase: 100%.");
+
     workers.clear();
     return new NamespaceWarmUp.Response();
   }
@@ -104,6 +106,9 @@ public class RawBenchmark extends Benchmark {
       workers.add(worker);
     }
     setMeasurementVariables(duration);
+
+    Logger.resetTimer();
+
     executor.invokeAll(workers);// blocking call
     long phaseFinishTime = System.currentTimeMillis();
     long actualExecutionTime = (phaseFinishTime - phaseStartTime);
@@ -113,7 +118,7 @@ public class RawBenchmark extends Benchmark {
 
     RawBenchmarkCommand.Response response =
             new RawBenchmarkCommand.Response(opType,
-            actualExecutionTime, successfulOps.get(), failedOps.get(), speed);
+            actualExecutionTime, successfulOps.get(), failedOps.get(), speed, getAliveNNsCount());
     return response;
   }
 

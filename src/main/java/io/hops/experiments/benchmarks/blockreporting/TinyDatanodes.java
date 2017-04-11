@@ -19,7 +19,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
-import io.hops.experiments.controller.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.hadoop.conf.Configuration;
@@ -125,7 +125,7 @@ public class TinyDatanodes {
           Exception {
     filesCreated = new AtomicLong(0);
     filesToCreate = nrFiles;
-    int fileCreationThreads = nrDatanodes * 10;
+    int fileCreationThreads = nrDatanodes * 100;
 
     Logger.printMsg(" Creating " + nrFiles + " files. Each file has "
             + blocksPerFile + " blocks.");
@@ -166,29 +166,35 @@ public class TinyDatanodes {
     @Override
     public Object call() throws Exception {
       // create files
-      try {
-      Logger.printMsg("Slave [" + id + "] creating  " + nrFiles + " files with "
-              + blocksPerFile + " blocks each.");
-      FileNameGenerator nameGenerator = new FileNameGenerator(baseDir + File.separator + machineName + File.separator + id, filesPerDirectory);
+      String clientDir ="";
+      if(!baseDir.trim().endsWith("/")){
+        clientDir =  baseDir+File.separator;
+      }else{
+        clientDir = baseDir;
+      }
+      clientDir = clientDir + machineName+"_"+id+File.separator+id;
+      FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
       String clientName = getClientName(id);
 
       for (int idx = 0; idx < nrFiles; idx++) {
-        String fileName = nameGenerator.getNextFileName("br");
-        nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
-                new EnumSetWritable<CreateFlag>(
-                EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true,
-                replication, blockSize);
-        ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
-          nameNodeProto.complete(fileName, clientName, lastBlock, 0);
-        filesCreated.incrementAndGet();
-        log();
+        try {
+          String fileName = nameGenerator.getNextFileName("br");
+          nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
+              new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true, replication,
+              blockSize);
+          ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
+          nameNodeProto.complete(fileName, clientName, lastBlock, null);
+          filesCreated.incrementAndGet();
+          log();
+        } catch (Exception e){
+          Logger.error(e);
         }
-        Logger.printMsg("Exiting");
-      }catch(Exception e){
-        Logger.error(e);
-        throw e;
       }
       return null;
+    }
+
+    private String getClientName(int idx) {
+      return "blockreporting-client-" + machineName + "_" + idx;
     }
 
     private void log() {
@@ -206,20 +212,25 @@ public class TinyDatanodes {
           throws IOException, SQLException {
     ExtendedBlock prevBlock = null;
     for (int jdx = 0; jdx < blocksPerFile; jdx++) {
-      LocatedBlock loc =
-              nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes()
-              , INodeId.GRANDFATHER_INODE_ID, null);
-      prevBlock = loc.getBlock();
-      for (DatanodeInfo dnInfo : loc.getLocations()) {
-        int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
-        datanodes[dnIdx].addBlock(loc.getBlock().getLocalBlock());
-        ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
-          ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
-        StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
-          datanodes[dnIdx].storage.getStorageID(), rdBlocks)};
-        datanodeProto.blockReceivedAndDeleted(
-                datanodes[dnIdx].dnRegistration,
-                loc.getBlock().getBlockPoolId(), report);
+      LocatedBlock loc = null;
+      try {
+        loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
+        prevBlock = loc.getBlock();
+        for (DatanodeInfo dnInfo : loc.getLocations()) {
+          int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
+          datanodes[dnIdx].addBlock(loc.getBlock().getLocalBlock());
+          ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
+                  ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
+          StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
+                  datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
+          datanodeProto.blockReceivedAndDeleted(
+                  datanodes[dnIdx].dnRegistration,
+                  loc.getBlock().getBlockPoolId(), report);
+        }
+      }catch (IndexOutOfBoundsException e){
+        System.out.println(e);
+        System.out.println("Located block "+Arrays.toString(loc.getLocations()));
+        System.out.println("Excluded Nodes are "+Arrays.toString(helper.getExcludedDatanodes()));
       }
     }
     return prevBlock;
@@ -232,9 +243,7 @@ public class TinyDatanodes {
     return dn.blockReport();
   }
 
-  private String getClientName(int idx) {
-    return "blockreporting-client-" + machineName + "_" + idx;
-  }
+
 
   void printStats() throws IOException {
     Logger.printMsg("Reports " + nameNodeSelector.getReportsStats().toString());

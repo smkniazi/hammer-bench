@@ -16,6 +16,9 @@
  */
 package io.hops.experiments.controller;
 
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
+import io.hops.experiments.utils.BenchmarkUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -23,6 +26,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -58,6 +63,10 @@ public class Logger {
       errorCounter++;
     }
 
+  }
+
+  public static void resetTimer(){
+    lastmsg.set(System.currentTimeMillis());
   }
 
  public static synchronized void printMsg(String msg) {
@@ -111,9 +120,12 @@ public class Logger {
 
     private int port;
     private boolean running = true;
+    private Map<String, Double> speedMap = new HashMap<String, Double>();
+    private final int maxSlaves;
 
-    public LogListener(int port) {
+    public LogListener(int port, int maxSlaves) {
       this.port = port;
+      this.maxSlaves = maxSlaves;
     }
 
     @Override
@@ -133,7 +145,8 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(recvPacket.getAddress().getHostName() + " -> " + msg);
+          System.out.println(BenchmarkUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          continuousAggSpeed(recvPacket.getAddress().getHostName(), msg);
           is.close();
           in.close();
           recvPacket = null;
@@ -144,6 +157,28 @@ public class Logger {
         }
       }
     }
+
+    public synchronized void continuousAggSpeed(String address, String msg){
+      try{
+        String token = "Speed: ";
+        if(msg.contains(token)){
+          int index = msg.lastIndexOf(token);
+          String speedStr = msg.substring(index+token.length());
+          Double speed = Double.parseDouble(speedStr);
+          speedMap.put(address, speed);
+        }
+
+        if(speedMap.size() == maxSlaves ){
+          double aggSpeed = 0;
+          for(Double speed: speedMap.values()){
+            aggSpeed += speed;
+          }
+          Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
+          speedMap.clear();
+        }
+      }catch(NumberFormatException e){
+      }
+ }
 
     public void stop() {
       this.running = false;

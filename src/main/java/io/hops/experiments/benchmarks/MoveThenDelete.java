@@ -16,10 +16,9 @@
  */
 package io.hops.experiments.benchmarks;
 
-import io.hops.experiments.controller.ConfigKeys;
-import io.hops.experiments.controller.MasterArgsReader;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
+import io.hops.experiments.benchmarks.common.config.Configuration;
 import io.hops.experiments.utils.BenchmarkUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -29,8 +28,8 @@ import org.apache.hadoop.fs.Path;
  */
 public class MoveThenDelete {
 
-  private Configuration conf = new Configuration();
-  private MasterArgsReader args;
+  private org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
+  private Configuration args;
 
   public static void main(String[] argv) throws Exception {
     
@@ -44,8 +43,8 @@ public class MoveThenDelete {
 
   private void start(String configFilePath, String hdfsFolder)  {
     try {
-      args = new MasterArgsReader(configFilePath);
-      Configuration conf = createHdfsConf();
+      args = new Configuration(configFilePath);
+      org.apache.hadoop.conf.Configuration conf = createHdfsConf();
 
       // do shit here
       FileSystem dfs = BenchmarkUtils.getDFSClient(conf);
@@ -78,8 +77,8 @@ public class MoveThenDelete {
     }
   }
 
-  private Configuration createHdfsConf() {
-    Configuration dfsClientConf = new Configuration();
+  private org.apache.hadoop.conf.Configuration createHdfsConf() {
+    org.apache.hadoop.conf.Configuration dfsClientConf = new org.apache.hadoop.conf.Configuration();
     dfsClientConf.set(ConfigKeys.FS_DEFAULTFS_KEY, args.getNameNodeRpcAddress());
     dfsClientConf.set(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, Long.toString(args.getNameNodeRefreshRate()));
     dfsClientConf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, args.getNameNodeSelectorPolicy());

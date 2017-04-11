@@ -17,9 +17,12 @@
  */
 package io.hops.experiments.utils;
 
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +36,7 @@ import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class BenchmarkUtils {
 
-    private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
+    private static final boolean SERVER_LESS_MODE=true; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
     private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
@@ -70,7 +73,7 @@ public class BenchmarkUtils {
             }
             
             filePools.set(filePool);
-            System.out.println("New FilePool created. Total :"+ filePoolCount.incrementAndGet());
+            System.out.println("New FilePool " +filePool+" created. Total :"+ filePoolCount.incrementAndGet());
         }else{
             System.out.println("Reusing file pool obj "+filePool);
         }
@@ -177,27 +180,65 @@ public class BenchmarkUtils {
       return round / 100;
     }
 
-  public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
-      if(SERVER_LESS_MODE){
-          serverLessModeRandomWait();
-          return;
-      }
+    public static String format(int spaces, String string) {
+        String format = "%1$-" + spaces + "s";
+        return String.format(format, string);
+    }
 
-    FSDataOutputStream out = dfs.append(path);
+    public static boolean isTwoDecimalPlace(double val) {
+        if (val == 0 || val == ((int) val)) {
+            return true;
+        } else {
+            String valStr = Double.toString(val);
+            int i = valStr.lastIndexOf('.');
+            if (i != -1 && (valStr.substring(i + 1).length() == 1 || valStr.substring(i + 1).length() == 2)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
+        if (SERVER_LESS_MODE) {
+            serverLessModeRandomWait();
+            return;
+        }
+
+        FSDataOutputStream out = dfs.append(path);
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
                 out.writeInt(1);
             }
         }
         out.close();
-  }
+    }
+
+    public static int getActiveNameNodesCount(BenchMarkFileSystemName fsName, FileSystem dfs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (SERVER_LESS_MODE) {
+            serverLessModeRandomWait();
+            return 0;
+        }
+
+        //it only works for HopsFS
+        if (fsName == BenchMarkFileSystemName.HopsFS) {
+            Class filesystem = dfs.getClass();
+            Method method = filesystem.getMethod("getNameNodesCount");
+            Object ret = method.invoke(dfs);
+            return (Integer) ret;
+        } else if (fsName == BenchMarkFileSystemName.HDFS) {
+            return 1;
+        } else {
+            throw new UnsupportedOperationException("Implement get namenode count for other filesystems");
+        }
+    }
 
     private static  void serverLessModeRandomWait(){
-        try {
+//        try {
 //            Thread.sleep(rand.nextInt(10));
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//            Thread.sleep(1);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 }

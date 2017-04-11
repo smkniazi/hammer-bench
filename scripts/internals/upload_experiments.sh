@@ -20,26 +20,14 @@
 # This script broadcasts all files required for running a HOP instance.
 # A password-less sign-on should be setup prior to calling this script
 
-PSSH=
-PRSYNC=
-OS=$(./os-type.sh)
-if [ $OS == "Ubuntu" ] ; then
-   PRSYNC="/usr/bin/parallel-rsync"
-   PSSH="/usr/bin/parallel-ssh"
-elif [ $OS == "CentOS" ] ; then
-   PRSYNC="/usr/bin/prsync"
-   PSSH="/usr/bin/pssh"
-fi
-
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PSSH=$($DIR/psshcmd.sh)
+PRSYNC=$($DIR/prsynccmd.sh)
 
 #upload Experiments
 
  echo "***   Copying the Experiment to $HopsFS_Experiments_Remote_Dist_Folder  on ${BM_Machines_FullList[*]}***"
-	for machine in ${BM_Machines_FullList[*]}
-	do
-		 connectStr="$HopsFS_User@$machine"
-		 ssh $connectStr 'mkdir -p '$HopsFS_Experiments_Remote_Dist_Folder
-	done
+        $PSSH -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  'mkdir -p '$HopsFS_Experiments_Remote_Dist_Folder
 
 	JarFileName=hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar
 	temp_folder=/tmp/hop_exp_distro
@@ -49,5 +37,8 @@ fi
 	cp ./internals/HopsFS_Exp_Remote_Scripts/* $temp_folder/
 	cp ./master.properties $temp_folder/
 	cp ./slave.properties $temp_folder/
+
+        sed -i 's|JAVA_BIN|'$JAVA_BIN'|g' $temp_folder/*.sh
+        sed -i 's|CPU_AFFINITY=.*|CPU_AFFINITY='$CPU_AFFINITY'|g' $temp_folder/*.sh
 
 	$PRSYNC -arzv -H "${BM_Machines_FullList[*]}" --user $HopsFS_User     $temp_folder/   $HopsFS_Experiments_Remote_Dist_Folder  

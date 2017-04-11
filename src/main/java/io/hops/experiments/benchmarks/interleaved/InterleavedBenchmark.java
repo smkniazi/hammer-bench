@@ -17,16 +17,16 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.OperationsUtils;
+import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
-import io.hops.experiments.coin.MultiFaceCoin;
+import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
-import org.apache.commons.math3.analysis.function.Log;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,6 +35,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -58,8 +59,9 @@ public class InterleavedBenchmark extends Benchmark {
 
     public InterleavedBenchmark(Configuration conf, int numThreads,
                                 int inodesPerDir, int filesPerDir,
-                                boolean fixedDepthTree, int treeDepth) {
-        super(conf, numThreads);
+                                boolean fixedDepthTree, int treeDepth,
+                                BenchMarkFileSystemName fsName) {
+        super(conf, numThreads,fsName);
         this.dirsPerDir = inodesPerDir;
         this.filesPerDir = filesPerDir;
         this.fixedDepthTree = fixedDepthTree;
@@ -79,37 +81,47 @@ public class InterleavedBenchmark extends Benchmark {
             workers.add(worker);
         }
         executor.invokeAll(workers); // blocking call
-        Logger.printMsg("Completed Warmup Phase");
+        Logger.printMsg("Finished. Warmup Phase: 100%.");
         workers.clear();
         return new NamespaceWarmUp.Response();
     }
 
     @Override
     protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-        InterleavedBenchmarkCommand.Request req = (InterleavedBenchmarkCommand.Request) command;
+        io.hops.experiments.benchmarks.common.config.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
 
-        duration = req.getDuration();
+        duration = config.getInterleavedBmDuration();
         System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
         List workers = new ArrayList<Worker>();
         for (int i = 0; i < numThreads; i++) {
-            Callable worker = new Worker(req);
+            Callable worker = new Worker(config);
             workers.add(worker);
         }
         startTime = System.currentTimeMillis();
 
         FailOverMonitor failOverTester = null;
         List<String> failOverLog = null;
-        if (req.isTestFailover()) {
-            failOverTester = startFailoverTestDeamon(req.getNamenodeRestartCommands(),
-                    req.getFailTestDuration(), req.getFailOverTestStartTime(),
-                    req.getNamenodeRestartTimePeriod());
+        if (config.testFailover()) {
+            boolean canIKillNamenodes = InetAddress.getLocalHost().getHostName().compareTo(config.getNamenodeKillerHost()) == 0;
+            if(canIKillNamenodes){
+                Logger.printMsg("Responsible for killing/restarting namenodes");
+            }
+            failOverTester = startFailoverTestDeamon(
+                    config.getNameNodeRestartCommands(),
+                    config.getFailOverTestDuration(),
+                    config.getFailOverTestStartTime(),
+                    config.getNameNodeRestartTimePeriod(),
+                    canIKillNamenodes);
         }
 
+        Logger.resetTimer();
+
         executor.invokeAll(workers); // blocking call
-        if (req.isTestFailover()) {
+        if (config.testFailover()) {
             failOverTester.stop();
             failOverLog = failOverTester.getFailoverLog();
         }
+
         long totalTime = System.currentTimeMillis() - startTime;
 
 
@@ -118,7 +130,7 @@ public class InterleavedBenchmark extends Benchmark {
         double speed = (operationsCompleted.get() / (double) totalTime) * 1000;
 
         InterleavedBenchmarkCommand.Response response =
-                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, avgLatency.getMean(), failOverLog);
+                new InterleavedBenchmarkCommand.Response(totalTime, operationsCompleted.get(), operationsFailed.get(), speed, opsExeTimes, avgLatency.getMean(), failOverLog,getAliveNNsCount());
         return response;
     }
 
@@ -126,26 +138,34 @@ public class InterleavedBenchmark extends Benchmark {
 
         private FileSystem dfs;
         private FilePool filePool;
-        private InterleavedBenchmarkCommand.Request req;
-        private MultiFaceCoin coin;
+        private InterleavedMultiFaceCoin coin;
+        private io.hops.experiments.benchmarks.common.config.Configuration config = null;
 
-        public Worker(InterleavedBenchmarkCommand.Request req) throws IOException {
-            this.req = req;
+        public Worker(io.hops.experiments.benchmarks.common.config.Configuration config) throws IOException {
+          this.config = config;
         }
 
         @Override
         public Object call() throws Exception {
             dfs = BenchmarkUtils.getDFSClient(conf);
-            filePool = BenchmarkUtils.getFilePool(conf, req.getBaseDir(),
+            filePool = BenchmarkUtils.getFilePool(conf, config.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
-            coin = new MultiFaceCoin(req.getCreatePercent(), req.getAppendPercent(),
-                    req.getReadPercent(), req.getRenamePercent(), req.getDeletePercent(),
-                    req.getLsFilePercent(), req.getLsDirPercent(),
-                    req.getChmodFilePercent(), req.getChmodDirsPercent(), req.getMkdirPercent(),
-                    req.getSetReplicationPercent(), req.getFileInfoPercent(), req.getDirInfoPercent(),
-                    req.getFileChownPercent(), req.getDirChownPercent());
-            String filePath = null;
-
+            coin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
+                    config.getInterleavedBmAppendFilePercentage(),
+                    config.getInterleavedBmReadFilesPercentage(),
+                    config.getInterleavedBmRenameFilesPercentage(),
+                    config.getInterleavedBmDeleteFilesPercentage(),
+                    config.getInterleavedBmLsFilePercentage(),
+                    config.getInterleavedBmLsDirPercentage(),
+                    config.getInterleavedBmChmodFilesPercentage(),
+                    config.getInterleavedBmChmodDirsPercentage(),
+                    config.getInterleavedBmMkdirPercentage(),
+                    config.getInterleavedBmSetReplicationPercentage(),
+                    config.getInterleavedBmGetFileInfoPercentage(),
+                    config.getInterleavedBmGetDirInfoPercentage(),
+                    config.getInterleavedBmFileChangeOwnerPercentage(),
+                    config.getInterleavedBmDirChangeOwnerPercentage()
+            );
             while (true) {
                 try {
                     if ((System.currentTimeMillis() - startTime) > duration) {
@@ -156,7 +176,7 @@ public class InterleavedBenchmark extends Benchmark {
 
                     performOperation(op);
 
-                    if (!req.isTestFailover()) {
+                    if (!config.testFailover()) {
                         log();
                     }
 
@@ -171,9 +191,9 @@ public class InterleavedBenchmark extends Benchmark {
             String message = "";
             if (Logger.canILog()) {
 
-                message += format(25, "Completed Ops: " + operationsCompleted + " ");
-                message += format(20, "Failed Ops: " + operationsFailed + " ");
-                message += format(20, "Avg. Speed: " + speedPSec(operationsCompleted.get(), startTime) + " ops/s ");
+                message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
+                message += BenchmarkUtils.format(25, "Failed Ops: " + operationsFailed + " ");
+                message += BenchmarkUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
 //                if(avgLatency.getN() > 0){
 //                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
 //                }
@@ -188,7 +208,7 @@ public class InterleavedBenchmark extends Benchmark {
 //
 //            double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
 //            String msg = op + ": [" + percent + "%] ";
-//            message += format(op.toString().length() + 14, msg);
+//            message += BenchmarkUtils.format(op.toString().length() + 14, msg);
 //          }
 //        }
                 Logger.printMsg(message);
@@ -204,7 +224,8 @@ public class InterleavedBenchmark extends Benchmark {
                     long opStartTime = 0L;
                     opStartTime = System.nanoTime();
 
-                    OperationsUtils.performOp(dfs, opType, filePool, path, req.getReplicationFactor(), req.getFileSize(), req.getAppendSize());
+                    OperationsUtils.performOp(dfs, opType, filePool, path, config.getReplicationFactor(),
+                           config.getFileSize(), config.getAppendFileSize());
                     opExeTime = System.nanoTime() - opStartTime;
                     retVal = true;
                 } catch (Exception e) {
@@ -213,6 +234,7 @@ public class InterleavedBenchmark extends Benchmark {
                 updateStats(opType, retVal, opExeTime);
             } else {
                 Logger.printMsg("Could not perform operation " + opType + ". Got Null from the file pool");
+//                System.exit(-1);
             }
         }
 
@@ -227,7 +249,7 @@ public class InterleavedBenchmark extends Benchmark {
             if (success) {
                 operationsCompleted.incrementAndGet();
                 avgLatency.addValue(opExeTime);
-                if (req.isPercentileEnabled()) {
+                if (config.isPercentileEnabled()) {
                     synchronized (opsExeTimes) {
                         ArrayList<Long> times = opsExeTimes.get(opType);
                         if (times == null) {
@@ -244,19 +266,14 @@ public class InterleavedBenchmark extends Benchmark {
         }
     }
 
-    protected String format(int spaces, String string) {
-        String format = "%1$-" + spaces + "s";
-        return String.format(format, string);
-    }
-
     private double speedPSec(long ops, long startTime) {
         long timePassed = (System.currentTimeMillis() - startTime);
         double opsPerMSec = (double) (ops) / (double) timePassed;
         return BenchmarkUtils.round(opsPerMSec * 1000);
     }
 
-    FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP) {
-        FailOverMonitor worker = new FailOverMonitor(commands, failoverTestDuration, failoverTestStartTime, namenodeRestartTP);
+    FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP, boolean canIKillNamenodes) {
+        FailOverMonitor worker = new FailOverMonitor(commands, failoverTestDuration, failoverTestStartTime, namenodeRestartTP, canIKillNamenodes);
         Thread t = new Thread(worker);
         t.start();
         return worker;
@@ -270,16 +287,18 @@ public class InterleavedBenchmark extends Benchmark {
         long namenodeRestartTP;
         long failoverTestDuration;
         long failoverStartTime;
+        boolean canIKillNNs;
 
         public FailOverMonitor(List<List<String>> commands,
                                long failoverTestDuration, long failoverTestStartTime,
-                               long namenodeRestartTP) {
+                               long namenodeRestartTP, boolean canIKillNNs) {
             this.allCommands = commands;
             this.namenodeRestartTP = namenodeRestartTP;
             this.stop = false;
             this.failoverStartTime = failoverTestStartTime;
             this.failoverTestDuration = failoverTestDuration;
             this.log = new LinkedList<String>();
+            this.canIKillNNs = canIKillNNs;
         }
 
         @Override
@@ -299,17 +318,20 @@ public class InterleavedBenchmark extends Benchmark {
                 }
 
                 log.add(tick + " " + speed);
-                Logger.printMsg("Time: " + tick + " sec. Speed:" + speed + " ops p/s");
+                Logger.printMsg("Time: " + tick + " sec. Speed: " + speed);
 
 
-                if (((System.currentTimeMillis() - startTime) > failoverStartTime)) {
-                    if ((startTime + failoverStartTime + failoverTestDuration) > System.currentTimeMillis()) {
-                        if (System.currentTimeMillis() - lastFailOver > namenodeRestartTP) {
-                            int index = (rrIndex++) % allCommands.size();
-                            List<String> nnCommands = allCommands.get(index);
-                            new Thread(new FailOverCommandExecutor(nnCommands)).start();
-                            lastFailOver = System.currentTimeMillis();
-                            log.add("#NameNode Restart Initiated");
+                if (canIKillNNs) {
+                    if (((System.currentTimeMillis() - startTime) > failoverStartTime)) {
+                        if ((startTime + failoverStartTime + failoverTestDuration) > System.currentTimeMillis()) {
+                            if (System.currentTimeMillis() - lastFailOver > namenodeRestartTP) {
+                                int index = (rrIndex++) % allCommands.size();
+                                List<String> nnCommands = allCommands.get(index);
+                                new Thread(new FailOverCommandExecutor(nnCommands)).start();
+                                lastFailOver = System.currentTimeMillis();
+                                log.add("#NameNode Restart Initiated");
+                                Logger.printMsg("#NameNode Restart Initiated");
+                            }
                         }
                     }
                 }
@@ -360,7 +382,6 @@ class FailOverCommandExecutor implements Runnable {
             if (command.contains("kill")) { //[s] for some reason NameNode does not start soon after it is killed. TODO: fix it
                 Thread.sleep(1000);
             }
-            Logger.printMsg("Command Executed");
         } catch (IOException e) {
             e.printStackTrace();
             Logger.printMsg("Exception During Restarting the NameNode Command " + command + "   Ex: " + e.toString());

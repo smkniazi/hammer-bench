@@ -34,9 +34,9 @@ public class BlockReportBMResults extends BMResult {
   private final double avgTimeToGetNameNodeToReport;
 
 
-  public BlockReportBMResults(int noOfNameNodes, int noOfNDBDataNodes, double speed, double successfulOps, double failedOps,
+  public BlockReportBMResults(int noOfExpectedNNs, int noOfAliveNNs, int noOfNDBDataNodes, double speed, double successfulOps, double failedOps,
           double avgTimePerReport, double avgTimeToGetNameNodeToReport) {
-    super(noOfNameNodes,noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
+    super(noOfExpectedNNs, noOfAliveNNs,noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.successfulOps = successfulOps;
     this.failedOps = failedOps;
@@ -71,7 +71,8 @@ public class BlockReportBMResults extends BMResult {
                 + " Speed-/sec: " + BenchmarkUtils.round(speed)
                 + " AvgTimePerReport: " + BenchmarkUtils.round(avgTimePerReport)
                 + " AvgTimeToGetNameNodeToReport: " + BenchmarkUtils.round(avgTimeToGetNameNodeToReport)
-                + " No of NameNodes: "+super.getNoOfNamenodes();
+                + " No of Expected NNs : "+super.getNoOfExpectedAliveNNs()
+                + " No of Alive NNs : "+super.getNoOfAcutallAliveNNs();
     return message;
   }
 }

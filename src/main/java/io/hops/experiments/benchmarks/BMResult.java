@@ -26,24 +26,30 @@ import java.io.Serializable;
  */
 public abstract class BMResult implements Serializable{
   private final BenchmarkType benchMarkType;
-  private final int noOfNameNodes;
+  private final int noOfExpectedAliveNNs;
+  private final int noOfAcutallAliveNNs;
   private final int noOfNDBDataNodes;
 
-  public BMResult(int noOfNameNodes, int noOfNDBDataNodes, BenchmarkType benchMarkType) {
+  public BMResult(int noOfExpectedAliveNNs, int noOfAcutallAliveNNs, int noOfNDBDataNodes, BenchmarkType benchMarkType) {
     this.benchMarkType = benchMarkType;
-    this.noOfNameNodes = noOfNameNodes;
+    this.noOfExpectedAliveNNs = noOfExpectedAliveNNs;
     this.noOfNDBDataNodes = noOfNDBDataNodes;
+    this.noOfAcutallAliveNNs = noOfAcutallAliveNNs;
   }
   
   public BenchmarkType getBenchMarkType(){
     return benchMarkType;
   }
   
-  public int getNoOfNamenodes(){
-    return noOfNameNodes;
+  public int getNoOfExpectedAliveNNs(){
+    return noOfExpectedAliveNNs;
   }
   
   public int getNoOfNDBDataNodes(){
     return noOfNDBDataNodes;
+  }
+
+  public int getNoOfAcutallAliveNNs() {
+    return noOfAcutallAliveNNs;
   }
 }

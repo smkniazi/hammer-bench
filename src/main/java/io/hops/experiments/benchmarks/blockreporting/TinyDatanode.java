@@ -15,38 +15,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.benchmarks.blockreporting;
+        package io.hops.experiments.benchmarks.blockreporting;
 
-import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hdfs.DFSConfigKeys;
-import org.apache.hadoop.hdfs.protocol.Block;
-import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
-import org.apache.hadoop.hdfs.protocol.DatanodeID;
-import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
-import org.apache.hadoop.hdfs.server.datanode.DataNode;
-import org.apache.hadoop.hdfs.server.datanode.DataStorage;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
-import org.apache.hadoop.hdfs.server.protocol.NamespaceInfo;
-import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
-import org.apache.hadoop.hdfs.server.protocol.StorageReport;
-import org.apache.hadoop.net.DNS;
-import org.apache.hadoop.util.Time;
-import org.apache.hadoop.util.VersionInfo;
+        import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
+        import org.apache.commons.logging.Log;
+        import org.apache.commons.logging.LogFactory;
+        import org.apache.hadoop.hdfs.DFSConfigKeys;
+        import org.apache.hadoop.hdfs.protocol.Block;
+        import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
+        import org.apache.hadoop.hdfs.protocol.DatanodeID;
+        import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
+        import org.apache.hadoop.hdfs.server.datanode.DataNode;
+        import org.apache.hadoop.hdfs.server.datanode.DataStorage;
+        import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
+        import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
+        import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
+        import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
+        import org.apache.hadoop.hdfs.server.protocol.NamespaceInfo;
+        import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
+        import org.apache.hadoop.hdfs.server.protocol.StorageReport;
+        import org.apache.hadoop.net.DNS;
+        import org.apache.hadoop.util.Time;
+        import org.apache.hadoop.util.VersionInfo;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+        import java.io.IOException;
+        import java.net.UnknownHostException;
+        import java.util.ArrayList;
+        import java.util.Collections;
+        import java.util.List;
 
-import static io.hops.experiments.benchmarks.blockreporting.nn
-    .BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
-import io.hops.experiments.controller.Logger;
+        import static io.hops.experiments.benchmarks.blockreporting.nn
+        .BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
+        import io.hops.experiments.controller.Logger;
 
 public class TinyDatanode implements Comparable<String> {
 
@@ -79,10 +79,10 @@ public class TinyDatanode implements Comparable<String> {
   }
 
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int
-      blockCapacity) throws IOException {
+          blockCapacity) throws IOException {
     this.dnIdx = dnIdx;
     this.blocks = new ArrayList<Block>(
-        Collections.nCopies(blockCapacity, (Block) null));
+            Collections.nCopies(blockCapacity, (Block) null));
     this.nrBlocks = 0;
     this.nameNodeSelector = nameNodeSelector;
   }
@@ -98,18 +98,18 @@ public class TinyDatanode implements Comparable<String> {
 
   void register(boolean isDataNodePopulated) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
+            .getNameNodes();
     // get versions from the namenode
     nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
-        new DatanodeID(DNS.getDefaultIP("default"),
-            DNS.getDefaultHost("default", "default"),
-                DataNode.generateUuid(), getNodePort(dnIdx),
-            DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
-            DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
-            DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
-        new DataStorage(nsInfo), new ExportedBlockKeys(),
-        VersionInfo.getVersion());
+            new DatanodeID(DNS.getDefaultIP("default"),
+                    DNS.getDefaultHost("default", "default"),
+                    DataNode.generateUuid(), getNodePort(dnIdx),
+                    DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
+                    DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
+                    DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
+            new DataStorage(nsInfo), new ExportedBlockKeys(),
+            VersionInfo.getVersion());
     //dnRegistration.setStorageID(createNewStorageId(dnRegistration.getXferPort(), dnIdx));
     // register datanode
     for(BlockReportingNameNodeHandle nn : namenodes) {
@@ -136,7 +136,7 @@ public class TinyDatanode implements Comparable<String> {
     StorageReport[] rep = { new StorageReport(storage, false,
             DF_CAPACITY, DF_USED, DF_CAPACITY - DF_USED, DF_USED) };
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
+            .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes) {
       DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep,
               0L, 0L, 0, 0, 0).getCommands();
@@ -174,7 +174,7 @@ public class TinyDatanode implements Comparable<String> {
 //    if(isDataNodePopulated){
 //      firstBlockReport(reports);
 //    }
-    
+
     Logger.printMsg("Datanode # "+this.dnIdx+" has generated a block report of size "+blocks.size());
   }
 
@@ -186,7 +186,7 @@ public class TinyDatanode implements Comparable<String> {
 
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
-        .getNameNodeToReportTo();
+            .getNameNodeToReportTo(reports.length);
 
     long start = Time.now();
     blockReport(nameNodeToReportTo, reports);
@@ -196,7 +196,7 @@ public class TinyDatanode implements Comparable<String> {
 
   private void firstBlockReport(StorageBlockReport[] reports) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
+            .getNameNodes();
     for(BlockReportingNameNodeHandle nn : namenodes){
       blockReport(nn.getDataNodeRPC(), reports);
     }

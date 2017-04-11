@@ -83,7 +83,7 @@ class HadoopNameNodeSelector implements BlockReportingNameNodeSelector{
   }
 
   @Override
-  public DatanodeProtocol getNameNodeToReportTo() throws IOException {
+  public DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws IOException {
     stats++;
     return datanodeProto;
   }
