@@ -30,16 +30,16 @@ public class NamespaceWarmUp {
     private BenchmarkType benchMarkType;
     private int filesToCreate;
     private short replicationFactor;
-    private long fileSize;
+    private String fileSizeDistribution;
     private long appendSize;
     private String baseDir;
 
     public Request(BenchmarkType benchMarkType, int filesToCreate,
-            short replicationFactor, long fileSize, long appendSize, String baseDir) {
+            short replicationFactor, String fileSizeDistribution, long appendSize, String baseDir) {
       this.benchMarkType = benchMarkType;
       this.filesToCreate = filesToCreate;
       this.replicationFactor = replicationFactor;
-      this.fileSize = fileSize;
+      this.fileSizeDistribution = fileSizeDistribution;
       this.appendSize = appendSize;
       this.baseDir = baseDir;
     }
@@ -64,8 +64,8 @@ public class NamespaceWarmUp {
       return replicationFactor;
     }
 
-    public long getFileSize() {
-      return fileSize;
+    public String getFileSizeDistribution() {
+      return fileSizeDistribution;
     }
   }
 
