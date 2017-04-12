@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Logger {
 
-  static AtomicLong lastmsg = new AtomicLong(System.currentTimeMillis());
+  static long lastmsg = 0;
   private static InetAddress loggerIp = null;
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
@@ -66,7 +66,7 @@ public class Logger {
   }
 
   public static void resetTimer(){
-    lastmsg.set(System.currentTimeMillis());
+    lastmsg = System.currentTimeMillis();
   }
 
  public static synchronized void printMsg(String msg) {
@@ -94,8 +94,8 @@ public class Logger {
   }
 
   public static synchronized boolean canILog() {
-    if ((System.currentTimeMillis() - lastmsg.get()) > 5000) {
-      lastmsg.set(System.currentTimeMillis());
+    if ((System.currentTimeMillis() - lastmsg) > 5000) {
+      lastmsg = System.currentTimeMillis();
       return true;
     } else {
       return false;
