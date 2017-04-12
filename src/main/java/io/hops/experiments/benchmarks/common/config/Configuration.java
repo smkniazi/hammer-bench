@@ -25,6 +25,7 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.utils.BenchmarkUtils;
@@ -82,6 +83,9 @@ public class Configuration implements Serializable {
     if (getInterleavedBmCreateFilesPercentage().doubleValue() <= getInterleavedBmDeleteFilesPercentage().doubleValue() && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       throw new IllegalArgumentException("Delete operations can not be more than create operations");
     }
+
+    //check the file size distribution coin
+    FileSizeMultiFaceCoin fcoin = new FileSizeMultiFaceCoin(this.getFileSizeDistribution());
 
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages

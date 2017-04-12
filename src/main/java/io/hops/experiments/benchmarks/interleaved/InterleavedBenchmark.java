@@ -142,9 +142,11 @@ public class InterleavedBenchmark extends Benchmark {
         private InterleavedMultiFaceCoin opCoin;
         private FileSizeMultiFaceCoin fileSizeCoin;
         private io.hops.experiments.benchmarks.common.config.Configuration config = null;
+        private long lastMsg = System.currentTimeMillis();
 
         public Worker(io.hops.experiments.benchmarks.common.config.Configuration config) throws IOException {
           this.config = config;
+          this.lastMsg = System.currentTimeMillis();
         }
 
         @Override
@@ -189,32 +191,41 @@ public class InterleavedBenchmark extends Benchmark {
             }
         }
 
+
         private void log() throws IOException {
 
-            String message = "";
-            if (Logger.canILog()) {
+            // Send a log message once every five second.
+            // The logger also tires to rate limit the log messages
+            // using the canILog() methods. canILog method is synchronized
+            // method. Calling it frequently can slightly impact the performance
+            // It is better that each thread call the canILog() method only
+            // once every five sec
+            if((System.currentTimeMillis() - lastMsg) > 5000) {
+                lastMsg = System.currentTimeMillis();
+                String message = "";
+                if (Logger.canILog()) {
+                    message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
+                    message += BenchmarkUtils.format(25, "Failed Ops: " + operationsFailed + " ");
+                    message += BenchmarkUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
+                /*if(avgLatency.getN() > 0){
+                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
+                }*/
 
-                message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
-                message += BenchmarkUtils.format(25, "Failed Ops: " + operationsFailed + " ");
-                message += BenchmarkUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
-//                if(avgLatency.getN() > 0){
-//                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
-//                }
 
+                /*SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+                sorted.addAll(operationsStats.keySet());
 
-//        SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
-//        sorted.addAll(operationsStats.keySet());
-//
-//        for (BenchmarkOperations op : sorted) {
-//          AtomicLong stat = operationsStats.get(op);
-//          if (stat != null) {
-//
-//            double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
-//            String msg = op + ": [" + percent + "%] ";
-//            message += BenchmarkUtils.format(op.toString().length() + 14, msg);
-//          }
-//        }
-                Logger.printMsg(message);
+                for (BenchmarkOperations op : sorted) {
+                  AtomicLong stat = operationsStats.get(op);
+                  if (stat != null) {
+
+                    double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
+                    String msg = op + ": [" + percent + "%] ";
+                    message += BenchmarkUtils.format(op.toString().length() + 14, msg);
+                  }
+                }*/
+                    Logger.printMsg(message);
+                }
             }
         }
 

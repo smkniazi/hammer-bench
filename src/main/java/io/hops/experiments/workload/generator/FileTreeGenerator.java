@@ -28,20 +28,21 @@ import java.util.*;
  */
 public class FileTreeGenerator implements FilePool {
 
-  private Random rand;
+  private Random rand1;
   private UUID uuid = null;
   protected List<String> allThreadFiles;
   protected List<String> allThreadDirs;
   protected String threadDir;
   private NameSpaceGenerator nameSpaceGenerator;
   private final int THRESHOLD = 3;
+  private int currIndex = -1;
 
   public FileTreeGenerator(String baseDir, int filesPerDir,
           int dirPerDir, int initialTreeDepth) {
 
     this.allThreadFiles = new ArrayList<String>(1000000);
     this.allThreadDirs = new ArrayList<String>(1000000);
-    this.rand = new Random(System.currentTimeMillis());
+    this.rand1 = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
 
 
@@ -49,7 +50,7 @@ public class FileTreeGenerator implements FilePool {
     try {
       machineName = InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
-      machineName = "Client_Machine+" + rand.nextInt();
+      machineName = "Client_Machine+" + rand1.nextInt();
     }
 
     baseDir = baseDir.trim();
@@ -106,22 +107,29 @@ public class FileTreeGenerator implements FilePool {
     }
 
     for (int i = 0; i < allThreadFiles.size(); i++) {
-      int renameIndex = rand.nextInt(allThreadFiles.size());
-      String path = allThreadFiles.get(renameIndex);
+      currIndex = rand1.nextInt(allThreadFiles.size());
+      String path = allThreadFiles.get(currIndex);
       if (getPathLength(path) < THRESHOLD) {
         continue;
       }
       //System.out.println("Rename path "+path);
       return path;
     }
+
     return null;
   }
 
   @Override
   public void fileRenamed(String from, String to) {
-    int index = allThreadFiles.indexOf(from);
-    allThreadFiles.remove(index);
-    allThreadFiles.add(index, to);
+//    int index = allThreadFiles.indexOf(from);
+//    allThreadFiles.remove(index);
+
+    String curr = allThreadFiles.get(currIndex);
+    if(curr != from){
+      IllegalStateException up = new IllegalStateException("File name did not match.");
+      throw up;
+    }
+//    allThreadFiles.set(currIndex, to);
   }
 
   @Override
@@ -129,9 +137,9 @@ public class FileTreeGenerator implements FilePool {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    int deleteIndex = rand.nextInt(allThreadFiles.size());
+    currIndex = rand1.nextInt(allThreadFiles.size());
     for (int i = 0; i < allThreadFiles.size(); i++) {
-      String file = allThreadFiles.remove(deleteIndex);
+      String file = allThreadFiles.remove(currIndex);
       if(getPathLength(file) < THRESHOLD){
         continue;
       }
@@ -194,8 +202,8 @@ public class FileTreeGenerator implements FilePool {
   private String getRandomFile() {
     if (!allThreadFiles.isEmpty()) {
       for (int i = 0; i < allThreadFiles.size(); i++) {
-        int index = rand.nextInt(allThreadFiles.size());
-        String path = allThreadFiles.get(index);
+        currIndex = rand1.nextInt(allThreadFiles.size());
+        String path = allThreadFiles.get(currIndex);
         if (getPathLength(path) < THRESHOLD) {
           continue;
         }
@@ -216,8 +224,8 @@ public class FileTreeGenerator implements FilePool {
   public String getRandomDir() {
     if (!allThreadFiles.isEmpty()) {
       for (int i = 0; i < allThreadFiles.size(); i++) {
-        int index = rand.nextInt(allThreadFiles.size());
-        String path = allThreadFiles.get(index);
+        currIndex = rand1.nextInt(allThreadFiles.size());
+        String path = allThreadFiles.get(currIndex);
         int dirIndex = path.lastIndexOf("/");
         path = path.substring(0, dirIndex);
         if (getPathLength(path) < THRESHOLD) {

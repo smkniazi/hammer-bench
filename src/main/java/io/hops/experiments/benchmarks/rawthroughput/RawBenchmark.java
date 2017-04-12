@@ -19,9 +19,7 @@ package io.hops.experiments.benchmarks.rawthroughput;
 import io.hops.experiments.benchmarks.OperationsUtils;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -130,6 +128,7 @@ public class RawBenchmark extends Benchmark {
     private FilePool filePool;
     private String baseDir;
     private FileSizeMultiFaceCoin fileSizeCoin;
+    private long lastLog = System.currentTimeMillis();
 
     public Generic(String baseDir, BenchmarkOperations opType) throws IOException {
       this.baseDir = baseDir;
@@ -137,6 +136,7 @@ public class RawBenchmark extends Benchmark {
       this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
     }
 
+    Map<Long, Long> stats = new HashMap<Long,Long>();
     @Override
     public Object call() throws Exception {
       try{
@@ -160,17 +160,57 @@ public class RawBenchmark extends Benchmark {
                                          + filesCreatedInWarmupPhase.get()))) {
             return null;
           }
-          
+
+          long fileSize = -1;
+          if(opType == opType.CREATE_FILE){
+            fileSize = fileSizeCoin.getFileSize();
+            /*For logging file size distribution
+            synchronized (this) {
+              Long count = stats.get(fileSize);
+              Long newCount = count == null ? 1 : count + 1;
+              stats.put(fileSize, newCount);
+            }*/
+          }
+
           OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, fileSizeCoin.getFileSize(), appendSize);
           
           successfulOps.incrementAndGet();
 
-          if (Logger.canILog()) {
-            Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + BenchmarkUtils.round(speedPSec(successfulOps, phaseStartTime)));
-          }
+          log();
+
         } catch (Exception e) {
           failedOps.incrementAndGet();
           Logger.error(e);
+        }
+      }
+    }
+
+    private void log(){
+      // Send a log message once every five second.
+      // The logger also tires to rate limit the log messages
+      // using the canILog() methods. canILog method is synchronized
+      // method. Calling it frequently can slightly impact the performance
+      // It is better that each thread call the canILog() method only
+      // once every five sec
+      if((System.currentTimeMillis() - lastLog) > 5000){
+        lastLog = System.currentTimeMillis();
+        if (Logger.canILog()) {
+          Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + BenchmarkUtils.round(speedPSec(successfulOps, phaseStartTime)));
+
+          //log file size distribution
+          /*synchronized (this) {
+            String msg = "";
+            Long total = new Long(0);
+            for (Long size : stats.keySet()) {
+              Long count = stats.get(size);
+              total += count;
+            }
+            for (Long size : stats.keySet()) {
+              Long count = stats.get(size);
+              msg += "  Size: " + size + " Percentage: " + (count / (double) total) * 100+"\n";
+            }
+            Logger.printMsg("Ratio: " + msg);
+          }*/
         }
       }
     }

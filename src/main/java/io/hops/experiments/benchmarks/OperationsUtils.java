@@ -59,10 +59,10 @@ public class OperationsUtils {
       return path;
     }
 
-    public static boolean performOp(FileSystem dfs, BenchmarkOperations opType, 
-            FilePool filePool, String pathStr, short replicationFactor,
+    static final String RENAMED = "RN";
+    public static boolean performOp(FileSystem dfs, BenchmarkOperations opType,
+            FilePool filePool, String path, short replicationFactor,
             long fileSize, long appendSize) throws IOException {
-      Path path = new Path(pathStr);
       if (opType == BenchmarkOperations.SET_REPLICATION) {
         BenchmarkUtils.setReplication(dfs, path);
       } else if (opType == BenchmarkOperations.FILE_INFO
@@ -75,18 +75,18 @@ public class OperationsUtils {
               || opType == BenchmarkOperations.LS_DIR) {
         BenchmarkUtils.ls(dfs, path);
       } else if (opType == BenchmarkOperations.READ_FILE) {
-        BenchmarkUtils.readFile(dfs, path, fileSize);
+        BenchmarkUtils.readFile(dfs, path);
       } else if (opType == BenchmarkOperations.MKDIRS) {
         BenchmarkUtils.mkdirs(dfs, path);
       } else if (opType == BenchmarkOperations.CREATE_FILE) {
           BenchmarkUtils.createFile(dfs, path, replicationFactor, fileSize);
-          filePool.fileCreationSucceeded(pathStr);
+          filePool.fileCreationSucceeded(path);
       } else if (opType == BenchmarkOperations.DELETE_FILE) {
         BenchmarkUtils.deleteFile(dfs, path);
       } else if (opType == BenchmarkOperations.RENAME_FILE) {
-        String from = filePool.getFileToRename();
+        String from = path;
+//        Count the number of times a files has been renamed
         int currentCounter = 0;
-        final String RENAMED = "Renamed";
         String to = from;
         if (from.contains(RENAMED)) {
           int index1 = from.lastIndexOf(RENAMED);
@@ -97,7 +97,7 @@ public class OperationsUtils {
         }
         currentCounter++;
         to = to + "_" + RENAMED + "_" + currentCounter + "_" + "Times";
-
+//        String to = from;
         if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }

@@ -18,6 +18,7 @@
 package io.hops.experiments.workload.generator;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -37,15 +38,15 @@ public class NameSpaceGenerator {
     private static Random rand = new Random(System.currentTimeMillis());
 
     public NameSpaceGenerator(String baseDir, int filesPerDir, int dirPerDir) {
-        this.allDirs = new ArrayList<String>();
+        this.allDirs = new LinkedList<String>();
         this.FILES_PER_DIR = filesPerDir;
         this.DIR_PER_DIR = dirPerDir;
         
         this.fileCounter = 0;
         this.dirGenerator = new DirNamesGenerator(baseDir,DIR_PER_DIR);
         this.filesPerDirCount = 0;
-        DIR_PREFIX = rand.nextInt()+DIR_PREFIX;
-        FILE_PREFIX = rand.nextInt()+FILE_PREFIX;
+//        DIR_PREFIX = rand.nextInt()+DIR_PREFIX;
+//        FILE_PREFIX = rand.nextInt()+FILE_PREFIX;
     }
 
     public String generateNewDirPath(){
@@ -63,7 +64,7 @@ public class NameSpaceGenerator {
         assert filesPerDirCount < FILES_PER_DIR;
         filesPerDirCount++;
         String filePath = allDirs.get(0)+"/"+FILE_PREFIX+"_"+(fileCounter++);
-        
+
         if(filesPerDirCount >= FILES_PER_DIR) {
             allDirs.remove(0);
             filesPerDirCount = 0;

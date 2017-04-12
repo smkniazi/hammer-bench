@@ -122,10 +122,10 @@ public abstract class Benchmark {
         try {
           filePath = filePool.getFileToCreate();
           BenchmarkUtils
-                  .createFile(dfs, new Path(filePath), replicationFactor,
+                  .createFile(dfs, filePath, replicationFactor,
                   fileSizeCoin.getFileSize());
           filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSizeCoin.getFileSize());
+          BenchmarkUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
         } catch (Exception e) {
