@@ -16,8 +16,7 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.benchmarks.BMResult;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -51,26 +50,26 @@ public abstract class Aggregate {
   }
 
   public double getSpeed() {
-    return BenchmarkUtils.round(speed.getMean());
+    return DFSOperationsUtils.round(speed.getMean());
   }
 
   public double getMaxSpeed() {
-    return BenchmarkUtils.round(speed.getMax());
+    return DFSOperationsUtils.round(speed.getMax());
   }
 
   public double getMinSpeed() {
-    return BenchmarkUtils.round(speed.getMin());
+    return DFSOperationsUtils.round(speed.getMin());
   }
 
   public double getSucessfulOps() {
-    return BenchmarkUtils.round(sucessfulOps.getMean());
+    return DFSOperationsUtils.round(sucessfulOps.getMean());
   }
 
   public double getFailedOps() {
-    return BenchmarkUtils.round(failedOps.getMean());
+    return DFSOperationsUtils.round(failedOps.getMean());
   }
 
   public double getRunDuration() {
-    return BenchmarkUtils.round(runDuration.getMean());
+    return DFSOperationsUtils.round(runDuration.getMean());
   }
 }

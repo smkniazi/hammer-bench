@@ -17,11 +17,11 @@
  */
 package io.hops.experiments.benchmarks.interleaved;
 
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.BenchmarkUtils;
-import java.text.DecimalFormat;
+import io.hops.experiments.utils.DFSOperationsUtils;
+
 import java.util.Map;
 
 /**
@@ -79,11 +79,11 @@ public class InterleavedBMResults extends BMResult {
   @Override
   public String toString() {
 
-    String message = "Speed-/sec: " + BenchmarkUtils.round(speed) 
-            + " Successful-Ops: " + BenchmarkUtils.round(successfulOps)
-            + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
-            + " Avg-Ops-Latency: " + BenchmarkUtils.round(avgOpLatency)
-            + " Avg-Test-Duration-sec " + BenchmarkUtils.round(duration)
+    String message = "Speed-/sec: " + DFSOperationsUtils.round(speed)
+            + " Successful-Ops: " + DFSOperationsUtils.round(successfulOps)
+            + " Failed-Ops: " + DFSOperationsUtils.round(failedOps)
+            + " Avg-Ops-Latency: " + DFSOperationsUtils.round(avgOpLatency)
+            + " Avg-Test-Duration-sec " + DFSOperationsUtils.round(duration)
             + " No of Expected NNs : "+super.getNoOfExpectedAliveNNs()
             + " No of Actual Alive NNs : "+super.getNoOfAcutallAliveNNs();
 

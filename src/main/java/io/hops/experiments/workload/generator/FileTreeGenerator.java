@@ -121,15 +121,12 @@ public class FileTreeGenerator implements FilePool {
 
   @Override
   public void fileRenamed(String from, String to) {
-//    int index = allThreadFiles.indexOf(from);
-//    allThreadFiles.remove(index);
-
     String curr = allThreadFiles.get(currIndex);
     if(curr != from){
       IllegalStateException up = new IllegalStateException("File name did not match.");
       throw up;
     }
-//    allThreadFiles.set(currIndex, to);
+    allThreadFiles.set(currIndex, to);
   }
 
   @Override

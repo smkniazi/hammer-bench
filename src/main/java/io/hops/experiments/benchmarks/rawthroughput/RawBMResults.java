@@ -17,11 +17,10 @@
  */
 package io.hops.experiments.benchmarks.rawthroughput;
 
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.BenchmarkUtils;
-import java.text.DecimalFormat;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 /**
  *
@@ -66,10 +65,10 @@ public class RawBMResults extends BMResult {
   @Override
   public String toString() {
     String message = operationType +" " 
-            + BenchmarkUtils.round(speed) + " ops/sec. " +
-                " Successful-Ops: " + BenchmarkUtils.round(successfulOps)
-            + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
-            + " Avg-Test-Duration-sec " + BenchmarkUtils.round(duration)
+            + DFSOperationsUtils.round(speed) + " ops/sec. " +
+                " Successful-Ops: " + DFSOperationsUtils.round(successfulOps)
+            + " Failed-Ops: " + DFSOperationsUtils.round(failedOps)
+            + " Avg-Test-Duration-sec " + DFSOperationsUtils.round(duration)
             + " No of Expected NNs "+super.getNoOfExpectedAliveNNs()
             + " No of Actual Alive NNs "+super.getNoOfAcutallAliveNNs();
     return message;

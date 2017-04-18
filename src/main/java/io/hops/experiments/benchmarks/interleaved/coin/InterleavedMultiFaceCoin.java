@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -171,7 +172,7 @@ public class InterleavedMultiFaceCoin {
       for (BenchmarkOperations op : counts.keySet()) {
         double percent = ((double) counts.get(op) / ((double)expectedSize) * 100);
                 
-        System.out.println(op + " count " + counts.get(op) + ",  " + BenchmarkUtils.round(percent) + "%");
+        System.out.println(op + " count " + counts.get(op) + ",  " + DFSOperationsUtils.round(percent) + "%");
       }
       throw new IllegalStateException("Dice is not properfly created. Dice should have  " + expectedSize + " faces. Found " + dice.size());
     }
@@ -200,7 +201,7 @@ public class InterleavedMultiFaceCoin {
 
     for (BenchmarkOperations op : counts.keySet()) {
       double percent = (double) counts.get(op) / ( times.doubleValue()) * (double) 100;
-      System.out.println(op + ": count: "+counts.get(op)+"        " + BenchmarkUtils.round(percent)+"%");
+      System.out.println(op + ": count: "+counts.get(op)+"        " + DFSOperationsUtils.round(percent)+"%");
     }
   }
   

@@ -14,11 +14,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.hops.experiments.benchmarks;
+package io.hops.experiments.controller;
 
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.common.config.Configuration;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -47,7 +47,7 @@ public class MoveThenDelete {
       org.apache.hadoop.conf.Configuration conf = createHdfsConf();
 
       // do shit here
-      FileSystem dfs = BenchmarkUtils.getDFSClient(conf);
+      FileSystem dfs = DFSOperationsUtils.getDFSClient(conf);
       
 
       Path from = new Path(hdfsFolder);

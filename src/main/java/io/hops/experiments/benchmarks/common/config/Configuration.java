@@ -28,7 +28,7 @@ import java.util.*;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -607,12 +607,12 @@ public class Configuration implements Serializable {
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
-    if (!BenchmarkUtils.isTwoDecimalPlace(defaultVal)) {
+    if (!DFSOperationsUtils.isTwoDecimalPlace(defaultVal)) {
       throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported. Value " + defaultVal + " key: " + key);
     }
 
     double userVal = Double.parseDouble(props.getProperty(key, Double.toString(defaultVal)));
-    if (!BenchmarkUtils.isTwoDecimalPlace(userVal)) {
+    if (!DFSOperationsUtils.isTwoDecimalPlace(userVal)) {
       throw new IllegalArgumentException("Wrong user value. Only one decimal place is supported. Value " + userVal + " key: " + key);
     }
 

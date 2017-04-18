@@ -16,8 +16,7 @@
  */
 package io.hops.experiments.benchmarks.common.coin;
 
-import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -81,7 +80,7 @@ public class FileSizeMultiFaceCoin {
 
       for (Long size : counts.keySet()) {
         double percent = ((double) counts.get(size) / ((double)expectedSize) * 100);
-        System.out.println(size + " count " + counts.get(size) + ",  " + BenchmarkUtils.round(percent) + "%");
+        System.out.println(size + " count " + counts.get(size) + ",  " + DFSOperationsUtils.round(percent) + "%");
       }
       throw new IllegalStateException("Dice is not properfly created. Dice should have  " + expectedSize + " faces. Found " + dice.size());
     }
@@ -98,7 +97,7 @@ public class FileSizeMultiFaceCoin {
         String percentage = strTok.nextToken();
         long s = Long.parseLong(size);
         double pd = Double.parseDouble(percentage);
-        if(!BenchmarkUtils.isTwoDecimalPlace(pd)){
+        if(!DFSOperationsUtils.isTwoDecimalPlace(pd)){
           throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported.");
         }
         points.add(new Point(s, new BigDecimal(pd, new MathContext(4, RoundingMode.HALF_UP))));
@@ -129,7 +128,7 @@ public class FileSizeMultiFaceCoin {
 
     for (Long size : counts.keySet()) {
       double percent = (double) counts.get(size) / ( times.doubleValue()) * (double) 100;
-      System.out.println(size + ": count: "+counts.get(size)+"        " + BenchmarkUtils.round(percent)+"%");
+      System.out.println(size + ": count: "+counts.get(size)+"        " + DFSOperationsUtils.round(percent)+"%");
     }
   }
   

@@ -24,7 +24,7 @@ import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.conf.Configuration;
 
@@ -35,7 +35,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 public abstract class Benchmark {
 
@@ -113,19 +112,19 @@ public abstract class Benchmark {
 
     @Override
     public Object call() throws Exception {
-      dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, 
+      dfs = DFSOperationsUtils.getDFSClient(conf);
+      filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
               filesPerDir, fixedDepthTree, treeDepth );
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
         try {
           filePath = filePool.getFileToCreate();
-          BenchmarkUtils
+          DFSOperationsUtils
                   .createFile(dfs, filePath, replicationFactor,
                   fileSizeCoin.getFileSize());
           filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, filePath);
+          DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
         } catch (Exception e) {
@@ -146,16 +145,16 @@ public abstract class Benchmark {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
-        Logger.printMsg("Warmup Phase: " + BenchmarkUtils.round(percent) + "%");
+        Logger.printMsg("Warmup Phase: " + DFSOperationsUtils.round(percent) + "%");
       }
     }
   };
 
   protected int getAliveNNsCount() throws IOException {
-    FileSystem fs = BenchmarkUtils.getDFSClient(conf);
+    FileSystem fs = DFSOperationsUtils.getDFSClient(conf);
     int actualNNCount = 0;
     try {
-      actualNNCount = BenchmarkUtils.getActiveNameNodesCount(fsName, fs);
+      actualNNCount = DFSOperationsUtils.getActiveNameNodesCount(fsName, fs);
     } catch (Exception e) {
       Logger.error(e);
     }

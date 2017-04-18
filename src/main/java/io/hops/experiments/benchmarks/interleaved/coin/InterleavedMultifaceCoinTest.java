@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import java.math.BigDecimal;
 
 /**
@@ -68,7 +68,7 @@ public class InterleavedMultifaceCoinTest {
         
         
         for(BenchmarkOperations op:map.keySet()){
-            System.out.println("Operation "+op+" Count "+map.get(op)+" = "+BenchmarkUtils.round(((map.get(op)/(double)times)*100))+"%");
+            System.out.println("Operation "+op+" Count "+map.get(op)+" = "+ DFSOperationsUtils.round(((map.get(op)/(double)times)*100))+"%");
         }
         
 

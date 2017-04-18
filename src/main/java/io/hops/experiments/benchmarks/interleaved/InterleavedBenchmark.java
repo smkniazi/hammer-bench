@@ -16,7 +16,7 @@
  */
 package io.hops.experiments.benchmarks.interleaved;
 
-import io.hops.experiments.benchmarks.OperationsUtils;
+import io.hops.experiments.utils.BMOperationsUtils;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
@@ -26,7 +26,7 @@ import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
@@ -151,8 +151,8 @@ public class InterleavedBenchmark extends Benchmark {
 
         @Override
         public Object call() throws Exception {
-            dfs = BenchmarkUtils.getDFSClient(conf);
-            filePool = BenchmarkUtils.getFilePool(conf, config.getBaseDir(),
+            dfs = DFSOperationsUtils.getDFSClient(conf);
+            filePool = DFSOperationsUtils.getFilePool(conf, config.getBaseDir(),
                     dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
             opCoin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
                     config.getInterleavedBmAppendFilePercentage(),
@@ -204,9 +204,9 @@ public class InterleavedBenchmark extends Benchmark {
                 lastMsg = System.currentTimeMillis();
                 String message = "";
                 if (Logger.canILog()) {
-                    message += BenchmarkUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
-                    message += BenchmarkUtils.format(25, "Failed Ops: " + operationsFailed + " ");
-                    message += BenchmarkUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
+                    message += DFSOperationsUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
+                    message += DFSOperationsUtils.format(25, "Failed Ops: " + operationsFailed + " ");
+                    message += DFSOperationsUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
                 /*if(avgLatency.getN() > 0){
                     message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
                 }*/
@@ -219,9 +219,9 @@ public class InterleavedBenchmark extends Benchmark {
                   AtomicLong stat = operationsStats.get(op);
                   if (stat != null) {
 
-                    double percent = BenchmarkUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
+                    double percent = DFSOperationsUtils.round(((double) stat.get() / operationsCompleted.get()) * 100);
                     String msg = op + ": [" + percent + "%] ";
-                    message += BenchmarkUtils.format(op.toString().length() + 14, msg);
+                    message += DFSOperationsUtils.format(op.toString().length() + 14, msg);
                   }
                 }*/
                     Logger.printMsg(message);
@@ -230,7 +230,7 @@ public class InterleavedBenchmark extends Benchmark {
         }
 
         private void performOperation(BenchmarkOperations opType) throws IOException {
-            String path = OperationsUtils.getPath(opType, filePool);
+            String path = BMOperationsUtils.getPath(opType, filePool);
             if (path != null) {
                 boolean retVal = false;
                 long opExeTime = 0;
@@ -238,7 +238,7 @@ public class InterleavedBenchmark extends Benchmark {
                     long opStartTime = 0L;
                     opStartTime = System.nanoTime();
 
-                    OperationsUtils.performOp(dfs, opType, filePool, path, config.getReplicationFactor(),
+                    BMOperationsUtils.performOp(dfs, opType, filePool, path, config.getReplicationFactor(),
                            fileSizeCoin.getFileSize(), config.getAppendFileSize());
                     opExeTime = System.nanoTime() - opStartTime;
                     retVal = true;
@@ -283,7 +283,7 @@ public class InterleavedBenchmark extends Benchmark {
     private double speedPSec(long ops, long startTime) {
         long timePassed = (System.currentTimeMillis() - startTime);
         double opsPerMSec = (double) (ops) / (double) timePassed;
-        return BenchmarkUtils.round(opsPerMSec * 1000);
+        return DFSOperationsUtils.round(opsPerMSec * 1000);
     }
 
     FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP, boolean canIKillNamenodes) {

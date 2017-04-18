@@ -16,7 +16,7 @@
  */
 package io.hops.experiments.benchmarks.rawthroughput;
 
-import io.hops.experiments.benchmarks.OperationsUtils;
+import io.hops.experiments.utils.BMOperationsUtils;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -28,10 +28,10 @@ import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.WarmUpCommand;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.conf.Configuration;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.fs.FileSystem;
@@ -140,8 +140,8 @@ public class RawBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       try{
-        dfs = BenchmarkUtils.getDFSClient(conf);
-        filePool = BenchmarkUtils.getFilePool(conf, baseDir, 
+        dfs = DFSOperationsUtils.getDFSClient(conf);
+        filePool = DFSOperationsUtils.getFilePool(conf, baseDir,
               dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
       }catch(Exception e){
         Logger.error(e);
@@ -151,7 +151,7 @@ public class RawBenchmark extends Benchmark {
       while (true) {
         try {
 
-          String path = OperationsUtils.getPath(opType,filePool);
+          String path = BMOperationsUtils.getPath(opType,filePool);
 
           if (path == null 
                   || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))
@@ -172,7 +172,7 @@ public class RawBenchmark extends Benchmark {
             }*/
           }
 
-          OperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, fileSizeCoin.getFileSize(), appendSize);
+          BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, fileSizeCoin.getFileSize(), appendSize);
           
           successfulOps.incrementAndGet();
 
@@ -195,7 +195,7 @@ public class RawBenchmark extends Benchmark {
       if((System.currentTimeMillis() - lastLog) > 5000){
         lastLog = System.currentTimeMillis();
         if (Logger.canILog()) {
-          Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + BenchmarkUtils.round(speedPSec(successfulOps, phaseStartTime)));
+          Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + DFSOperationsUtils.round(speedPSec(successfulOps, phaseStartTime)));
 
           //log file size distribution
           /*synchronized (this) {

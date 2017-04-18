@@ -22,7 +22,7 @@ import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.Time;
@@ -130,13 +130,13 @@ public class BlockReportingBenchmark extends Benchmark {
           if (Logger.canILog()) {
             Logger.printMsg("Successful Rpts: " + successfulOps.get() + ", Failed Rpts: " + failedOps.get() + ", Speed: "
                     + currentSpeed() + " ops/sec,  Select NN for Rpt [Avg,Min,Max]:  ["
-                    +BenchmarkUtils.round(getNewNameNodeElapsedTime.getMean())+", "
-                    +BenchmarkUtils.round(getNewNameNodeElapsedTime.getMin())+", "
-                    +BenchmarkUtils.round(getNewNameNodeElapsedTime.getMax())+"] "
+                    + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMean())+", "
+                    + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMin())+", "
+                    + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMax())+"] "
                     +" Blk Rept [Avg,Min,Max]: ["+
-                    +BenchmarkUtils.round(brElapsedTimes.getMean())+", "
-                    +BenchmarkUtils.round(brElapsedTimes.getMin())+", "
-                    +BenchmarkUtils.round(brElapsedTimes.getMax())+"]"
+                    +DFSOperationsUtils.round(brElapsedTimes.getMean())+", "
+                    + DFSOperationsUtils.round(brElapsedTimes.getMin())+", "
+                    + DFSOperationsUtils.round(brElapsedTimes.getMax())+"]"
                     );
           }
         } catch (Exception e) {
@@ -151,6 +151,6 @@ public class BlockReportingBenchmark extends Benchmark {
   double currentSpeed() {
     double timePassed = Time.now() - startTime;
     double opsPerMSec = (double) (successfulOps.get()) / timePassed;
-    return BenchmarkUtils.round(opsPerMSec * 1000);
+    return DFSOperationsUtils.round(opsPerMSec * 1000);
   }
 }

@@ -2,13 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package io.hops.experiments.benchmarks;
+package io.hops.experiments.utils;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.utils.BenchmarkUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -17,7 +15,7 @@ import org.apache.hadoop.fs.Path;
  *
  * @author salman
  */
-public class OperationsUtils {
+public class BMOperationsUtils {
   public static String getPath(BenchmarkOperations opType, FilePool filePool) {
       String path = null;
       if (opType == BenchmarkOperations.SET_REPLICATION) {
@@ -64,25 +62,25 @@ public class OperationsUtils {
             FilePool filePool, String path, short replicationFactor,
             long fileSize, long appendSize) throws IOException {
       if (opType == BenchmarkOperations.SET_REPLICATION) {
-        BenchmarkUtils.setReplication(dfs, path);
+        DFSOperationsUtils.setReplication(dfs, path);
       } else if (opType == BenchmarkOperations.FILE_INFO
               || opType == BenchmarkOperations.DIR_INFO) {
-        BenchmarkUtils.getInfo(dfs, path);
+        DFSOperationsUtils.getInfo(dfs, path);
       } else if (opType == BenchmarkOperations.CHMOD_FILE
               || opType == BenchmarkOperations.CHMOD_DIR) {
-        BenchmarkUtils.chmodPath(dfs, path);
+        DFSOperationsUtils.chmodPath(dfs, path);
       } else if (opType == BenchmarkOperations.LS_FILE
               || opType == BenchmarkOperations.LS_DIR) {
-        BenchmarkUtils.ls(dfs, path);
+        DFSOperationsUtils.ls(dfs, path);
       } else if (opType == BenchmarkOperations.READ_FILE) {
-        BenchmarkUtils.readFile(dfs, path);
+        DFSOperationsUtils.readFile(dfs, path);
       } else if (opType == BenchmarkOperations.MKDIRS) {
-        BenchmarkUtils.mkdirs(dfs, path);
+        DFSOperationsUtils.mkdirs(dfs, path);
       } else if (opType == BenchmarkOperations.CREATE_FILE) {
-          BenchmarkUtils.createFile(dfs, path, replicationFactor, fileSize);
+          DFSOperationsUtils.createFile(dfs, path, replicationFactor, fileSize);
           filePool.fileCreationSucceeded(path);
       } else if (opType == BenchmarkOperations.DELETE_FILE) {
-        BenchmarkUtils.deleteFile(dfs, path);
+        DFSOperationsUtils.deleteFile(dfs, path);
       } else if (opType == BenchmarkOperations.RENAME_FILE) {
         String from = path;
 //        Count the number of times a files has been renamed
@@ -98,14 +96,14 @@ public class OperationsUtils {
         currentCounter++;
         to = to + "_" + RENAMED + "_" + currentCounter + "_" + "Times";
 //        String to = from;
-        if (BenchmarkUtils.renameFile(dfs, new Path(from), new Path(to))) {
+        if (DFSOperationsUtils.renameFile(dfs, new Path(from), new Path(to))) {
           filePool.fileRenamed(from, to);
         }
       }else if (opType == BenchmarkOperations.APPEND_FILE) {
-        BenchmarkUtils.appendFile(dfs, path,appendSize);
+        DFSOperationsUtils.appendFile(dfs, path,appendSize);
       } else if (opType == BenchmarkOperations.CHOWN_DIR ||
               opType == BenchmarkOperations.CHOWN_FILE) {
-        BenchmarkUtils.chown(dfs, path);
+        DFSOperationsUtils.chown(dfs, path);
       }
       
       else {
