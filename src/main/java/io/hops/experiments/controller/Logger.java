@@ -28,6 +28,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -159,12 +160,18 @@ public class Logger {
 
     public synchronized void continuousAggSpeed(String address, String msg){
       try{
-        String token = "Speed: ";
+        String token = "Speed:";
         if(msg.contains(token)){
-          int index = msg.lastIndexOf(token);
-          String speedStr = msg.substring(index+token.length());
-          Double speed = Double.parseDouble(speedStr);
-          speedMap.put(address, speed);
+          StringTokenizer st = new StringTokenizer(msg, " ");
+          while(st.hasMoreTokens()){
+            String t = st.nextToken();
+            if (t.compareToIgnoreCase(token)==0){
+              String speedStr = st.nextToken();
+              Double speed = Double.parseDouble(speedStr);
+              speedMap.put(address, speed);
+              break;
+            }
+          }
         }
 
         if(speedMap.size() == maxSlaves ){

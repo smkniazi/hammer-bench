@@ -207,12 +207,12 @@ public class InterleavedBenchmark extends Benchmark {
                     message += DFSOperationsUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
                     message += DFSOperationsUtils.format(25, "Failed Ops: " + operationsFailed + " ");
                     message += DFSOperationsUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
-                /*if(avgLatency.getN() > 0){
-                    message += format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
-                }*/
+                if(avgLatency.getN() > 0){
+                    message += DFSOperationsUtils.format(20, "Avg. Op Latency: " + avgLatency.getMean() +" ms");
+                }
 
 
-                /*SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+                SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
                 sorted.addAll(operationsStats.keySet());
 
                 for (BenchmarkOperations op : sorted) {
@@ -223,7 +223,7 @@ public class InterleavedBenchmark extends Benchmark {
                     String msg = op + ": [" + percent + "%] ";
                     message += DFSOperationsUtils.format(op.toString().length() + 14, msg);
                   }
-                }*/
+                }
                     Logger.printMsg(message);
                 }
             }
