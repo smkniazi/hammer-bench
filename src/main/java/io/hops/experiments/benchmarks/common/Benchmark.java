@@ -41,7 +41,7 @@ public abstract class Benchmark {
   protected final Configuration conf;
   protected final int numThreads;
   protected final ExecutorService executor;
-  private AtomicInteger threadsWarmedUp = new AtomicInteger(0);
+  protected AtomicInteger threadsWarmedUp = new AtomicInteger(0);
   private final BenchMarkFileSystemName fsName;
 
   public Benchmark(Configuration conf, int numThreads, BenchMarkFileSystemName fsName) {
@@ -95,10 +95,11 @@ public abstract class Benchmark {
     private final int filesPerDir;
     private final boolean fixedDepthTree;
     private final int treeDepth;
+    private final String stage;
 
     public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
             String baseDir, int dirsPerDir, int filesPerDir,
-            boolean fixedDepthTree, int treeDepth) throws IOException {
+            boolean fixedDepthTree, int treeDepth, String stage) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSizeDistribution = fileSizeDistribution;
       this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
@@ -108,6 +109,7 @@ public abstract class Benchmark {
       this.filesPerDir = filesPerDir;
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
+      this.stage = stage;
     }
 
     @Override
@@ -145,7 +147,7 @@ public abstract class Benchmark {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
-        Logger.printMsg("Warmup Phase: " + DFSOperationsUtils.round(percent) + "%");
+        Logger.printMsg(stage+" " + DFSOperationsUtils.round(percent) + "%");
       }
     }
   };

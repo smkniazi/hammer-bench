@@ -75,16 +75,40 @@ public class RawBenchmark extends Benchmark {
     this.fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
     this.appendSize = namespaceWarmUp.getAppendSize();
     this.baseDir = namespaceWarmUp.getBaseDir();
-    List workers = new ArrayList<BaseWarmUp>();
-    for (int i = 0; i < numThreads; i++) {
-      Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate(), replicationFactor,
-              fileSizeDistribution, baseDir, dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
-      workers.add(worker);
-    }
-    executor.invokeAll(workers);
-    Logger.printMsg("Finished. Warmup Phase: 100%.");
 
-    workers.clear();
+    // Warn up is done in two stages.
+    // In the first phase all the parent dirs are created
+    // and then in the second stage we create the further
+    // file/dir in the parent dir.
+
+    if (namespaceWarmUp.getFilesToCreate() > 1) {
+      List workers = new ArrayList<BaseWarmUp>();
+      // Stage 1
+      threadsWarmedUp.set(0);
+      for (int i = 0; i < numThreads; i++) {
+        Callable worker = new BaseWarmUp(1,
+                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
+                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage1: Creating Parent Dirs. ");
+        workers.add(worker);
+      }
+      executor.invokeAll(workers); // blocking call
+      workers.clear();
+
+      // Stage 2
+      threadsWarmedUp.set(0);
+      for (int i = 0; i < numThreads; i++) {
+        Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate() - 1,
+                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
+                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage2: Creating files/dirs. ");
+        workers.add(worker);
+      }
+      executor.invokeAll(workers); // blocking call
+      Logger.printMsg("Finished. Warmup Phase. Created ("+numThreads+"*"+namespaceWarmUp.getFilesToCreate()+") = "+
+              (numThreads*namespaceWarmUp.getFilesToCreate())+" files. ");
+      workers.clear();
+    }
     return new NamespaceWarmUp.Response();
   }
 
