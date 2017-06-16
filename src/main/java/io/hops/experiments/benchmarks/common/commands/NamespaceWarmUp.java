@@ -35,10 +35,11 @@ public class NamespaceWarmUp {
     private String baseDir;
     private boolean readFilesFromDisk;
     private String diskFilsPath;
+    private boolean slaveWorkerDirMetaLogEnabled;
 
     public Request(BenchmarkType benchMarkType, int filesToCreate,
             short replicationFactor, String fileSizeDistribution, long appendSize, String baseDir,
-                   boolean readFilesFromDisk, String diskFilsPath) {
+                   boolean readFilesFromDisk, String diskFilsPath, boolean slaveWorkerDirMetaLogEnabled) {
       this.benchMarkType = benchMarkType;
       this.filesToCreate = filesToCreate;
       this.replicationFactor = replicationFactor;
@@ -47,6 +48,7 @@ public class NamespaceWarmUp {
       this.baseDir = baseDir;
       this.readFilesFromDisk = readFilesFromDisk;
       this.diskFilsPath = diskFilsPath;
+      this.slaveWorkerDirMetaLogEnabled = slaveWorkerDirMetaLogEnabled;
     }
 
     public long getAppendSize() {
@@ -79,6 +81,10 @@ public class NamespaceWarmUp {
 
     public String getDiskFilsPath() {
       return diskFilsPath;
+    }
+
+    public boolean isSlaveWorkerDirMetaLogEnabled() {
+      return slaveWorkerDirMetaLogEnabled;
     }
   }
 

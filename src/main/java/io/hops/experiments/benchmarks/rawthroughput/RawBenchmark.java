@@ -94,7 +94,7 @@ public class RawBenchmark extends Benchmark {
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
                 dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
-                "Warming up. Stage1: Creating Parent Dirs. ");
+                "Warming up. Stage1: Creating Parent Dirs. ", namespaceWarmUp.isSlaveWorkerDirMetaLogEnabled());
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -107,7 +107,7 @@ public class RawBenchmark extends Benchmark {
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
                 dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
-                "Warming up. Stage2: Creating files/dirs. ");
+                "Warming up. Stage2: Creating files/dirs. ",  namespaceWarmUp.isSlaveWorkerDirMetaLogEnabled());
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call

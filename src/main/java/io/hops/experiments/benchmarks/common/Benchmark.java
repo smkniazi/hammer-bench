@@ -35,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 public abstract class Benchmark {
 
@@ -97,11 +99,12 @@ public abstract class Benchmark {
     private final boolean fixedDepthTree;
     private final int treeDepth;
     private final String stage;
+    private boolean slaveWorkerDirMetaLogEnabled;
 
     public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
             String baseDir, int dirsPerDir, int filesPerDir,
             boolean fixedDepthTree, int treeDepth, boolean readFilesFromDisk,
-                      String diskFilesPath, String stage) throws IOException {
+                      String diskFilesPath, String stage, boolean slaveWorkerDirMetaLogEnabled) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSizeDistribution = fileSizeDistribution;
       this.replicationFactor = replicationFactor;
@@ -113,6 +116,7 @@ public abstract class Benchmark {
       this.stage = stage;
       this.readFilesFromDisk = readFilesFromDisk;
       this.diskFilesPath = diskFilesPath;
+      this.slaveWorkerDirMetaLogEnabled = slaveWorkerDirMetaLogEnabled;
     }
 
     @Override
@@ -122,6 +126,13 @@ public abstract class Benchmark {
               filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution,
               readFilesFromDisk, diskFilesPath);
       String filePath = null;
+
+      if(slaveWorkerDirMetaLogEnabled){
+        String workerParentDir = filePool.getDirToCreate();
+        Path workerParentPath = new Path(workerParentDir);
+        dfs.mkdirs(workerParentPath);
+        ((DistributedFileSystem)dfs).setMetaEnabled(workerParentPath, true);
+      }
 
       for (int i = 0; i < filesToCreate; i++) {
         try {

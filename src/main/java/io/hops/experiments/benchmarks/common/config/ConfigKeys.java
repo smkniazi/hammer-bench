@@ -315,4 +315,13 @@ public class ConfigKeys {
 
     public static final String MASTER_SLAVE_WARMUP_DELAY_KEY= "master.slave.warmup.delay";
     public static final int MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT = 0;
+
+    public static final String DFS_BASEDIR_METALOG_ENABLED = "dfs.basedir" +
+        ".metalog.enabled";
+    public static final boolean DFS_BASEDIR_METALOG_ENABLED_DEFAULT = false;
+
+    public static final String DFS_SLAVE_WORKER_DIR_METALOG_ENABLED = "dfs" +
+        ".slave.worker.dir.metalog.enabled";
+    public static final boolean DFS_SLAVE_WORKER_DIR_METALOG_ENABLED_DEFAULT=
+        false;
 }

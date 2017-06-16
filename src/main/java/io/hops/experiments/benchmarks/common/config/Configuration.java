@@ -629,5 +629,13 @@ public class Configuration implements Serializable {
     return new BigDecimal(userVal, new MathContext(4, RoundingMode.HALF_UP));
   }
 
+  public boolean isBaseDirMetaLogEnabled(){
+    return getBoolean(ConfigKeys.DFS_BASEDIR_METALOG_ENABLED, ConfigKeys
+        .DFS_BASEDIR_METALOG_ENABLED_DEFAULT);
+  }
 
+  public boolean isSlaveWorkerMetaLogEnabled(){
+    return getBoolean(ConfigKeys.DFS_SLAVE_WORKER_DIR_METALOG_ENABLED,
+        ConfigKeys.DFS_SLAVE_WORKER_DIR_METALOG_ENABLED_DEFAULT);
+  }
 }

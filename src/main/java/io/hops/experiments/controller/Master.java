@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import io.hops.experiments.utils.MasterUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -91,6 +93,8 @@ public class Master {
       removeExistingResultsFiles();
       
       startRemoteLogger(config.getSlavesList().size());
+
+      MasterUtils.setBaseDirMetaEnabled(config);
 
       connectSlaves();
 
@@ -314,7 +318,7 @@ public class Master {
             || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
               config.getFileSizeDistribution(), config.getAppendFileSize(),
-              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
+              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath(), config.isSlaveWorkerMetaLogEnabled());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
       warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(), config.getBlockReportingNumOfBlocksPerReport(), config
               .getBlockReportingNumOfBlocksPerFile(), config

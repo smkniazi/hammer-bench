@@ -95,7 +95,8 @@ public class InterleavedBenchmark extends Benchmark {
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
                 dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
-                readFilesFromDisk, diskFilesPath, "Warming up. Stage1: Creating Parent Dirs. ");
+                readFilesFromDisk, diskFilesPath, "Warming up. Stage1: Creating Parent Dirs. ",
+				namespaceWarmUp.isSlaveWorkerDirMetaLogEnabled());
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -108,7 +109,8 @@ public class InterleavedBenchmark extends Benchmark {
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
                 dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
-                readFilesFromDisk, diskFilesPath, "Warming up. Stage2: Creating files/dirs. ");
+                readFilesFromDisk, diskFilesPath, "Warming up. Stage2: Creating files/dirs. ", 
+				namespaceWarmUp.isSlaveWorkerDirMetaLogEnabled());
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
