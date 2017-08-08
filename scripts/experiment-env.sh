@@ -27,10 +27,10 @@ HopsFS_Upload_Exp=true
 CPU_AFFINITY=1-23
 
 #Machines
-DNS_FullList=(`cat datanodes`) 
-NNS_FullList=(`cat namenodes`)
+DNS_FullList=(`grep -v "^#" datanodes`) 
+NNS_FullList=(`grep -v "^#" namenodes`)
 
-BM_Machines_FullList=(`cat experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
+BM_Machines_FullList=(`grep -v "^#" experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
 DFS_CLIENTS_PER_NAMENODE=900                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
                                                    #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
