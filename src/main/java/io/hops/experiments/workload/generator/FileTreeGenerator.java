@@ -40,8 +40,8 @@ public class FileTreeGenerator implements FilePool {
   public FileTreeGenerator(String baseDir, int filesPerDir,
           int dirPerDir, int initialTreeDepth) {
 
-    this.allThreadFiles = new ArrayList<String>(1000000);
-    this.allThreadDirs = new ArrayList<String>(1000000);
+    this.allThreadFiles = new ArrayList<String>(10000);
+    this.allThreadDirs = new ArrayList<String>(10000);
     this.rand1 = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
 
@@ -134,16 +134,24 @@ public class FileTreeGenerator implements FilePool {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    currIndex = rand1.nextInt(allThreadFiles.size());
-    for (int i = 0; i < allThreadFiles.size(); i++) {
+    if(allThreadFiles.size()>0){
+      currIndex = allThreadFiles.size()-1;
       String file = allThreadFiles.remove(currIndex);
-      if(getPathLength(file) < THRESHOLD){
-        continue;
-      }
-      //System.out.println("Delete Path "+file);
       return file;
     }
+
     return null;
+
+//    currIndex = allThreadFiles.size();
+//    for (int i = 0; i < allThreadFiles.size(); i++) {
+//      String file = allThreadFiles.remove(currIndex);
+//      if(getPathLength(file) < THRESHOLD){
+//        continue;
+//      }
+//      System.out.println("Delete Path "+file);
+//      return file;
+//    }
+//    return null;
   }
 
   @Override
