@@ -16,6 +16,7 @@
  */
 package io.hops.experiments.workload.generator;
 
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.controller.Logger;
 
 import java.net.InetAddress;
@@ -36,14 +37,17 @@ public class FileTreeGenerator implements FilePool {
   private NameSpaceGenerator nameSpaceGenerator;
   private final int THRESHOLD = 3;
   private int currIndex = -1;
+  private FileSizeMultiFaceCoin fileSizeCoin;
+  private long currentFileSize = -1;
 
   public FileTreeGenerator(String baseDir, int filesPerDir,
-          int dirPerDir, int initialTreeDepth) {
+          int dirPerDir, int initialTreeDepth, String fileDistribution) {
 
     this.allThreadFiles = new ArrayList<String>(10000);
     this.allThreadDirs = new ArrayList<String>(10000);
     this.rand1 = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
+    fileSizeCoin = new FileSizeMultiFaceCoin(fileDistribution);
 
 
     String machineName = "";
@@ -204,6 +208,36 @@ public class FileTreeGenerator implements FilePool {
     return getRandomDir();
   }
 
+  @Override
+  public long getFileData(byte[] buffer, int offset, int length, long fileSize) {
+    if(fileSize != currentFileSize){
+      throw new IllegalStateException("File size did not match. Expecting: "+currentFileSize+" Got: "+fileSize);
+    }
+
+    if(offset >= fileSize ){
+      return -1;
+    }
+
+    long toRead = -1;
+    if((offset+length)<fileSize){
+      toRead = length;
+    } else{
+      toRead = fileSize - offset;
+    }
+
+    for(int i = 0; i < toRead; i++) {
+      buffer[i] = 0;
+  }
+
+    return toRead;
+  }
+
+  @Override
+  public long getFileSize() {
+    currentFileSize = fileSizeCoin.getFileSize();
+    return currentFileSize;
+  }
+
   private String getRandomFile() {
     if (!allThreadFiles.isEmpty()) {
       for (int i = 0; i < allThreadFiles.size(); i++) {
@@ -245,5 +279,6 @@ public class FileTreeGenerator implements FilePool {
     Logger.printMsg("Error: Unable to getRandomDir from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
     return null;
   }
+
 }
 

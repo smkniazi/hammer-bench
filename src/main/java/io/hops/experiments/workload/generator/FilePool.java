@@ -56,4 +56,8 @@ public interface FilePool {
   public String getFileToChown();
   
   public String getDirToChown();
+
+  public long getFileData(byte[] buffer, int offset, int length, long fileSize);
+
+  public long getFileSize();
 }

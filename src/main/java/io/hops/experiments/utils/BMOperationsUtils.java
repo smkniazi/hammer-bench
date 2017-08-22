@@ -60,7 +60,7 @@ public class BMOperationsUtils {
     static final String RENAMED = "RN";
     public static boolean performOp(FileSystem dfs, BenchmarkOperations opType,
             FilePool filePool, String path, short replicationFactor,
-            long fileSize, long appendSize) throws IOException {
+            long appendSize) throws IOException {
       if (opType == BenchmarkOperations.SET_REPLICATION) {
         DFSOperationsUtils.setReplication(dfs, path);
       } else if (opType == BenchmarkOperations.FILE_INFO
@@ -77,7 +77,7 @@ public class BMOperationsUtils {
       } else if (opType == BenchmarkOperations.MKDIRS) {
         DFSOperationsUtils.mkdirs(dfs, path);
       } else if (opType == BenchmarkOperations.CREATE_FILE) {
-          DFSOperationsUtils.createFile(dfs, path, replicationFactor, fileSize);
+          DFSOperationsUtils.createFile(dfs, path, replicationFactor, filePool);
           filePool.fileCreationSucceeded(path);
       } else if (opType == BenchmarkOperations.DELETE_FILE) {
         DFSOperationsUtils.deleteFile(dfs, path);

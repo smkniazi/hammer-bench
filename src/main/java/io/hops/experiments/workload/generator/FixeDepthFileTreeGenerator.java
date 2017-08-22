@@ -22,7 +22,7 @@ package io.hops.experiments.workload.generator;
  */
 public class FixeDepthFileTreeGenerator extends FileTreeGenerator implements FilePool {
 
-  public FixeDepthFileTreeGenerator(String baseDir, int treeDepth) {
-    super(baseDir, Integer.MAX_VALUE, Integer.MAX_VALUE, treeDepth);
+  public FixeDepthFileTreeGenerator(String baseDir, int treeDepth, String fileSizeDistribution) {
+    super(baseDir, Integer.MAX_VALUE, Integer.MAX_VALUE, treeDepth, fileSizeDistribution);
   }
 }

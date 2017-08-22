@@ -151,13 +151,11 @@ public class RawBenchmark extends Benchmark {
     private FileSystem dfs;
     private FilePool filePool;
     private String baseDir;
-    private FileSizeMultiFaceCoin fileSizeCoin;
     private long lastLog = System.currentTimeMillis();
 
     public Generic(String baseDir, BenchmarkOperations opType) throws IOException {
       this.baseDir = baseDir;
       this.opType = opType;
-      this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
     }
 
     Map<Long, Long> stats = new HashMap<Long,Long>();
@@ -166,7 +164,7 @@ public class RawBenchmark extends Benchmark {
       try{
         dfs = DFSOperationsUtils.getDFSClient(conf);
         filePool = DFSOperationsUtils.getFilePool(conf, baseDir,
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution);
       }catch(Exception e){
         Logger.error(e);
         e.printStackTrace();
@@ -187,7 +185,6 @@ public class RawBenchmark extends Benchmark {
 
           long fileSize = -1;
           if(opType == opType.CREATE_FILE){
-            fileSize = fileSizeCoin.getFileSize();
             /*For logging file size distribution
             synchronized (this) {
               Long count = stats.get(fileSize);
@@ -196,7 +193,7 @@ public class RawBenchmark extends Benchmark {
             }*/
           }
 
-          BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, fileSizeCoin.getFileSize(), appendSize);
+          BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, appendSize);
           
           successfulOps.incrementAndGet();
 

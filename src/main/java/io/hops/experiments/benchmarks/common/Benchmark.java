@@ -89,7 +89,6 @@ public abstract class Benchmark {
     private final int filesToCreate;
     private final short replicationFactor;
     private final String fileSizeDistribution;
-    private final FileSizeMultiFaceCoin fileSizeCoin;
     private final String baseDir;
     private final int dirsPerDir;
     private final int filesPerDir;
@@ -102,7 +101,6 @@ public abstract class Benchmark {
             boolean fixedDepthTree, int treeDepth, String stage) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSizeDistribution = fileSizeDistribution;
-      this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
       this.dirsPerDir = dirsPerDir;
@@ -116,15 +114,14 @@ public abstract class Benchmark {
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
-              filesPerDir, fixedDepthTree, treeDepth );
+              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution);
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
         try {
           filePath = filePool.getFileToCreate();
           DFSOperationsUtils
-                  .createFile(dfs, filePath, replicationFactor,
-                  fileSizeCoin.getFileSize());
+                  .createFile(dfs, filePath, replicationFactor, filePool);
           filePool.fileCreationSucceeded(filePath);
           DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();

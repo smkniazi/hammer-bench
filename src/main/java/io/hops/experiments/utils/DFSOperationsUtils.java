@@ -65,13 +65,13 @@ public class DFSOperationsUtils {
     }
 
     public static FilePool getFilePool(Configuration conf, String baseDir, 
-            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth) {
+            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth, String fileSizeDistribution) {
         FilePool filePool = filePools.get();
         if (filePool == null) {
             if(fixedDepthTree){
-              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth);
+              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth, fileSizeDistribution);
             }else{
-              filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0);
+              filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0, fileSizeDistribution);
             }
             
             filePools.set(filePool);
@@ -82,18 +82,27 @@ public class DFSOperationsUtils {
         return filePool;
     }
     
-    public static void createFile(FileSystem dfs, String pathStr, short replication, final long size /*in bytes*/) throws IOException {
+    public static void createFile(FileSystem dfs, String pathStr, short replication, FilePool filePool) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
 
         FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
-        if (size != 0) {
-            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
-                out.writeInt(1);
-            }
+        long size = filePool.getFileSize();
+        if(size > 0){
+            int offset = 0;
+            byte[] buffer = new byte[1024];
+            long read = -1;
+            do {
+                read = filePool.getFileData(buffer, offset, buffer.length, size);
+                if(read > 0){
+                    out.write(buffer, 0, (int)read);
+                    offset += read;
+                }
+            }while( read > -1);
         }
+
         out.close();
     }
 
@@ -238,11 +247,11 @@ public class DFSOperationsUtils {
     }
 
     private static  void serverLessModeRandomWait(){
-//        try {
-//            Thread.sleep(rand.nextInt(10));
-//            Thread.sleep(1);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Thread.sleep(rand.nextInt(100));
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

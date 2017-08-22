@@ -53,6 +53,7 @@ public class InterleavedBenchmark extends Benchmark {
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
   HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
   SynchronizedDescriptiveStatistics avgLatency = new SynchronizedDescriptiveStatistics();
+  private String fileSizeDistribution;
   private final int dirsPerDir;
   private final int filesPerDir;
   private final boolean fixedDepthTree;
@@ -73,6 +74,7 @@ public class InterleavedBenchmark extends Benchmark {
   protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpCommand)
           throws IOException, InterruptedException {
     NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
+    fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
     // Warn up is done in two stages.
     // In the first phase all the parent dirs are created
     // and then in the second stage we create the further
@@ -163,7 +165,6 @@ public class InterleavedBenchmark extends Benchmark {
     private FileSystem dfs;
     private FilePool filePool;
     private InterleavedMultiFaceCoin opCoin;
-    private FileSizeMultiFaceCoin fileSizeCoin;
     private io.hops.experiments.benchmarks.common.config.Configuration config = null;
     private long lastMsg = System.currentTimeMillis();
 
@@ -176,7 +177,7 @@ public class InterleavedBenchmark extends Benchmark {
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf, config.getBaseDir(),
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth);
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution );
       opCoin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
               config.getInterleavedBmAppendFilePercentage(),
               config.getInterleavedBmReadFilesPercentage(),
@@ -193,7 +194,6 @@ public class InterleavedBenchmark extends Benchmark {
               config.getInterleavedBmFileChangeOwnerPercentage(),
               config.getInterleavedBmDirChangeOwnerPercentage()
       );
-      fileSizeCoin = new FileSizeMultiFaceCoin(config.getFileSizeDistribution());
       while (true) {
         try {
           if ((System.currentTimeMillis() - startTime) > duration) {
@@ -261,7 +261,7 @@ public class InterleavedBenchmark extends Benchmark {
           opStartTime = System.nanoTime();
 
           BMOperationsUtils.performOp(dfs, opType, filePool, path, config.getReplicationFactor(),
-                  fileSizeCoin.getFileSize(), config.getAppendFileSize());
+                  config.getAppendFileSize());
           opExeTime = System.nanoTime() - opStartTime;
           retVal = true;
         } catch (Exception e) {
