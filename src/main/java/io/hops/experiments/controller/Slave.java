@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import io.hops.experiments.benchmarks.common.config.SlaveArgsReader;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.KillSlave;

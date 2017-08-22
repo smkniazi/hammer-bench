@@ -314,7 +314,7 @@ public class Master {
             || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
               config.getFileSizeDistribution(), config.getAppendFileSize(),
-              config.getBaseDir());
+              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
       warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(), config.getBlockReportingNumOfBlocksPerReport(), config
               .getBlockReportingNumOfBlocksPerFile(), config

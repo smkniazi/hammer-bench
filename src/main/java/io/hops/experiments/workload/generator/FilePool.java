@@ -17,6 +17,9 @@
  */
 package io.hops.experiments.workload.generator;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  *
  * @author salman
@@ -57,7 +60,7 @@ public interface FilePool {
   
   public String getDirToChown();
 
-  public long getFileData(byte[] buffer, int offset, int length, long fileSize);
+  public long getFileData(byte[] buffer) throws IOException;
 
-  public long getFileSize();
+  public long getNewFileSize() throws IOException;
 }

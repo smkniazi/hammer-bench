@@ -92,13 +92,16 @@ public abstract class Benchmark {
     private final String baseDir;
     private final int dirsPerDir;
     private final int filesPerDir;
+    private final boolean readFilesFromDisk;
+    private final String diskFilesPath;
     private final boolean fixedDepthTree;
     private final int treeDepth;
     private final String stage;
 
     public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
             String baseDir, int dirsPerDir, int filesPerDir,
-            boolean fixedDepthTree, int treeDepth, String stage) throws IOException {
+            boolean fixedDepthTree, int treeDepth, boolean readFilesFromDisk,
+                      String diskFilesPath, String stage) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSizeDistribution = fileSizeDistribution;
       this.replicationFactor = replicationFactor;
@@ -108,13 +111,16 @@ public abstract class Benchmark {
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
       this.stage = stage;
+      this.readFilesFromDisk = readFilesFromDisk;
+      this.diskFilesPath = diskFilesPath;
     }
 
     @Override
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
-              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution);
+              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution,
+              readFilesFromDisk, diskFilesPath);
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {

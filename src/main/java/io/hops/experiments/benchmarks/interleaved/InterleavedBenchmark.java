@@ -56,6 +56,10 @@ public class InterleavedBenchmark extends Benchmark {
   private String fileSizeDistribution;
   private final int dirsPerDir;
   private final int filesPerDir;
+  private boolean readFilesFromDisk;
+  private String diskFilesPath;
+
+
   private final boolean fixedDepthTree;
   private final int treeDepth;
 
@@ -75,6 +79,8 @@ public class InterleavedBenchmark extends Benchmark {
           throws IOException, InterruptedException {
     NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
     fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
+    readFilesFromDisk = namespaceWarmUp.isReadFilesFromDisk();
+    diskFilesPath = namespaceWarmUp.getDiskFilsPath();
     // Warn up is done in two stages.
     // In the first phase all the parent dirs are created
     // and then in the second stage we create the further
@@ -88,7 +94,8 @@ public class InterleavedBenchmark extends Benchmark {
         Callable worker = new BaseWarmUp(1,
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage1: Creating Parent Dirs. ");
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
+                readFilesFromDisk, diskFilesPath, "Warming up. Stage1: Creating Parent Dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -100,7 +107,8 @@ public class InterleavedBenchmark extends Benchmark {
         Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate() - 1,
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage2: Creating files/dirs. ");
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
+                readFilesFromDisk, diskFilesPath, "Warming up. Stage2: Creating files/dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -177,7 +185,8 @@ public class InterleavedBenchmark extends Benchmark {
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf, config.getBaseDir(),
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution );
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
+              fileSizeDistribution, readFilesFromDisk, diskFilesPath);
       opCoin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
               config.getInterleavedBmAppendFilePercentage(),
               config.getInterleavedBmReadFilesPercentage(),

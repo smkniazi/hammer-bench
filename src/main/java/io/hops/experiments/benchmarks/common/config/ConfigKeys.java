@@ -203,6 +203,12 @@ public class ConfigKeys {
     
     public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "append.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
+
+    public static String READ_FILES_FROM_DISK= "read.files.from.disk";
+    public static boolean READ_FILES_FROM_DISK_DEFAULT=false;
+
+    public static String DISK_FILES_PATH="disk.files.path";
+    public static String DISK_FILES_PATH_DEFAULT="~";
     
     public static String DIR_PER_DIR_KEY= "dir.per.dir";
     public static int    DIR_PER_DIR_DEFAULT = 2;

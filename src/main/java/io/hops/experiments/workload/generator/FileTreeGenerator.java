@@ -17,8 +17,11 @@
 package io.hops.experiments.workload.generator;
 
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -39,6 +42,7 @@ public class FileTreeGenerator implements FilePool {
   private int currIndex = -1;
   private FileSizeMultiFaceCoin fileSizeCoin;
   private long currentFileSize = -1;
+  private long currentFileDataRead = -1;
 
   public FileTreeGenerator(String baseDir, int filesPerDir,
           int dirPerDir, int initialTreeDepth, String fileDistribution) {
@@ -47,6 +51,11 @@ public class FileTreeGenerator implements FilePool {
     this.allThreadDirs = new ArrayList<String>(10000);
     this.rand1 = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
+
+    if (fileDistribution == null){// return 0
+        fileDistribution = ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT;
+    }
+
     fileSizeCoin = new FileSizeMultiFaceCoin(fileDistribution);
 
 
@@ -209,32 +218,29 @@ public class FileTreeGenerator implements FilePool {
   }
 
   @Override
-  public long getFileData(byte[] buffer, int offset, int length, long fileSize) {
-    if(fileSize != currentFileSize){
-      throw new IllegalStateException("File size did not match. Expecting: "+currentFileSize+" Got: "+fileSize);
+  public long getFileData(byte[] buffer) throws IOException {
+    long toRead = -1;
+    if((currentFileDataRead+buffer.length)>=currentFileSize){
+      toRead = currentFileSize - currentFileDataRead;
+    } else{
+      toRead = buffer.length;
     }
 
-    if(offset >= fileSize ){
+    if(toRead>0) {
+      for (int i = 0; i < toRead; i++) {
+        buffer[i] = 0;
+      }
+      currentFileDataRead += toRead;
+      return toRead;
+    } else {
       return -1;
     }
-
-    long toRead = -1;
-    if((offset+length)<fileSize){
-      toRead = length;
-    } else{
-      toRead = fileSize - offset;
-    }
-
-    for(int i = 0; i < toRead; i++) {
-      buffer[i] = 0;
-  }
-
-    return toRead;
   }
 
   @Override
-  public long getFileSize() {
+  public long getNewFileSize() throws IOException {
     currentFileSize = fileSizeCoin.getFileSize();
+    currentFileDataRead = 0;
     return currentFileSize;
   }
 

@@ -478,6 +478,14 @@ public class Configuration implements Serializable {
     return getString(ConfigKeys.NAMENOE_KILLER_HOST_KEY, ConfigKeys.NAMENOE_KILLER_HOST_DEFAULT);
   }
 
+  public boolean getReadFilesFromDisk(){
+    return getBoolean(ConfigKeys.READ_FILES_FROM_DISK, ConfigKeys.READ_FILES_FROM_DISK_DEFAULT);
+  }
+
+  public String getDiskNameSpacePath(){
+    return getString(ConfigKeys.DISK_FILES_PATH, ConfigKeys.DISK_FILES_PATH_DEFAULT);
+  }
+
   public List<String> getFailOverNameNodes(){
     List<String> namenodesList = new LinkedList<String>();
     String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES,ConfigKeys.FAILOVER_NAMENODES_DEFAULT);

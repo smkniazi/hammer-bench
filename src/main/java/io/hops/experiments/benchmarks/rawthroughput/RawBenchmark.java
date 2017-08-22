@@ -53,6 +53,8 @@ public class RawBenchmark extends Benchmark {
   private long appendSize;
   private final int dirsPerDir;
   private final int filesPerDir;
+  private boolean readFilesFromDisk;
+  private String diskFilesPath;
   private final int treeDepth;
   private final boolean fixedDepthTree;
   
@@ -75,6 +77,8 @@ public class RawBenchmark extends Benchmark {
     this.fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
     this.appendSize = namespaceWarmUp.getAppendSize();
     this.baseDir = namespaceWarmUp.getBaseDir();
+    this.readFilesFromDisk = namespaceWarmUp.isReadFilesFromDisk();
+    this.diskFilesPath = namespaceWarmUp.getDiskFilsPath();
 
     // Warn up is done in two stages.
     // In the first phase all the parent dirs are created
@@ -89,7 +93,8 @@ public class RawBenchmark extends Benchmark {
         Callable worker = new BaseWarmUp(1,
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage1: Creating Parent Dirs. ");
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
+                "Warming up. Stage1: Creating Parent Dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -101,7 +106,8 @@ public class RawBenchmark extends Benchmark {
         Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate() - 1,
                 namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
                 .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, "Warming up. Stage2: Creating files/dirs. ");
+                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
+                "Warming up. Stage2: Creating files/dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -164,7 +170,7 @@ public class RawBenchmark extends Benchmark {
       try{
         dfs = DFSOperationsUtils.getDFSClient(conf);
         filePool = DFSOperationsUtils.getFilePool(conf, baseDir,
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution);
+              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution,readFilesFromDisk, diskFilesPath );
       }catch(Exception e){
         Logger.error(e);
         e.printStackTrace();

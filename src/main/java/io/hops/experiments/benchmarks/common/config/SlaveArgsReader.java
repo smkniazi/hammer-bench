@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.experiments.controller;
+package io.hops.experiments.benchmarks.common.config;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
