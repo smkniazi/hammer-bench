@@ -63,4 +63,6 @@ public interface FilePool {
   public long getFileData(byte[] buffer) throws IOException;
 
   public long getNewFileSize() throws IOException;
+
+  public boolean hasMoreFilesToWrite();
 }

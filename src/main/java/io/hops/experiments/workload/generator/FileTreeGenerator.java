@@ -244,6 +244,12 @@ public class FileTreeGenerator implements FilePool {
     return currentFileSize;
   }
 
+  @Override
+  public boolean hasMoreFilesToWrite(){
+    return true;
+  }
+
+
   private String getRandomFile() {
     if (!allThreadFiles.isEmpty()) {
       for (int i = 0; i < allThreadFiles.size(); i++) {

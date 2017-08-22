@@ -264,11 +264,11 @@ public class DFSOperationsUtils {
     }
 
     private static  void serverLessModeRandomWait(){
-        try {
-            Thread.sleep(rand.nextInt(100));
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(rand.nextInt(100));
+//            Thread.sleep(1);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 }

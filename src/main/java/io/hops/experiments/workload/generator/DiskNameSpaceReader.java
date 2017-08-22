@@ -32,7 +32,7 @@ public class DiskNameSpaceReader {
         long startTime = System.currentTimeMillis();
         FileUtils files = new FileUtils();
         list = (List<File>) files.listFiles(new File(path), null, true);
-        Logger.printMsg("Reading the namespace from the disk took "+(System.currentTimeMillis() - startTime)+ " ms");
+        Logger.printMsg("Reading the namespace containing "+list.size()+" files from the disk took "+(System.currentTimeMillis() - startTime)+ " ms");
     }
 
     protected DiskNameSpaceReader(String path){
@@ -46,6 +46,14 @@ public class DiskNameSpaceReader {
         }
         else {
             return  null;
+        }
+    }
+
+    public synchronized boolean hasMoreFiles(){
+        if(list.size()>0){
+            return true;
+        }else{
+            return false;
         }
     }
 }

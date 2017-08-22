@@ -185,7 +185,8 @@ public class RawBenchmark extends Benchmark {
                   || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))
                   || (opType == BenchmarkOperations.CREATE_FILE && 
                       maxFilesToCreate < (long)(successfulOps.get() 
-                                         + filesCreatedInWarmupPhase.get()))) {
+                                         + filesCreatedInWarmupPhase.get()))
+                  || (readFilesFromDisk && !filePool.hasMoreFilesToWrite())) {
             return null;
           }
 
