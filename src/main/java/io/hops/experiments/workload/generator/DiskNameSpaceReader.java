@@ -14,13 +14,13 @@ public class DiskNameSpaceReader {
     private static List<File> list = null;
 
 
-    public static DiskNameSpaceReader getInstance(String path){
-        if(instance == null){
+    public static DiskNameSpaceReader getInstance(String path) {
+        if (instance == null) {
             instance = new DiskNameSpaceReader(path);
             instancePath = path;
         }
 
-        if(instancePath != path){
+        if (instancePath != path) {
             throw new IllegalArgumentException("DiskNameSpaceReader is a singleton." +
                     " It can not handle multiple paths");
         }
@@ -28,31 +28,31 @@ public class DiskNameSpaceReader {
         return instance;
     }
 
-    private static void  readDir(String path){
+    private static void readDir(String path) {
         long startTime = System.currentTimeMillis();
         FileUtils files = new FileUtils();
         list = (List<File>) files.listFiles(new File(path), null, true);
-        Logger.printMsg("Reading the namespace containing "+list.size()+" files from the disk took "+(System.currentTimeMillis() - startTime)+ " ms");
+        Logger.printMsg("Reading the namespace containing " + list.size() + " files from the disk took " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
-    protected DiskNameSpaceReader(String path){
+    protected DiskNameSpaceReader(String path) {
         readDir(path);
     }
 
     public synchronized File getFile() throws IOException {
-        if(list.size()>0){
+        while (list.size() > 0) {
             File file = list.remove(0);
-            return file.getCanonicalFile();
+            if (file.length() <= (32 * 1024)) {
+                return file.getCanonicalFile();
+            }
         }
-        else {
-            return  null;
-        }
+        return null;
     }
 
-    public synchronized boolean hasMoreFiles(){
-        if(list.size()>0){
+    public synchronized boolean hasMoreFiles() {
+        if (list.size() > 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

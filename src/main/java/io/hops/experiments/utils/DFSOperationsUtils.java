@@ -39,12 +39,12 @@ import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class DFSOperationsUtils {
 
-    private static final boolean SERVER_LESS_MODE=true; //only for testing. If enabled then the clients will not
+    private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
     private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
     private static ThreadLocal<FilePool> filePools = new ThreadLocal<FilePool>();
-    
+
     private static AtomicInteger filePoolCount = new AtomicInteger(0);
     private static AtomicInteger dfsClientsCount = new AtomicInteger(0);
 
@@ -65,7 +65,7 @@ public class DFSOperationsUtils {
         return client;
     }
 
-    public static FilePool getFilePool(Configuration conf, String baseDir, 
+    public static FilePool getFilePool(Configuration conf, String baseDir,
             int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth, String fileSizeDistribution,
                                        boolean readFilesFromDisk, String diskFilesPath) {
         FilePool filePool = filePools.get();
@@ -73,7 +73,7 @@ public class DFSOperationsUtils {
             if(fixedDepthTree){
               filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth, fileSizeDistribution);
             }if(readFilesFromDisk){
-              filePool = new FileTreeFromDiskGenerator(baseDir,filesPerDir, dirsPerDir,0);
+              filePool = new FileTreeFromDiskGenerator(baseDir,filesPerDir, dirsPerDir,0, diskFilesPath);
             } else{
                 filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0, fileSizeDistribution);
             }
@@ -89,21 +89,6 @@ public class DFSOperationsUtils {
     public static void createFile(FileSystem dfs, String pathStr, short replication, FilePool filePool) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
-            //
-            long counter = 0;
-            long size = filePool.getNewFileSize();
-            if(size > 0){
-                byte[] buffer = new byte[1024];
-                long read = -1;
-                do {
-                    read = filePool.getFileData(buffer);
-                    if(read > 0){
-                        counter += read;
-                    }
-                }while( read > -1);
-                System.out.println("Counter: "+counter);
-            }
-            //
             return;
         }
 

@@ -346,8 +346,7 @@ public class Master {
 
     sendToAllSlaves(request,0/*delay*/);
 
-    Thread.sleep(request.getDurationInMS());
-    Collection<Object> responses = receiveFromAllSlaves(60 * 1000/*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves((int) (request.getDurationInMS() + 60 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);
