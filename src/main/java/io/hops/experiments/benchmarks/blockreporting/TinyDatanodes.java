@@ -184,7 +184,7 @@ public class TinyDatanodes {
               new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true, replication,
               blockSize);
           ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
-          nameNodeProto.complete(fileName, clientName, lastBlock,null);
+          nameNodeProto.complete(fileName, clientName, lastBlock, 0);
           filesCreated.incrementAndGet();
           log();
         } catch (Exception e){
@@ -215,7 +215,7 @@ public class TinyDatanodes {
     for (int jdx = 0; jdx < blocksPerFile; jdx++) {
       LocatedBlock loc = null;
       try {
-        loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes());
+        loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes(),0,null);
         prevBlock = loc.getBlock();
         for (DatanodeInfo dnInfo : loc.getLocations()) {
           int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
@@ -223,7 +223,7 @@ public class TinyDatanodes {
           ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
                   ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
           StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
-                  datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
+                  datanodes[dnIdx].storage, rdBlocks)};
           datanodeProto.blockReceivedAndDeleted(
                   datanodes[dnIdx].dnRegistration,
                   loc.getBlock().getBlockPoolId(), report);
