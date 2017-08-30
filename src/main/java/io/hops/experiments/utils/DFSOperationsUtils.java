@@ -222,8 +222,8 @@ public class DFSOperationsUtils {
 
         FSDataOutputStream out = dfs.append(new Path(pathStr));
         if (size != 0) {
-            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
-                out.writeInt(1);
+            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 1) {
+                out.writeByte(1);
             }
         }
         out.close();

@@ -14,7 +14,7 @@ public class DiskNameSpaceReader {
     private static List<File> list = null;
 
 
-    public static DiskNameSpaceReader getInstance(String path) {
+    public synchronized static DiskNameSpaceReader getInstance(String path) {
         if (instance == null) {
             instance = new DiskNameSpaceReader(path);
             instancePath = path;
@@ -35,16 +35,16 @@ public class DiskNameSpaceReader {
         Logger.printMsg("Reading the namespace containing " + list.size() + " files from the disk took " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
-    protected DiskNameSpaceReader(String path) {
+    private DiskNameSpaceReader(String path) {
         readDir(path);
     }
 
     public synchronized File getFile() throws IOException {
         while (list.size() > 0) {
             File file = list.remove(0);
-            if (file.length() <= (32 * 1024)) {
+//            if (file.length() <= (64 * 1024)) {
                 return file.getCanonicalFile();
-            }
+ //           }
         }
         return null;
     }
