@@ -16,20 +16,13 @@
  */
 package io.hops.experiments.workload.generator;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-
 /**
  *
  * @author salman
  */
 public class FixeDepthFileTreeGenerator extends FileTreeGenerator implements FilePool {
 
-  public FixeDepthFileTreeGenerator(String baseDir, int treeDepth) {
-    super(baseDir, Integer.MAX_VALUE, Integer.MAX_VALUE, treeDepth);
+  public FixeDepthFileTreeGenerator(String baseDir, int treeDepth, String fileSizeDistribution) {
+    super(baseDir, Integer.MAX_VALUE, Integer.MAX_VALUE, treeDepth, fileSizeDistribution);
   }
 }

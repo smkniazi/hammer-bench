@@ -21,6 +21,7 @@ import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSe
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CreateFlag;
@@ -49,7 +50,7 @@ import java.util.concurrent.ExecutorService;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
-import io.hops.experiments.utils.BenchmarkUtils;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TinyDatanodes {
@@ -183,7 +184,7 @@ public class TinyDatanodes {
               new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.OVERWRITE)), true, replication,
               blockSize);
           ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName);
-          nameNodeProto.complete(fileName, clientName, lastBlock, null);
+          nameNodeProto.complete(fileName, clientName, lastBlock,null);
           filesCreated.incrementAndGet();
           log();
         } catch (Exception e){
@@ -200,7 +201,7 @@ public class TinyDatanodes {
     private void log() {
       if (Logger.canILog()) {
         double percent = ((double)filesCreated.get() / (double)filesToCreate) * 100;
-        Logger.printMsg("Warmup " + BenchmarkUtils.round(percent) + "% completed");
+        Logger.printMsg("Warmup " + DFSOperationsUtils.round(percent) + "% completed");
       }
     }
   }

@@ -18,8 +18,11 @@
 package io.hops.experiments.utils;
 
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
+import io.hops.experiments.workload.generator.FileTreeFromDiskGenerator;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
+
+import java.io.EOFException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,14 +37,14 @@ import io.hops.experiments.workload.generator.FilePool;
 import io.hops.experiments.workload.generator.FileTreeGenerator;
 import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
-public class BenchmarkUtils {
+public class DFSOperationsUtils {
 
-    private static final boolean SERVER_LESS_MODE=true; //only for testing. If enabled then the clients will not
+    private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
     private static ThreadLocal<FileSystem> dfsClients = new ThreadLocal<FileSystem>();
     private static ThreadLocal<FilePool> filePools = new ThreadLocal<FilePool>();
-    
+
     private static AtomicInteger filePoolCount = new AtomicInteger(0);
     private static AtomicInteger dfsClientsCount = new AtomicInteger(0);
 
@@ -62,14 +65,17 @@ public class BenchmarkUtils {
         return client;
     }
 
-    public static FilePool getFilePool(Configuration conf, String baseDir, 
-            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth) {
+    public static FilePool getFilePool(Configuration conf, String baseDir,
+            int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth, String fileSizeDistribution,
+                                       boolean readFilesFromDisk, String diskFilesPath) {
         FilePool filePool = filePools.get();
         if (filePool == null) {
             if(fixedDepthTree){
-              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth);
-            }else{
-              filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0);
+              filePool = new FixeDepthFileTreeGenerator(baseDir,treeDepth, fileSizeDistribution);
+            }if(readFilesFromDisk){
+              filePool = new FileTreeFromDiskGenerator(baseDir,filesPerDir, dirsPerDir,0, diskFilesPath);
+            } else{
+                filePool = new FileTreeGenerator(baseDir,filesPerDir, dirsPerDir,0, fileSizeDistribution);
             }
             
             filePools.set(filePool);
@@ -80,34 +86,43 @@ public class BenchmarkUtils {
         return filePool;
     }
     
-    public static void createFile(FileSystem dfs, Path path, short replication, final long size /*in bytes*/) throws IOException {
+    public static void createFile(FileSystem dfs, String pathStr, short replication, FilePool filePool) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
 
-        FSDataOutputStream out = dfs.create(path, replication);
-        if (size != 0) {
-            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
-                out.writeInt(1);
-            }
+        FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
+        long size = filePool.getNewFileSize();
+        if(size > 0){
+            byte[] buffer = new byte[1024];
+            long read = -1;
+            do {
+                read = filePool.getFileData(buffer);
+                if(read > 0){
+                    out.write(buffer, 0, (int)read);
+                }
+            }while( read > -1);
         }
+
         out.close();
     }
 
-    public static void readFile(FileSystem dfs, Path path, final long size /*in bytes*/) throws IOException {
+    public static void readFile(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
 
-        FSDataInputStream in = dfs.open(path);
-        if (size != 0) {
-            for (long bytesRead = 0; bytesRead < size; bytesRead += 4) {
-                in.readInt();
-            }
+        FSDataInputStream in = dfs.open(new Path(pathStr));
+        try {
+            byte b;
+            do{
+                b = in.readByte();
+            }while(true);
+        }catch (EOFException e){
+            in.close();
         }
-        in.close();
     }
 
     public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
@@ -118,60 +133,60 @@ public class BenchmarkUtils {
         return dfs.rename(from, to);    
     }
 
-    public static boolean deleteFile(FileSystem dfs, Path file) throws IOException {
+    public static boolean deleteFile(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return true;
         }
-        return dfs.delete(file, true);
+        return dfs.delete(new Path(pathStr), true);
     }
     
-    public static void ls(FileSystem dfs, Path path) throws IOException {
+    public static void ls(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-       dfs.listStatus(path);
+       dfs.listStatus(new Path(pathStr));
     }
     
-    public static void getInfo(FileSystem dfs, Path path) throws IOException {
+    public static void getInfo(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-       dfs.getFileStatus(path);
+       dfs.getFileStatus(new Path(pathStr));
     }
     
-    public static void chmodPath(FileSystem dfs, Path path) throws IOException {
+    public static void chmodPath(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-        dfs.setPermission(path, new FsPermission((short)0777));
+        dfs.setPermission(new Path(pathStr), new FsPermission((short)0777));
     }
     
-    public static void mkdirs(FileSystem dfs, Path path) throws IOException {
+    public static void mkdirs(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-        dfs.mkdirs(path);
+        dfs.mkdirs(new Path(pathStr));
     }
     
-    public static void chown(FileSystem dfs, Path path) throws IOException {
+    public static void chown(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-        dfs.setOwner(path, System.getProperty("user.name"), System.getProperty("user.name"));
+        dfs.setOwner(new Path(pathStr), System.getProperty("user.name"), System.getProperty("user.name"));
     }
     
-    public static void setReplication(FileSystem dfs, Path path) throws IOException {
+    public static void setReplication(FileSystem dfs, String pathStr) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return;
         }
-        dfs.setReplication(path, (short)3);
+        dfs.setReplication(new Path(pathStr), (short)3);
     }
     
     public static double round(double val){
@@ -199,16 +214,16 @@ public class BenchmarkUtils {
         }
     }
 
-    public static void appendFile(FileSystem dfs, Path path, long size) throws IOException {
+    public static void appendFile(FileSystem dfs, String pathStr, long size) throws IOException {
         if (SERVER_LESS_MODE) {
             serverLessModeRandomWait();
             return;
         }
 
-        FSDataOutputStream out = dfs.append(path);
+        FSDataOutputStream out = dfs.append(new Path(pathStr));
         if (size != 0) {
-            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 4) {
-                out.writeInt(1);
+            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 1) {
+                out.writeByte(1);
             }
         }
         out.close();
@@ -235,7 +250,7 @@ public class BenchmarkUtils {
 
     private static  void serverLessModeRandomWait(){
 //        try {
-//            Thread.sleep(rand.nextInt(10));
+//            Thread.sleep(rand.nextInt(100));
 //            Thread.sleep(1);
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();

@@ -17,7 +17,7 @@
 package io.hops.experiments.controller;
 
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +28,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Logger {
 
-  static AtomicLong lastmsg = new AtomicLong(System.currentTimeMillis());
+  static long lastmsg = 0;
   private static InetAddress loggerIp = null;
   private static int loggerPort = 0;
   private static boolean enableRemoteLogging = false;
@@ -66,7 +66,7 @@ public class Logger {
   }
 
   public static void resetTimer(){
-    lastmsg.set(System.currentTimeMillis());
+    lastmsg = System.currentTimeMillis();
   }
 
  public static synchronized void printMsg(String msg) {
@@ -94,8 +94,8 @@ public class Logger {
   }
 
   public static synchronized boolean canILog() {
-    if ((System.currentTimeMillis() - lastmsg.get()) > 5000) {
-      lastmsg.set(System.currentTimeMillis());
+    if ((System.currentTimeMillis() - lastmsg) > 5000) {
+      lastmsg = System.currentTimeMillis();
       return true;
     } else {
       return false;
@@ -145,7 +145,7 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(BenchmarkUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          System.out.println(DFSOperationsUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
           continuousAggSpeed(recvPacket.getAddress().getHostName(), msg);
           is.close();
           in.close();
@@ -160,12 +160,18 @@ public class Logger {
 
     public synchronized void continuousAggSpeed(String address, String msg){
       try{
-        String token = "Speed: ";
+        String token = "Speed:";
         if(msg.contains(token)){
-          int index = msg.lastIndexOf(token);
-          String speedStr = msg.substring(index+token.length());
-          Double speed = Double.parseDouble(speedStr);
-          speedMap.put(address, speed);
+          StringTokenizer st = new StringTokenizer(msg, " ");
+          while(st.hasMoreTokens()){
+            String t = st.nextToken();
+            if (t.compareToIgnoreCase(token)==0){
+              String speedStr = st.nextToken();
+              Double speed = Double.parseDouble(speedStr);
+              speedMap.put(address, speed);
+              break;
+            }
+          }
         }
 
         if(speedMap.size() == maxSlaves ){

@@ -16,12 +16,12 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
 import io.hops.experiments.benchmarks.common.config.Configuration;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -205,7 +206,7 @@ public class RawBMResultAggregator extends Aggregator{
       msg+=CompileResults.format("HopsFS");
       msg+=CompileResults.format(RECORD_NOT_FOUND); // first col 
       for(Double val : hopsHisto){
-        msg+=CompileResults.format(BenchmarkUtils.round(val)+"");
+        msg+=CompileResults.format(DFSOperationsUtils.round(val)+"");
       }
       
       msg+="\n";
@@ -293,7 +294,7 @@ public class RawBMResultAggregator extends Aggregator{
       List<Double> hopsVals = hopsFsCr.valsMap.get(op);
       String msg = CompileResults.format("HopsFS_" + op.toString());
       for (Double val : hopsVals) {
-        msg += CompileResults.format(BenchmarkUtils.round(val) + "");
+        msg += CompileResults.format(DFSOperationsUtils.round(val) + "");
       }
 
       msg += "\n" + CompileResults.format("HDFS_" + op.toString());

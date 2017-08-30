@@ -4,7 +4,7 @@
  */
 package io.hops.experiments.results.compiler;
 
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 
 /**
  *

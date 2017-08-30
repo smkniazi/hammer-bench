@@ -24,7 +24,7 @@ import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.Handshake;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.conf.Configuration;
 
@@ -35,14 +35,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 public abstract class Benchmark {
 
   protected final Configuration conf;
   protected final int numThreads;
   protected final ExecutorService executor;
-  private AtomicInteger threadsWarmedUp = new AtomicInteger(0);
+  protected AtomicInteger threadsWarmedUp = new AtomicInteger(0);
   private final BenchMarkFileSystemName fsName;
 
   public Benchmark(Configuration conf, int numThreads, BenchMarkFileSystemName fsName) {
@@ -90,42 +89,47 @@ public abstract class Benchmark {
     private final int filesToCreate;
     private final short replicationFactor;
     private final String fileSizeDistribution;
-    private final FileSizeMultiFaceCoin fileSizeCoin;
     private final String baseDir;
     private final int dirsPerDir;
     private final int filesPerDir;
+    private final boolean readFilesFromDisk;
+    private final String diskFilesPath;
     private final boolean fixedDepthTree;
     private final int treeDepth;
+    private final String stage;
 
     public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
             String baseDir, int dirsPerDir, int filesPerDir,
-            boolean fixedDepthTree, int treeDepth) throws IOException {
+            boolean fixedDepthTree, int treeDepth, boolean readFilesFromDisk,
+                      String diskFilesPath, String stage) throws IOException {
       this.filesToCreate = filesToCreate;
       this.fileSizeDistribution = fileSizeDistribution;
-      this.fileSizeCoin = new FileSizeMultiFaceCoin(fileSizeDistribution);
       this.replicationFactor = replicationFactor;
       this.baseDir = baseDir;
       this.dirsPerDir = dirsPerDir;
       this.filesPerDir = filesPerDir;
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
+      this.stage = stage;
+      this.readFilesFromDisk = readFilesFromDisk;
+      this.diskFilesPath = diskFilesPath;
     }
 
     @Override
     public Object call() throws Exception {
-      dfs = BenchmarkUtils.getDFSClient(conf);
-      filePool = BenchmarkUtils.getFilePool(conf, baseDir, dirsPerDir, 
-              filesPerDir, fixedDepthTree, treeDepth );
+      dfs = DFSOperationsUtils.getDFSClient(conf);
+      filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
+              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution,
+              readFilesFromDisk, diskFilesPath);
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
         try {
           filePath = filePool.getFileToCreate();
-          BenchmarkUtils
-                  .createFile(dfs, new Path(filePath), replicationFactor,
-                  fileSizeCoin.getFileSize());
+          DFSOperationsUtils
+                  .createFile(dfs, filePath, replicationFactor, filePool);
           filePool.fileCreationSucceeded(filePath);
-          BenchmarkUtils.readFile(dfs, new Path(filePath), fileSizeCoin.getFileSize());
+          DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
         } catch (Exception e) {
@@ -146,16 +150,16 @@ public abstract class Benchmark {
       if (Logger.canILog()) {
         long totalFilesThatWillBeCreated = filesToCreate * numThreads;
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
-        Logger.printMsg("Warmup Phase: " + BenchmarkUtils.round(percent) + "%");
+        Logger.printMsg(stage+" " + DFSOperationsUtils.round(percent) + "%");
       }
     }
   };
 
   protected int getAliveNNsCount() throws IOException {
-    FileSystem fs = BenchmarkUtils.getDFSClient(conf);
+    FileSystem fs = DFSOperationsUtils.getDFSClient(conf);
     int actualNNCount = 0;
     try {
-      actualNNCount = BenchmarkUtils.getActiveNameNodesCount(fsName, fs);
+      actualNNCount = DFSOperationsUtils.getActiveNameNodesCount(fsName, fs);
     } catch (Exception e) {
       Logger.error(e);
     }

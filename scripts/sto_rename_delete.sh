@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 read -n1 -r -p "Press any key  to continue the rename and delete test ..." key
-java -Xmx1g -cp ../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.benchmarks.MoveThenDelete $1
+java -Xmx1g -cp ../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.MoveThenDelete $1
 
 
 

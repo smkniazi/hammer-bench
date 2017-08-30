@@ -203,6 +203,12 @@ public class ConfigKeys {
     
     public static String APPEND_FILE_SIZE_IN_Bytes_KEY= "append.size";
     public static long   APPEND_FILE_SIZE_IN_Bytes_DEFAULT = 0;
+
+    public static String READ_FILES_FROM_DISK= "read.files.from.disk";
+    public static boolean READ_FILES_FROM_DISK_DEFAULT=false;
+
+    public static String DISK_FILES_PATH="disk.files.path";
+    public static String DISK_FILES_PATH_DEFAULT="~";
     
     public static String DIR_PER_DIR_KEY= "dir.per.dir";
     public static int    DIR_PER_DIR_DEFAULT = 2;
@@ -272,7 +278,7 @@ public class ConfigKeys {
     public static String DFS_STORE_SMALL_FILES_IN_DB =  "dfs.store.small.files.in.db";
     public static final boolean DFS_STORE_SMALL_FILES_IN_DB_DEFAULT = false;
 
-    public static final String DFS_DB_FILE_MAX_SIZE_KEY = "dfs.database.file.max.size";
+    public static final String DFS_DB_FILE_MAX_SIZE_KEY = "dfs.db.file.max.size";
     public static final int DFS_DB_FILE_MAX_SIZE_DEFAULT = 32*1024; // 32KB
 
     //failover test

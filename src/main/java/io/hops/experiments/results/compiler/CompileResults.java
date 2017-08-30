@@ -17,7 +17,7 @@
 package io.hops.experiments.results.compiler;
 
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;

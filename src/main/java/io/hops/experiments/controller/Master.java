@@ -40,7 +40,7 @@ import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
@@ -314,7 +314,7 @@ public class Master {
             || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
               config.getFileSizeDistribution(), config.getAppendFileSize(),
-              config.getBaseDir());
+              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
       warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(), config.getBlockReportingNumOfBlocksPerReport(), config
               .getBlockReportingNumOfBlocksPerFile(), config
@@ -346,8 +346,7 @@ public class Master {
 
     sendToAllSlaves(request,0/*delay*/);
 
-    Thread.sleep(request.getDurationInMS());
-    Collection<Object> responses = receiveFromAllSlaves(60 * 1000/*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves((int) (request.getDurationInMS() + 60 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);

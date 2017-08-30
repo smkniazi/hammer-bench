@@ -17,10 +17,9 @@
  */
 package io.hops.experiments.benchmarks.blockreporting;
 
-import io.hops.experiments.benchmarks.BMResult;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.BenchmarkUtils;
-import java.text.DecimalFormat;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 /**
  *
@@ -66,11 +65,11 @@ public class BlockReportBMResults extends BMResult {
 
   @Override
   public String toString() {
-     String message = "Successful-Ops: " + BenchmarkUtils.round(successfulOps)
-                + " Failed-Ops: " + BenchmarkUtils.round(failedOps)
-                + " Speed-/sec: " + BenchmarkUtils.round(speed)
-                + " AvgTimePerReport: " + BenchmarkUtils.round(avgTimePerReport)
-                + " AvgTimeToGetNameNodeToReport: " + BenchmarkUtils.round(avgTimeToGetNameNodeToReport)
+     String message = "Successful-Ops: " + DFSOperationsUtils.round(successfulOps)
+                + " Failed-Ops: " + DFSOperationsUtils.round(failedOps)
+                + " Speed-/sec: " + DFSOperationsUtils.round(speed)
+                + " AvgTimePerReport: " + DFSOperationsUtils.round(avgTimePerReport)
+                + " AvgTimeToGetNameNodeToReport: " + DFSOperationsUtils.round(avgTimeToGetNameNodeToReport)
                 + " No of Expected NNs : "+super.getNoOfExpectedAliveNNs()
                 + " No of Alive NNs : "+super.getNoOfAcutallAliveNNs();
     return message;

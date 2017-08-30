@@ -18,13 +18,15 @@
 package io.hops.experiments.workload.generator;
 
 
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
+
 /**
  *
  * @author salman
  */
 public class TestFileGen {
     public static void main(String[] argv){
-        FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test",5);
+        FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test",5, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
 
         for(int i = 0; i < 10000; i++){
             System.out.println(gen.getDirToCreate());

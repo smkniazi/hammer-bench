@@ -25,9 +25,10 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.BenchmarkUtils;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -82,6 +83,9 @@ public class Configuration implements Serializable {
     if (getInterleavedBmCreateFilesPercentage().doubleValue() <= getInterleavedBmDeleteFilesPercentage().doubleValue() && getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       throw new IllegalArgumentException("Delete operations can not be more than create operations");
     }
+
+    //check the file size distribution coin
+    FileSizeMultiFaceCoin fcoin = new FileSizeMultiFaceCoin(this.getFileSizeDistribution());
 
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages
@@ -478,6 +482,14 @@ public class Configuration implements Serializable {
     return getString(ConfigKeys.NAMENOE_KILLER_HOST_KEY, ConfigKeys.NAMENOE_KILLER_HOST_DEFAULT);
   }
 
+  public boolean getReadFilesFromDisk(){
+    return getBoolean(ConfigKeys.READ_FILES_FROM_DISK, ConfigKeys.READ_FILES_FROM_DISK_DEFAULT);
+  }
+
+  public String getDiskNameSpacePath(){
+    return getString(ConfigKeys.DISK_FILES_PATH, ConfigKeys.DISK_FILES_PATH_DEFAULT);
+  }
+
   public List<String> getFailOverNameNodes(){
     List<String> namenodesList = new LinkedList<String>();
     String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES,ConfigKeys.FAILOVER_NAMENODES_DEFAULT);
@@ -611,12 +623,12 @@ public class Configuration implements Serializable {
   }
 
   private BigDecimal getBigDecimal(String key, double defaultVal) {
-    if (!BenchmarkUtils.isTwoDecimalPlace(defaultVal)) {
+    if (!DFSOperationsUtils.isTwoDecimalPlace(defaultVal)) {
       throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported. Value " + defaultVal + " key: " + key);
     }
 
     double userVal = Double.parseDouble(props.getProperty(key, Double.toString(defaultVal)));
-    if (!BenchmarkUtils.isTwoDecimalPlace(userVal)) {
+    if (!DFSOperationsUtils.isTwoDecimalPlace(userVal)) {
       throw new IllegalArgumentException("Wrong user value. Only one decimal place is supported. Value " + userVal + " key: " + key);
     }
 

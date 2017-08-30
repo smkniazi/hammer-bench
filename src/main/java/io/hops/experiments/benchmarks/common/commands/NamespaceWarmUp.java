@@ -33,15 +33,20 @@ public class NamespaceWarmUp {
     private String fileSizeDistribution;
     private long appendSize;
     private String baseDir;
+    private boolean readFilesFromDisk;
+    private String diskFilsPath;
 
     public Request(BenchmarkType benchMarkType, int filesToCreate,
-            short replicationFactor, String fileSizeDistribution, long appendSize, String baseDir) {
+            short replicationFactor, String fileSizeDistribution, long appendSize, String baseDir,
+                   boolean readFilesFromDisk, String diskFilsPath) {
       this.benchMarkType = benchMarkType;
       this.filesToCreate = filesToCreate;
       this.replicationFactor = replicationFactor;
       this.fileSizeDistribution = fileSizeDistribution;
       this.appendSize = appendSize;
       this.baseDir = baseDir;
+      this.readFilesFromDisk = readFilesFromDisk;
+      this.diskFilsPath = diskFilsPath;
     }
 
     public long getAppendSize() {
@@ -66,6 +71,14 @@ public class NamespaceWarmUp {
 
     public String getFileSizeDistribution() {
       return fileSizeDistribution;
+    }
+
+    public boolean isReadFilesFromDisk() {
+      return readFilesFromDisk;
+    }
+
+    public String getDiskFilsPath() {
+      return diskFilsPath;
     }
   }
 
