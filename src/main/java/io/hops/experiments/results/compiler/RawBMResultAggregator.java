@@ -175,6 +175,27 @@ public class RawBMResultAggregator extends Aggregator{
 
     lines(hdfsCr, hopsFsCr, outputFolder);
     histogram(hdfsCr, hopsFsCr, outputFolder);
+    lineGraph(hdfsCr,hopsFsCr,outputFolder);
+
+  }
+
+  public static void lineGraph(CompiledResults hdfsCr, CompiledResults hopsFsCr, String outputFolder) throws IOException{
+
+    SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+    sorted.addAll(hopsFsCr.valsMap.keySet());
+    List<Integer> NNIndex = hopsFsCr.nnCounts;
+    for (BenchmarkOperations op : sorted) {
+      String res = "";
+      List<Double> list = hopsFsCr.valsMap.get(op);
+      res += op.toString()+"\n";
+      for(int i = 0; i < list.size(); i++) {
+        res += CompileResults.format(NNIndex.get(i)+"")+"  "+CompileResults.format(list.get(i)+"")+" "+"\n";
+      }
+
+      res += "\n";
+      CompileResults.writeToFile(outputFolder+"/"+op+"-line.dat", res, false);
+      System.out.println(res);
+    }
 
   }
 
