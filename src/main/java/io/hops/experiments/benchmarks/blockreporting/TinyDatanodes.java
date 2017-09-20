@@ -222,7 +222,7 @@ public class TinyDatanodes {
           int dnIdx = Arrays.binarySearch(datanodes, dnInfo.getXferAddr());
           datanodes[dnIdx].addBlock(loc.getBlock().getLocalBlock());
           ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
-                  ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
+                  ReceivedDeletedBlockInfo.BlockStatus.RECEIVED, null)};
           StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
                   datanodes[dnIdx].dnRegistration.getStorageID(), rdBlocks)};
           datanodeProto.blockReceivedAndDeleted(
