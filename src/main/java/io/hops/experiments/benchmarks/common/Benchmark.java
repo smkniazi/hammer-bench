@@ -132,7 +132,6 @@ public abstract class Benchmark {
           DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
-          log();
           threadsWarmedUp.incrementAndGet();
           while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
             Thread.sleep(100);
