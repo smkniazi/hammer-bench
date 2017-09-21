@@ -45,7 +45,7 @@ public class Logger {
   //send one error per sec. this avoids printing too much to the output of the master
   static long lastError = 0;
   static long errorCounter = 0;
-  public static synchronized void error(Exception e) {
+  public static synchronized void error(Throwable e) {
     e.printStackTrace();
     if(((System.currentTimeMillis() - lastError) > 2000)){
       final int MSG_SIZE = 200; //send small messages

@@ -117,14 +117,14 @@ public abstract class Benchmark {
 
     @Override
     public Object call() throws Exception {
-      dfs = DFSOperationsUtils.getDFSClient(conf);
-      filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
-              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution,
-              readFilesFromDisk, diskFilesPath);
-      String filePath = null;
+      try {
+        dfs = DFSOperationsUtils.getDFSClient(conf);
+        filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
+                filesPerDir, fixedDepthTree, treeDepth, fileSizeDistribution,
+                readFilesFromDisk, diskFilesPath);
+        String filePath = null;
 
-      for (int i = 0; i < filesToCreate; i++) {
-        try {
+        for (int i = 0; i < filesToCreate; i++) {
           filePath = filePool.getFileToCreate();
           DFSOperationsUtils
                   .createFile(dfs, filePath, replicationFactor, filePool);
@@ -132,17 +132,17 @@ public abstract class Benchmark {
           DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
           log();
-        } catch (Exception e) {
-          Logger.error(e);
-        }
-      }
-      log();
-      threadsWarmedUp.incrementAndGet();
-      while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
-        Thread.sleep(100);
-      }
+          log();
+          threadsWarmedUp.incrementAndGet();
+          while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
+            Thread.sleep(100);
+          }
 
-      System.out.println("WarmedUp");
+          System.out.println("WarmedUp");
+        }
+      } catch (Throwable e) {
+        Logger.error(e);
+      }
       return null;
     }
 
