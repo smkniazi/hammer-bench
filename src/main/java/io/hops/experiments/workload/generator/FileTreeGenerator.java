@@ -19,6 +19,7 @@ package io.hops.experiments.workload.generator;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -269,7 +270,8 @@ public class FileTreeGenerator implements FilePool {
   }
 
   private int getPathLength(String path){
-    return PathUtils.getPathNames(path).length;
+//    return PathUtils.getPathNames(path).length;
+     return StringUtils.countMatches(path,"/");
   }
 
   public String getRandomDir() {

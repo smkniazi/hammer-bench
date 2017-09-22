@@ -68,10 +68,12 @@ public abstract class Benchmark {
   public static Benchmark getBenchmark(Configuration conf, Handshake.Request handShake) {
     if (handShake.getBenchMarkType() == BenchmarkType.RAW) {
       return new RawBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth(),handShake.getBenchMarkFileSystemName());
+              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth(),
+              handShake.isPercentilesEnabled(), handShake.getBenchMarkFileSystemName());
     } else if (handShake.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       return new InterleavedBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-               handShake.isFixedDepthTree(), handShake.getTreeDepth(),handShake.getBenchMarkFileSystemName());
+               handShake.isFixedDepthTree(), handShake.getTreeDepth(),
+              handShake.isPercentilesEnabled(),handShake.getBenchMarkFileSystemName());
     } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
 //        throw new UnsupportedOperationException("BR is commented out as it is only supported for hadoop 2.0.4-alpha");
          return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),

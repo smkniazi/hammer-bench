@@ -21,6 +21,9 @@ import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 /**
  *
@@ -59,14 +62,18 @@ public class RawBenchmarkCommand {
         private final long totalFailedOps;
         private final double opsPerSec;
         private final int nnCount;
+        private final ArrayList<Long> opsExeTimes;
 
-        public Response(BenchmarkOperations phase, long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec, int nnCount) {
+        public Response(BenchmarkOperations phase, long runTime, long totalSuccessfulOps,
+                        long totalFailedOps, double opsPerSec, int nnCount,
+                        ArrayList<Long> opsExeTimes) {
             this.phase = phase;
             this.runTime = runTime;
             this.totalSuccessfulOps = totalSuccessfulOps;
             this.totalFailedOps = totalFailedOps;
             this.opsPerSec = opsPerSec;
             this.nnCount = nnCount;
+            this.opsExeTimes = opsExeTimes;
         }
 
         public BenchmarkOperations getPhase() {
@@ -91,6 +98,10 @@ public class RawBenchmarkCommand {
 
         public int getNnCount() {
           return nnCount;
+        }
+
+        public ArrayList<Long> getOpsExeTimes(){
+            return opsExeTimes;
         }
     }
 }

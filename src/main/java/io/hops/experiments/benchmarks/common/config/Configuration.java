@@ -366,7 +366,11 @@ public class Configuration implements Serializable {
   }
 
   public String getResultsDir() {
-    return getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
+    String filePath =  getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
+    if(!filePath.endsWith("/")){
+      filePath += "/";
+    }
+    return filePath;
   }
 
   public int getFilesToCreateInWarmUpPhase() {

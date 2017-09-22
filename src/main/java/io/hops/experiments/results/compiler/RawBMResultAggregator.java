@@ -354,6 +354,7 @@ public class RawBMResultAggregator extends Aggregator{
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
     DescriptiveStatistics noOfAliveNNs = new DescriptiveStatistics();
+    ArrayList<Long> latencies = new ArrayList<Long>();
     for (Object obj : responses) {
       if (!(obj instanceof RawBenchmarkCommand.Response)
               || (obj instanceof RawBenchmarkCommand.Response
@@ -366,6 +367,7 @@ public class RawBMResultAggregator extends Aggregator{
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
         noOfAliveNNs.addValue(response.getNnCount());
+        latencies.addAll(response.getOpsExeTimes());
       }
     }
 
@@ -375,7 +377,7 @@ public class RawBMResultAggregator extends Aggregator{
             request.getPhase(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))),
             (duration.getMean() / 1000),
-            (successfulOps.getSum()), (failedOps.getSum()));
+            (successfulOps.getSum()), (failedOps.getSum()), latencies);
     return result;
   }
   

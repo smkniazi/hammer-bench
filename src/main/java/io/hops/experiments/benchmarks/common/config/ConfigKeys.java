@@ -43,7 +43,7 @@ public class ConfigKeys {
     public static String BENCHMARK_TYPE_DEFAULT = "RAW";// "Type. RAW | INTERLEAVED | BM ."
     
     public static String GENERATE_PERCENTILES_KEY = "generate.percentiles";
-    public static boolean   GENERATE_PERCENTILES_DEFAULT = true;
+    public static boolean   GENERATE_PERCENTILES_DEFAULT = false;
     
     public static String INTERLEAVED_BM_DURATION_KEY = "interleaved.bm.duration";
     public static long   INTERLEAVED_BM_DURATION_DEFAULT = 60*1000;

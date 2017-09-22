@@ -47,6 +47,7 @@ public class Handshake implements Serializable {
     private final int treeDepth;
     private final BenchMarkFileSystemName benchMarkFileSystemName;
     private final Properties fsConfig;
+    private final boolean percentilesEnabled;
 
     public Request(int numThreads, String fileSizeDistribution, long appendSize, short replicationFactor,
             BenchmarkType benchMarkType, String baseDir,
@@ -54,7 +55,8 @@ public class Handshake implements Serializable {
             int dirPerDir, int filesPerDir,
             long maxFilesToCreate,
             boolean fixedDepthTree,
-            int treeDepth, BenchMarkFileSystemName fsName,
+            int treeDepth, boolean percentilesEnabled,
+            BenchMarkFileSystemName fsName,
             Properties fsConfig) {
       this.numThreads = numThreads;
       this.fileSizeDistribution = fileSizeDistribution;
@@ -70,7 +72,8 @@ public class Handshake implements Serializable {
       this.fixedDepthTree = fixedDepthTree;
       this.treeDepth = treeDepth;
       this.benchMarkFileSystemName = fsName;
-      this.fsConfig = fsConfig; 
+      this.fsConfig = fsConfig;
+      this.percentilesEnabled = percentilesEnabled;
     }
 
     public Properties getFsConfig() {
@@ -140,6 +143,10 @@ public class Handshake implements Serializable {
 
     public int getDirPerDir() {
       return dirPerDir;
+    }
+
+    public boolean isPercentilesEnabled() {
+      return percentilesEnabled;
     }
   }
   public static class Response implements Serializable {
