@@ -95,7 +95,7 @@ public class DFSOperationsUtils {
         FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
         long size = filePool.getNewFileSize();
         if(size > 0){
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[64*1024];
             long read = -1;
             do {
                 read = filePool.getFileData(buffer);
@@ -119,8 +119,9 @@ public class DFSOperationsUtils {
             byte b;
             do{
                 b = in.readByte();
-            }while(true);
+            }while(false);
         }catch (EOFException e){
+        }finally {
             in.close();
         }
     }

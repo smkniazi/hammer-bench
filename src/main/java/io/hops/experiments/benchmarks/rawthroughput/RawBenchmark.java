@@ -181,12 +181,15 @@ public class RawBenchmark extends Benchmark {
 
           String path = BMOperationsUtils.getPath(opType,filePool);
 
-          if (path == null 
-                  || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))
-                  || (opType == BenchmarkOperations.CREATE_FILE && 
-                      maxFilesToCreate < (long)(successfulOps.get() 
-                                         + filesCreatedInWarmupPhase.get()))
-                  || (readFilesFromDisk && !filePool.hasMoreFilesToWrite())) {
+          if (path == null){
+            return null;
+          } else if( (System.currentTimeMillis() - phaseStartTime) > phaseDurationInMS){
+            return null;
+          } else if ( opType == BenchmarkOperations.CREATE_FILE &&
+                  maxFilesToCreate < (long)(successfulOps.get() + filesCreatedInWarmupPhase.get())){
+            return null;
+          } else if( opType == BenchmarkOperations.CREATE_FILE &&
+                  readFilesFromDisk && !filePool.hasMoreFilesToWrite()){
             return null;
           }
 
