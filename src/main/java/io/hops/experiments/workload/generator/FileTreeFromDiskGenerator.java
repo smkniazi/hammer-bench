@@ -81,5 +81,11 @@ public class FileTreeFromDiskGenerator extends FileTreeGenerator {
     public boolean hasMoreFilesToWrite(){
         return diskNameSpaceReader.hasMoreFiles();
     }
+
+    @Override
+    public String getFileToRead() {
+//        return super.getFileToRead();
+        return super.getFileToDelete();
+    }
 }
 

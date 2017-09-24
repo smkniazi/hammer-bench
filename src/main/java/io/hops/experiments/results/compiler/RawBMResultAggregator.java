@@ -101,17 +101,29 @@ public class RawBMResultAggregator extends Aggregator{
       Map<BenchmarkOperations, RawAggregate> map = allResults.get(key);
       for (BenchmarkOperations op : map.keySet()) {
         RawAggregate agg = map.get(op);
-        List<Double> vals = cr.valsMap.get(op);
-        if (vals == null) {
-          vals = new ArrayList<Double>();
-          cr.valsMap.put(op, vals);
+        List<Double> avgVal = cr.avgVals.get(op);
+        List<Double> maxVal = cr.maxVals.get(op);
+        List<Double> minVal = cr.minVals.get(op);
+        if (avgVal == null) {
+          avgVal = new ArrayList<Double>();
+          cr.avgVals.put(op, avgVal);
         }
-        vals.add(agg.getSpeed());
+        if (minVal == null){
+          minVal = new ArrayList<Double>();
+          cr.minVals.put(op, minVal);
+        }
+        if(maxVal==null){
+          maxVal = new ArrayList<Double>();
+          cr.maxVals.put(op,maxVal);
+        }
+        avgVal.add(agg.getSpeed());
+        minVal.add(agg.getMinSpeed());
+        maxVal.add(agg.getMaxSpeed());
       }
     }
     //create histogram
-    for (BenchmarkOperations op : cr.valsMap.keySet()) {
-      List<Double> vals = cr.valsMap.get(op);
+    for (BenchmarkOperations op : cr.avgVals.keySet()) {
+      List<Double> vals = cr.avgVals.get(op);
       Double max = new Double(0);
       for(int i = 0; i < vals.size();i++){
         if(i > 0){
@@ -124,8 +136,8 @@ public class RawBMResultAggregator extends Aggregator{
     }
 
     //create histogram
-    for (BenchmarkOperations op : cr.valsMap.keySet()) {
-      List<Double> vals = cr.valsMap.get(op);
+    for (BenchmarkOperations op : cr.avgVals.keySet()) {
+      List<Double> vals = cr.avgVals.get(op);
       List<Double> histo = cr.histoMap.get(op);
       if (histo == null) {
         histo = new ArrayList<Double>();
@@ -152,7 +164,9 @@ public class RawBMResultAggregator extends Aggregator{
   }
 
   class CompiledResults {
-    Map<BenchmarkOperations, List<Double>> valsMap = new HashMap<BenchmarkOperations, List<Double>>();
+    Map<BenchmarkOperations, List<Double>> avgVals = new HashMap<BenchmarkOperations, List<Double>>();
+    Map<BenchmarkOperations, List<Double>> minVals = new HashMap<BenchmarkOperations, List<Double>>();
+    Map<BenchmarkOperations, List<Double>> maxVals = new HashMap<BenchmarkOperations, List<Double>>();
     Map<BenchmarkOperations, List<Double>> histoMap = new HashMap<BenchmarkOperations, List<Double>>();
     List<Integer> nnCounts = new ArrayList<Integer>();
   }
@@ -175,6 +189,31 @@ public class RawBMResultAggregator extends Aggregator{
 
     lines(hdfsCr, hopsFsCr, outputFolder);
     histogram(hdfsCr, hopsFsCr, outputFolder);
+    lineGraph(hdfsCr,hopsFsCr,outputFolder);
+
+  }
+
+  public static void lineGraph(CompiledResults hdfsCr, CompiledResults hopsFsCr, String outputFolder) throws IOException{
+
+    SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
+    sorted.addAll(hopsFsCr.avgVals.keySet());
+    List<Integer> NNIndex = hopsFsCr.nnCounts;
+    for (BenchmarkOperations op : sorted) {
+      String res = "";
+      List<Double> avgList = hopsFsCr.avgVals.get(op);
+      List<Double> minList = hopsFsCr.minVals.get(op);
+      List<Double> maxList = hopsFsCr.maxVals.get(op);
+      res += op.toString()+"\n";
+      for(int i = 0; i < avgList.size(); i++) {
+        res += CompileResults.format(NNIndex.get(i)+"")+"  "+CompileResults.format(minList.get(i)+"")+" "+
+                CompileResults.format(avgList.get(i)+"")+" "+
+                CompileResults.format(maxList.get(i)+"")+" "+"\n";
+      }
+
+      res += "\n";
+      CompileResults.writeToFile(outputFolder+"/"+op+"-line.dat", res, false);
+      System.out.println(res);
+    }
 
   }
 
@@ -197,7 +236,7 @@ public class RawBMResultAggregator extends Aggregator{
     String plotCommands = "";
     
     SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
-    sorted.addAll(hopsFsCr.valsMap.keySet());
+    sorted.addAll(hopsFsCr.avgVals.keySet());
     for (BenchmarkOperations op : sorted) {
       int colorIndex = 0;
       List<Double> hopsHisto = hopsFsCr.histoMap.get(op);
@@ -211,7 +250,7 @@ public class RawBMResultAggregator extends Aggregator{
       
       msg+="\n";
       msg+=CompileResults.format("HDFS");
-      List<Double> hdfsVals = hdfsCr.valsMap.get(op);
+      List<Double> hdfsVals = hdfsCr.avgVals.get(op);
       if (hdfsVals != null) {
         if (hdfsVals.size() > 1) {
           System.err.println("In Hdfs there should be only one value for " + op);
@@ -289,9 +328,9 @@ public class RawBMResultAggregator extends Aggregator{
 
     
     SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
-    sorted.addAll(hopsFsCr.valsMap.keySet());
+    sorted.addAll(hopsFsCr.avgVals.keySet());
     for (BenchmarkOperations op : sorted) {
-      List<Double> hopsVals = hopsFsCr.valsMap.get(op);
+      List<Double> hopsVals = hopsFsCr.avgVals.get(op);
       String msg = CompileResults.format("HopsFS_" + op.toString());
       for (Double val : hopsVals) {
         msg += CompileResults.format(DFSOperationsUtils.round(val) + "");
@@ -299,7 +338,7 @@ public class RawBMResultAggregator extends Aggregator{
 
       msg += "\n" + CompileResults.format("HDFS_" + op.toString());
 
-      List<Double> hdfsVals = hdfsCr.valsMap.get(op);
+      List<Double> hdfsVals = hdfsCr.avgVals.get(op);
       int hdfsRecordSize = 0;
       if (hdfsVals != null) {
         if (hdfsVals.size() > 1) {
@@ -333,6 +372,7 @@ public class RawBMResultAggregator extends Aggregator{
     DescriptiveStatistics speed = new DescriptiveStatistics();
     DescriptiveStatistics duration = new DescriptiveStatistics();
     DescriptiveStatistics noOfAliveNNs = new DescriptiveStatistics();
+    ArrayList<Long> latencies = new ArrayList<Long>();
     for (Object obj : responses) {
       if (!(obj instanceof RawBenchmarkCommand.Response)
               || (obj instanceof RawBenchmarkCommand.Response
@@ -345,6 +385,7 @@ public class RawBMResultAggregator extends Aggregator{
         speed.addValue(response.getOpsPerSec());
         duration.addValue(response.getRunTime());
         noOfAliveNNs.addValue(response.getNnCount());
+        latencies.addAll(response.getOpsExeTimes());
       }
     }
 
@@ -354,7 +395,7 @@ public class RawBMResultAggregator extends Aggregator{
             request.getPhase(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))),
             (duration.getMean() / 1000),
-            (successfulOps.getSum()), (failedOps.getSum()));
+            (successfulOps.getSum()), (failedOps.getSum()), latencies);
     return result;
   }
   

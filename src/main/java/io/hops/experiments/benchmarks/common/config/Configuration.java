@@ -366,7 +366,11 @@ public class Configuration implements Serializable {
   }
 
   public String getResultsDir() {
-    return getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
+    String filePath =  getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
+    if(!filePath.endsWith("/")){
+      filePath += "/";
+    }
+    return filePath;
   }
 
   public int getFilesToCreateInWarmUpPhase() {
@@ -569,6 +573,7 @@ public class Configuration implements Serializable {
               Boolean.toString(getBoolean(ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB, ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB_DEFAULT)));
       dfsClientConf.setProperty(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY,
               Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
+      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_KEY, Integer.toString(ConfigKeys.DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_DEFAULT));
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
       System.out.println("Creating config for CephFS");
       dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());

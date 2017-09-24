@@ -22,6 +22,8 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.utils.DFSOperationsUtils;
 
+import java.util.List;
+
 /**
  *
  * @author salman
@@ -32,14 +34,19 @@ public class RawBMResults extends BMResult {
   private final double successfulOps;
   private final double failedOps;
   private final BenchmarkOperations operationType;
+  private final List<Long> latencies;
 
-  public RawBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes, BenchmarkOperations operationType, double speed, double duration, double successfulOps, double failedOps) {
-    super(noOfExpectedNNs, noOfActualAliveNNs, noOfNDBDataNodes, BenchmarkType.RAW);
+  public RawBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes,
+                      BenchmarkOperations operationType, double speed, double duration,
+                      double successfulOps, double failedOps,
+                      List<Long> latencies) {
+    super(noOfExpectedNNs, noOfActualAliveNNs, noOfNDBDataNodes,  BenchmarkType.RAW);
     this.speed = speed;
     this.duration = duration;
     this.successfulOps = successfulOps;
     this.failedOps = failedOps;
     this.operationType = operationType;
+    this.latencies = latencies;
   }
 
   public double getSpeed() {
@@ -60,6 +67,10 @@ public class RawBMResults extends BMResult {
 
   public BenchmarkOperations getOperationType() {
     return operationType;
+  }
+
+  public List<Long> getLatencies(){
+    return latencies;
   }
 
   @Override

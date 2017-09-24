@@ -57,16 +57,20 @@ public class RawBenchmark extends Benchmark {
   private String diskFilesPath;
   private final int treeDepth;
   private final boolean fixedDepthTree;
-  
+  private final boolean percentilesEnabled;
+  private final ArrayList<Long> opsExeTimes = new ArrayList<Long>();
+
   public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, 
           int filesPerDir, long maxFilesToCreate,
-          boolean fixedDepthTree, int treeDepth, BenchMarkFileSystemName fsName) {
+          boolean fixedDepthTree, int treeDepth,
+          boolean percentilesEnabled, BenchMarkFileSystemName fsName) {
     super(conf, numThreads, fsName);
     this.dirsPerDir = dirsPerDir;
     this.filesPerDir = filesPerDir;
     this.maxFilesToCreate = maxFilesToCreate;
     this.fixedDepthTree = fixedDepthTree;
     this.treeDepth = treeDepth;
+    this.percentilesEnabled = percentilesEnabled;
   }
 
   @Override
@@ -147,7 +151,7 @@ public class RawBenchmark extends Benchmark {
 
     RawBenchmarkCommand.Response response =
             new RawBenchmarkCommand.Response(opType,
-            actualExecutionTime, successfulOps.get(), failedOps.get(), speed, getAliveNNsCount());
+            actualExecutionTime, successfulOps.get(), failedOps.get(), speed, getAliveNNsCount(), opsExeTimes);
     return response;
   }
 
@@ -181,12 +185,15 @@ public class RawBenchmark extends Benchmark {
 
           String path = BMOperationsUtils.getPath(opType,filePool);
 
-          if (path == null 
-                  || ((System.currentTimeMillis() - phaseStartTime) > (phaseDurationInMS))
-                  || (opType == BenchmarkOperations.CREATE_FILE && 
-                      maxFilesToCreate < (long)(successfulOps.get() 
-                                         + filesCreatedInWarmupPhase.get()))
-                  || (readFilesFromDisk && !filePool.hasMoreFilesToWrite())) {
+          if (path == null){
+            return null;
+          } else if( (System.currentTimeMillis() - phaseStartTime) > phaseDurationInMS){
+            return null;
+          } else if ( opType == BenchmarkOperations.CREATE_FILE &&
+                  maxFilesToCreate < (long)(successfulOps.get() + filesCreatedInWarmupPhase.get())){
+            return null;
+          } else if( opType == BenchmarkOperations.CREATE_FILE &&
+                  readFilesFromDisk && !filePool.hasMoreFilesToWrite()){
             return null;
           }
 
@@ -200,20 +207,30 @@ public class RawBenchmark extends Benchmark {
             }*/
           }
 
+
+          long startTime = System.currentTimeMillis();
           BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, appendSize);
-          
-          successfulOps.incrementAndGet();
+          logStats(opType,(System.currentTimeMillis() - startTime));
 
-          log();
+          logMessage();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
           failedOps.incrementAndGet();
           Logger.error(e);
         }
       }
     }
 
-    private void log(){
+    private void logStats(BenchmarkOperations type, long opExeTime){
+      successfulOps.incrementAndGet();
+      if(percentilesEnabled) {
+        synchronized (opsExeTimes){
+          opsExeTimes.add(opExeTime);
+        }
+      }
+    }
+
+    private void logMessage(){
       // Send a log message once every five second.
       // The logger also tires to rate limit the log messages
       // using the canILog() methods. canILog method is synchronized
@@ -249,6 +266,7 @@ public class RawBenchmark extends Benchmark {
     phaseStartTime = System.currentTimeMillis();
     successfulOps = new AtomicInteger(0);
     failedOps = new AtomicInteger(0);
+    opsExeTimes.clear();
   }
 
   public double speedPSec(AtomicInteger ops, long startTime) {

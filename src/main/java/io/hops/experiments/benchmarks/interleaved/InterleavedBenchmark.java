@@ -58,6 +58,7 @@ public class InterleavedBenchmark extends Benchmark {
   private final int filesPerDir;
   private boolean readFilesFromDisk;
   private String diskFilesPath;
+  private final boolean percentileEnabled;
 
 
   private final boolean fixedDepthTree;
@@ -66,12 +67,14 @@ public class InterleavedBenchmark extends Benchmark {
   public InterleavedBenchmark(Configuration conf, int numThreads,
                               int inodesPerDir, int filesPerDir,
                               boolean fixedDepthTree, int treeDepth,
+                              boolean percentileEnabled,
                               BenchMarkFileSystemName fsName) {
     super(conf, numThreads, fsName);
     this.dirsPerDir = inodesPerDir;
     this.filesPerDir = filesPerDir;
     this.fixedDepthTree = fixedDepthTree;
     this.treeDepth = treeDepth;
+    this.percentileEnabled = percentileEnabled;
   }
 
   @Override
@@ -294,7 +297,7 @@ public class InterleavedBenchmark extends Benchmark {
       if (success) {
         operationsCompleted.incrementAndGet();
         avgLatency.addValue(opExeTime);
-        if (config.isPercentileEnabled()) {
+        if (percentileEnabled) {
           synchronized (opsExeTimes) {
             ArrayList<Long> times = opsExeTimes.get(opType);
             if (times == null) {

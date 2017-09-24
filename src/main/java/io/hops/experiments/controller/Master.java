@@ -293,7 +293,7 @@ public class Master {
             config.isEnableRemoteLogging(), config.getRemoteLogginPort(),
             config.getDirPerDir(),
             config.getFilesPerDir(), config.getRawBmMaxFilesToCreate(),
-            config.isFixedDepthTree(), config.getTreeDepth(),
+            config.isFixedDepthTree(), config.getTreeDepth(), config.isPercentileEnabled(),
             config.getBenchMarkFileSystemName(), config.getFsConfig()));
     Collection<Object> allResponses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
 
@@ -346,7 +346,7 @@ public class Master {
 
     sendToAllSlaves(request,0/*delay*/);
 
-    Collection<Object> responses = receiveFromAllSlaves((int) (request.getDurationInMS() + 60 * 1000)/*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves((int) (request.getDurationInMS() + 10 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);
@@ -437,9 +437,6 @@ public class Master {
   private void generateResultsFile() throws FileNotFoundException, IOException {
     
     String filePath = config.getResultsDir();
-    if(!filePath.endsWith("/")){
-      filePath += "/";
-    }
     filePath += ConfigKeys.BINARY_RESULT_FILE_NAME;
     printMasterLogMessages("Writing results to "+filePath);
     FileOutputStream fout = new FileOutputStream(filePath);
@@ -451,9 +448,6 @@ public class Master {
     
     
     filePath = config.getResultsDir();
-    if(!filePath.endsWith("/")){
-      filePath += "/";
-    }
     filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
     printMasterLogMessages("Writing results to "+filePath);
     FileWriter out = new FileWriter(filePath, false);
@@ -461,6 +455,19 @@ public class Master {
       out.write(result.toString() + "\n");
     }
     out.close();
+
+    if(config.getBenchMarkType() == BenchmarkType.RAW && config.isPercentileEnabled()){
+      for (BMResult result : results) {
+        RawBMResults rawResult = (RawBMResults) result;
+        filePath = config.getResultsDir();
+        filePath += rawResult.getOperationType()+".csv";
+        out = new FileWriter(filePath, false);
+        for(long l : rawResult.getLatencies()){
+          out.write(l+"\n");
+        }
+        out.close();
+      }
+    }
   }
 
   private void redColoredText(String msg) {
