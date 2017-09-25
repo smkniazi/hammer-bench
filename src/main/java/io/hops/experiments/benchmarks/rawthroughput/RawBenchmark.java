@@ -207,10 +207,15 @@ public class RawBenchmark extends Benchmark {
             }*/
           }
 
-
-          long startTime = System.currentTimeMillis();
+          long time = 0;
+          if(percentilesEnabled) {
+            time = System.currentTimeMillis();
+          }
           BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, appendSize);
-          logStats(opType,(System.currentTimeMillis() - startTime));
+          if(percentilesEnabled) {
+            time = System.nanoTime() - time;
+          }
+          logStats(opType, time);
 
           logMessage();
 
@@ -221,13 +226,13 @@ public class RawBenchmark extends Benchmark {
       }
     }
 
-    private void logStats(BenchmarkOperations type, long opExeTime){
-      successfulOps.incrementAndGet();
+    private void logStats(BenchmarkOperations type, long time){
       if(percentilesEnabled) {
         synchronized (opsExeTimes){
-          opsExeTimes.add(opExeTime);
+          opsExeTimes.add(time);
         }
       }
+      successfulOps.incrementAndGet();
     }
 
     private void logMessage(){
