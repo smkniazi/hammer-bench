@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -463,7 +465,7 @@ public class Master {
         filePath += rawResult.getOperationType()+".csv";
         out = new FileWriter(filePath, false);
         for(long l : rawResult.getLatencies()){
-          out.write(l+"\n");
+          out.write(((double)l/1000000.0)+"\n");
         }
         out.close();
       }
