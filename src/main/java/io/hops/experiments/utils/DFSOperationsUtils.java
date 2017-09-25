@@ -119,7 +119,7 @@ public class DFSOperationsUtils {
             byte b;
             do{
                 b = in.readByte();
-            }while(false);
+            }while(true);
         }catch (EOFException e){
         }finally {
             in.close();
