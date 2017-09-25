@@ -209,7 +209,7 @@ public class RawBenchmark extends Benchmark {
 
           long time = 0;
           if(percentilesEnabled) {
-            time = System.currentTimeMillis();
+            time = System.nanoTime();
           }
           BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, appendSize);
           if(percentilesEnabled) {
