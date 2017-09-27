@@ -22,10 +22,8 @@ import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.common.config.Configuration;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+
+import java.io.*;
 import java.util.*;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -166,9 +164,6 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         throw new IllegalStateException("Wrong response received from the client");
       } else {
         String filePath = args.getResultsDir();
-        if (!filePath.endsWith("/")) {
-          filePath += "/";
-        }
         InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
         filePath += "ResponseRawData"+responseCount+++ConfigKeys.RAW_RESPONSE_FILE_EXT;
         System.out.println("Writing Rwaw results to " + filePath);
@@ -176,6 +171,20 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         ObjectOutputStream oos = new ObjectOutputStream(fout);
         oos.writeObject(response);
         oos.close();
+
+
+        System.out.println("Writing CSV results ");
+        HashMap<BenchmarkOperations, ArrayList<Long>> times = response.getOpsExeTimes();
+        for(BenchmarkOperations op : times.keySet()){
+          filePath=args.getResultsDir();
+          filePath+=op.toString()+".txt";
+          FileWriter out = new FileWriter(filePath, true);
+          for(Long time : times.get(op)){
+            out.write(((double)time/1000000.0)+"\n");
+          }
+          out.close();
+
+        }
       }
     }
 
