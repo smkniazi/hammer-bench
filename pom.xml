@@ -38,7 +38,13 @@
       <artifactId>guava</artifactId>
       <version>18.0</version>
     </dependency>
-    
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+
+
     <!-- Hops Dependencies -->
     <dependency>
       <groupId>io.hops</groupId>
@@ -59,7 +65,7 @@
 	</dependency>
 
 
-    <!-- HDFS Dependencies -->
+      <!-- HDFS Dependencies -->
 <!--    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
