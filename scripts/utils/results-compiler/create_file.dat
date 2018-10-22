@@ -1,4 +1,0 @@
-#create_file        
-NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
-HopsFS              -                   2165.56             3052.78             2969.36             3367.28             3363.81             3021.97             2310.38             0.0                 2829.8              1603.12             189.55              0.0                 
-HDFS                0                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   

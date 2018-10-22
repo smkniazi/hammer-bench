@@ -1,4 +1,0 @@
-#APPEND_FILE        
-NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
-HopsFS              -                   3364.25             3155.05             2931.57             2587.42             2575.31             2095.96             1071.83             448.53              382.21              276.28              181.3               0.0                 
-HDFS                9277.92             -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   

@@ -1,4 +1,0 @@
-#chmod_dir          
-NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
-HopsFS              -                   3565.22             4710.09             4728.55             5280.31             5229.13             4812.23             4290.13             0.0                 4305.87             3128.3              416.0               0.0                 
-HDFS                0                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   
