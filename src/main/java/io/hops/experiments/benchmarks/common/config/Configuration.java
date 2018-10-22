@@ -16,7 +16,7 @@
  */
 package io.hops.experiments.benchmarks.common.config;
 
-import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
+//import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 
 import java.io.*;
@@ -140,9 +140,9 @@ public class Configuration implements Serializable {
       }
     }
 
-    if(!isBlockReportingSkipCreations() && getBenchMarkType() == BenchmarkType.BR) {
-      TinyDatanodesHelper.dropTable(getBlockReportingPersistDatabase());
-    }
+//    if(!isBlockReportingSkipCreations() && getBenchMarkType() == BenchmarkType.BR) {
+//      TinyDatanodesHelper.dropTable(getBlockReportingPersistDatabase());
+//    }
   }
 
   public List<InetAddress> getSlavesList() throws UnknownHostException {
