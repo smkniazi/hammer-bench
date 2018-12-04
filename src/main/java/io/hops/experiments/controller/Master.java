@@ -385,7 +385,7 @@ public class Master {
         handshake.setSlaveId(slaveId++);
         handshake.setFsConfig(config.getFsConfig(slave.getHostAddress()));
         printMasterLogMessages("*** Slave " + slave.getHostAddress() + " has " +
-            "locationDomainId" + handshake.getFsConfig().getProperty("dfs" +
+            "locationDomainId " + handshake.getFsConfig().getProperty("dfs" +
             ".locationDomainId"));
         conn.sendToSlave(handshake);
       }
