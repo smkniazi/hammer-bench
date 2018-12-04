@@ -43,7 +43,8 @@ public class Configuration implements Serializable {
   private List<InetAddress> listOfSlaves = null;
   private List<String> nameNodeList = null;
   private Properties props = null;
-
+  private Properties slavesLocationDomainIds = null;
+  
   private Configuration() {
   }
 
@@ -51,11 +52,21 @@ public class Configuration implements Serializable {
     System.out.println("FU");
   }
 
-  public Configuration(String file) throws FileNotFoundException, IOException, SQLException {
+  public Configuration(String file, String slavesDomainIds) throws FileNotFoundException,
+      IOException, SQLException {
+    props = loadPropFile(file);
+    validateArgs();
+    if(!isSkipLocationDomainIds()){
+      slavesLocationDomainIds = loadPropFile(slavesDomainIds);
+    }
+  }
+  
+  public Configuration(String file) throws FileNotFoundException,
+      IOException, SQLException {
     props = loadPropFile(file);
     validateArgs();
   }
-
+  
   private Properties loadPropFile(String file) throws FileNotFoundException, IOException {
     final String PROP_FILE = file;
     Properties props = new Properties();
@@ -590,7 +601,25 @@ public class Configuration implements Serializable {
     }
     return dfsClientConf;
   }
-
+  
+  public Properties getFsConfig(String slaveIp) {
+    Properties dfsClientConf = getFsConfig();
+    if(slavesLocationDomainIds != null) {
+      String locDomainId = slavesLocationDomainIds.getProperty(slaveIp);
+      if (locDomainId != null) {
+        dfsClientConf.setProperty("dfs.locationDomainId", locDomainId);
+      } else {
+        dfsClientConf.setProperty("dfs.locationDomainId", "0");
+      }
+    }
+    return dfsClientConf;
+  }
+  
+  public boolean isSkipLocationDomainIds() {
+    return getBoolean(ConfigKeys.LOCATION_DOMAIN_IDS_SKIP,
+        ConfigKeys.LOCATION_DOMAIN_IDS_SKIP_DEFAULT);
+  }
+  
   private int getInt(String key, int defaultVal) {
     String val = props.getProperty(key, Integer.toString(defaultVal));
     return Integer.parseInt(val);

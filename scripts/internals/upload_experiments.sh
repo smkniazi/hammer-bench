@@ -37,6 +37,7 @@ PRSYNC=$($DIR/prsynccmd.sh)
 	cp ./internals/HopsFS_Exp_Remote_Scripts/* $temp_folder/
 	cp ./master.properties $temp_folder/
 	cp ./slave.properties $temp_folder/
+  cp ./experiment-nodes-domainIds $temp_folder/
 
         sed -i 's|JAVA_BIN|'$JAVA_BIN'|g' $temp_folder/*.sh
         sed -i 's|CPU_AFFINITY=.*|CPU_AFFINITY='$CPU_AFFINITY'|g' $temp_folder/*.sh

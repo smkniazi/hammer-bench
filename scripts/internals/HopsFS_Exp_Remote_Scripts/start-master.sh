@@ -18,5 +18,6 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-JAVA_BIN  -Dlog4j.configuration=file:$DIR/log4j.properties  -cp $DIR/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.Master  $DIR/master.properties 
+JAVA_BIN  -Dlog4j.configuration=file:$DIR/log4j.properties  -cp
+$DIR/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.Master  $DIR/master.properties $DIR/experiment-nodes-domainIds
 

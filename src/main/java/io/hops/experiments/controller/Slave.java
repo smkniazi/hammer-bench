@@ -83,7 +83,9 @@ public class Slave {
               dfsClientConf.set(keyStr, val);
             }
             
-
+            System.out.println(" Slave has " + dfsClientConf.get("dfs" +
+                ".locationDomainId"));
+            
             benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
 
             sendResponseToMaster(new Handshake.Response());

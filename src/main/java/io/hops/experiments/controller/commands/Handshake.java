@@ -46,7 +46,7 @@ public class Handshake implements Serializable {
     private final boolean fixedDepthTree;
     private final int treeDepth;
     private final BenchMarkFileSystemName benchMarkFileSystemName;
-    private final Properties fsConfig;
+    private Properties fsConfig;
     private final boolean percentilesEnabled;
 
     public Request(int numThreads, String fileSizeDistribution, long appendSize, short replicationFactor,
@@ -80,6 +80,10 @@ public class Handshake implements Serializable {
       return fsConfig;
     }
 
+    public void setFsConfig(Properties fsConfig){
+      this.fsConfig = fsConfig;
+    }
+    
     public BenchMarkFileSystemName getBenchMarkFileSystemName() {
       return benchMarkFileSystemName;
     }

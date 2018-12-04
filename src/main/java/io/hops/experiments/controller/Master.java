@@ -74,21 +74,23 @@ public class Master {
 
   public static void main(String[] argv) throws Exception {
     String configFilePath = "master.properties";
-    if (argv.length == 1) {
+    String slavesDomainIdsPath = "experiment-nodes-domainIds";
+    if (argv.length == 2) {
       if (argv[0].compareToIgnoreCase("help") == 0) {
         Configuration.printHelp();
         System.exit(0);
       } else {
         configFilePath = argv[0];
+        slavesDomainIdsPath = argv[1];
       }
     }
-    new Master().start(configFilePath);
+    new Master().start(configFilePath, slavesDomainIdsPath);
   }
 
-  public void start(String configFilePath) throws Exception {
+  public void start(String configFilePath, String slavesDomainIds) throws Exception {
     try {
       System.out.println("*** Starting the master ***");
-      config = new Configuration(configFilePath);
+      config = new Configuration(configFilePath, slavesDomainIds);
 
       removeExistingResultsFiles();
       
@@ -381,6 +383,10 @@ public class Master {
       for (InetAddress slave : slavesConnections.keySet()) {
         SlaveConnection conn = slavesConnections.get(slave);
         handshake.setSlaveId(slaveId++);
+        handshake.setFsConfig(config.getFsConfig(slave.getHostAddress()));
+        printMasterLogMessages("*** Slave " + slave.getHostAddress() + " has " +
+            "locationDomainId" + handshake.getFsConfig().getProperty("dfs" +
+            ".locationDomainId"));
         conn.sendToSlave(handshake);
       }
     }

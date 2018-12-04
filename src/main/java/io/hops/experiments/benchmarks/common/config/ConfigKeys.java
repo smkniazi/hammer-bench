@@ -315,4 +315,8 @@ public class ConfigKeys {
 
     public static final String MASTER_SLAVE_WARMUP_DELAY_KEY= "master.slave.warmup.delay";
     public static final int MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT = 0;
+    
+    public static final String LOCATION_DOMAIN_IDS_SKIP= "locationDomainIds.skip";
+    public static final boolean LOCATION_DOMAIN_IDS_SKIP_DEFAULT = true;
+    
 }
