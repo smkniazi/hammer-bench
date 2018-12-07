@@ -15,7 +15,7 @@ exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
 kill_NNs=false
-randomize_NNs_list=true
+randomize_NNs_list=false
 
 #############################################################################################################################
 run() {
