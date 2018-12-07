@@ -1,4 +1,0 @@
-#rename_file        
-NameNodes           SingleNN            1-NN                2-NN                3-NN                4-NN                5-NN                6-NN                7-NN                8-NN                9-NN                10-NN               11-NN               12-NN               
-HopsFS              -                   2025.27             2929.02             2734.57             2911.39             2968.56             2766.34             2510.62             459.73              2103.41             1936.15             314.34              177.55              
-HDFS                0                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   -                   
