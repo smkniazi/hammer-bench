@@ -14,8 +14,8 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
-kill_NNs=true
-randomize_NNs_list=true
+kill_NNs=false
+randomize_NNs_list=false
 
 #############################################################################################################################
 run() {
@@ -167,10 +167,11 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             done
                             
                             if [ -z "$NameNodeRpcPort" ]; then
-                               BOOT_STRAP_NN="hdfs://$Current_Leader_NN"                                         
+                               BOOT_STRAP_NN="ceph://$Current_Leader_NN"
+
                             else
                                RPC_PORT=$(echo "($NameNodeRpcPort)" | bc)
-                               BOOT_STRAP_NN="hdfs://$Current_Leader_NN:$RPC_PORT"                   
+                               BOOT_STRAP_NN="ceph://$Current_Leader_NN:$RPC_PORT"
                             fi
                             
                             currentExpDir="$currentDirBM/$TotalNNCount-NN-$TotalClients-Clients-$BenchMark-BenchMark"
