@@ -14,6 +14,9 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
+run_nmon_script="$DIR/internals/run-nmon.sh"
+stop_nmon_script="$DIR/internals/stop-and-collect-nmon.sh"
+
 kill_NNs=true
 randomize_NNs_list=true
 
@@ -41,7 +44,9 @@ run() {
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
   sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'     $exp_master_prop_file
   sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file
- 
+
+ source $run_nmon_script
+
   date1=$(date +"%s") 
 #: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -65,6 +70,8 @@ run() {
     source $kill_java_everywhere;      # kills all zombie java processes
  fi
 
+ mkdir -p $currentExpDir/nmon
+ source $stop_nmon_script $currentExpDir/nmon/
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
