@@ -14,6 +14,9 @@ Start_HopsFS_Script="$DIR/internals/hdfs-kill-format-start.sh"
 exp_stop_hdfs_script="$DIR/internals/stop-hdfs.sh"
 kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh .*java"
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
+run_nmon_script="$DIR/internals/run-nmon.sh"
+stop_nmon_script="$DIR/internals/stop-and-collect-nmon.sh"
+
 kill_NNs=false
 randomize_NNs_list=false
 
@@ -32,39 +35,43 @@ run() {
   echo "DataNodes $DNS_FullList_STR"
   echo "Bootstrap NN $BOOT_STRAP_NN"
   echo "*************************** Exp Params End ****************************"
-  
+
   sed -i 's|list.of.slaves.*|list.of.slaves='"$ExpMaster ${ExpSlaves[@]}"'|g'       $exp_master_prop_file
   sed -i 's|benchmark.type.*|benchmark.type='$BenchMark'|g'                         $exp_master_prop_file
   sed -i 's|num.slave.threads.*|num.slave.threads='$ClientsPerSlave'|g'             $exp_master_prop_file
-  sed -i 's|results.dir.*|results.dir='$exp_remote_bench_mark_result_dir'|g'        $exp_master_prop_file      
+  sed -i 's|results.dir.*|results.dir='$exp_remote_bench_mark_result_dir'|g'        $exp_master_prop_file
   sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
   sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'     $exp_master_prop_file
   sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file
- 
-  date1=$(date +"%s") 
+
+ source $run_nmon_script
+
+  date1=$(date +"%s")
 #: <<'END'
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
- if [ $kill_NNs = true ]; then  
+ if [ $kill_NNs = true ]; then
     echo "*** Starting HopsFS ***"
     source $Start_HopsFS_Script;
  fi
-  
+
   echo "*** strating the benchmark ***"
   ssh $HopsFS_User@$ExpMaster mkdir -p $exp_remote_bench_mark_result_dir
-  source $exp_start_script $ExpMaster 
+  source $exp_start_script $ExpMaster
   scp $HopsFS_User@$ExpMaster:$exp_remote_bench_mark_result_dir/* $currentExpDir/
 
-  echo "*** shutting down the exp nodes ***" 
+  echo "*** shutting down the exp nodes ***"
   source $exp_stop_script           # kills exp
-  
+
   #source sto_rename_delete.sh /test
 
- if [ $kill_NNs = true ]; then  
+ if [ $kill_NNs = true ]; then
     source $exp_stop_hdfs_script      # kills hdfs
     source $kill_java_everywhere;      # kills all zombie java processes
  fi
 
+ mkdir -p $currentExpDir/nmon
+ source $stop_nmon_script $currentExpDir/nmon/
 #END
   date2=$(date +"%s")
   diff=$(($date2-$date1))
@@ -74,7 +81,7 @@ run() {
 
 
 shuffle() {
-   if [ $randomize_NNs_list = true ]; then 
+   if [ $randomize_NNs_list = true ]; then
      local i tmp size max rand
      # $RANDOM % (i+1) is biased because of the limited range of $RANDOM
      # Compensate by using a range which is a multiple of the array size.
@@ -101,7 +108,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
         let counter+=1
         currentDir="$All_Results_Folder/run_$counter"
         mkdir -p $currentDir
-        
+
         currentNNIndex=$EXP_START_INDEX
         while [ $currentNNIndex -le ${#NNS_FullList[@]} ]; do
             shuffle
@@ -116,10 +123,10 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                 fi
                 All_NNs_In_Current_Exp="$All_NNs_In_Current_Exp ${NNS_FullList[$e_i]}"
             done
-            
+
                     for ((e_x = 0; e_x < ${#Benchmark_Types[@]}; e_x++)) do
                         BenchMark=${Benchmark_Types[$e_x]}
-                        
+
                         DNS_FullList_STR=""
                         HBTime=3
                         if [ $BenchMark = "BR" ]; then
@@ -131,31 +138,31 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             done
                             HBTime=3
                         fi
-                
+
 
                         currentDirBM="$currentDir/$BenchMark"
                         mkdir -p $currentDirBM
-                            
+
                             TotalNNCount=$currentNNIndex
-                                       
+
                             TotalSlaves=${#BM_Machines_FullList[@]}
-                            
+
                             ClientsPerSlave=1
                             EXP_WARM_UP_TIME=600000 #10 mins
                             if [ $BenchMark = "BR" ]; then
                                 TotalClients=$(echo "scale=2; ($TotalNNCount * $TINY_DATANODES_PER_NAMENODE)" | bc)
-                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)                              
+                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)
                                 EXP_WARM_UP_TIME=3600000 #1hr
                             else
                                 TotalClients=$(echo "scale=2; ($TotalNNCount * $DFS_CLIENTS_PER_NAMENODE)" | bc)
                                 ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)
                             fi
-                            
+
                             #ceiling
                             ClientsPerSlave=$(echo "scale=2; ($ClientsPerSlave + 0.5) " | bc)
                             ClientsPerSlave=$(echo "($ClientsPerSlave/1)" | bc)
                             TotalClients=$(echo "($ClientsPerSlave * $TotalSlaves)" | bc) #recalculate
-                            
+
                             ExpSlaves=""
                             ExpMaster=""
                             for ((e_k = 0; e_k < ${#BM_Machines_FullList[@]}; e_k++)) do
@@ -165,7 +172,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                                     ExpSlaves="$ExpSlaves ${BM_Machines_FullList[$e_k]}"
                                 fi
                             done
-                            
+
                             if [ -z "$NameNodeRpcPort" ]; then
                                BOOT_STRAP_NN="ceph://$Current_Leader_NN"
 
@@ -173,16 +180,14 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                                RPC_PORT=$(echo "($NameNodeRpcPort)" | bc)
                                BOOT_STRAP_NN="ceph://$Current_Leader_NN:$RPC_PORT"
                             fi
-                            
+
                             currentExpDir="$currentDirBM/$TotalNNCount-NN-$TotalClients-Clients-$BenchMark-BenchMark"
-                            mkdir -p  $currentExpDir       
+                            mkdir -p  $currentExpDir
                             run
-                                          
+
                 done
-                currentNNIndex=$(echo "($currentNNIndex + $NN_INCREMENT)" | bc)  
+                currentNNIndex=$(echo "($currentNNIndex + $NN_INCREMENT)" | bc)
         done
-              
+
 done
 exit
-
-
