@@ -20,6 +20,9 @@ stop_nmon_script="$DIR/internals/stop-and-collect-nmon.sh"
 kill_NNs=true
 randomize_NNs_list=true
 
+NNS_FullList1=(`grep -v "^#" namenodes-2`)
+NNS_FullList2=(`grep -v "^#" namenodes-3`)
+
 #############################################################################################################################
 run() {
   echo "*************************** Exp Params Start ****************************"
@@ -69,11 +72,9 @@ run() {
     source $exp_stop_hdfs_script      # kills hdfs
     source $kill_java_everywhere;      # kills all zombie java processes
  fi
-
  cp namenodes-domainIds $currentExpDir/
  cp namenodes-hosts $currentExpDir/
  echo $All_NNs_In_Current_Exp > $currentExpDir/active-namenodes
- 
  mkdir -p $currentExpDir/nmon
  source $stop_nmon_script $currentExpDir/nmon/
 #END
@@ -97,6 +98,24 @@ shuffle() {
        rand=$(( rand % (i+1) ))
        tmp=${NNS_FullList[i]} NNS_FullList[i]=${NNS_FullList[rand]} NNS_FullList[rand]=$tmp
      done
+
+     size=${#NNS_FullList1[*]}
+     max=$(( 32768 / size * size ))
+
+     for ((i=size-1; i>0; i--)); do
+       while (( (rand=$RANDOM) >= max )); do :; done
+       rand=$(( rand % (i+1) ))
+       tmp=${NNS_FullList1[i]} NNS_FullList1[i]=${NNS_FullList1[rand]} NNS_FullList1[rand]=$tmp
+     done
+
+     size=${#NNS_FullList2[*]}
+     max=$(( 32768 / size * size ))
+
+     for ((i=size-1; i>0; i--)); do
+       while (( (rand=$RANDOM) >= max )); do :; done
+       rand=$(( rand % (i+1) ))
+       tmp=${NNS_FullList2[i]} NNS_FullList2[i]=${NNS_FullList2[rand]} NNS_FullList2[rand]=$tmp
+     done
    fi
 }
 
@@ -119,13 +138,27 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
             Current_Leader_NN=""
             Non_Leader_NNs=""
             All_NNs_In_Current_Exp=""
-            for ((e_i = 0; e_i < $currentNNIndex; e_i++)) do
-                if [ $e_i -eq 0 ]; then
-                   Current_Leader_NN=${NNS_FullList[$e_i]}
+            let half=$currentNNIndex/2
+            let residue=$currentNNIndex-${half}*2
+            let nn1List=$half
+            let nn2List=$half+$residue
+
+            for ((e_i = 0; e_i < $nn1List; e_i++)) do
+                if [ $e_i -eq 0 ] && [ $residue -eq 0 ]; then
+                   Current_Leader_NN=${NNS_FullList1[$e_i]}
                 else
-                   Non_Leader_NNs="$Non_Leader_NNs ${NNS_FullList[$e_i]}"
+                   Non_Leader_NNs="$Non_Leader_NNs ${NNS_FullList1[$e_i]}"
                 fi
-                All_NNs_In_Current_Exp="$All_NNs_In_Current_Exp ${NNS_FullList[$e_i]}"
+                All_NNs_In_Current_Exp="$All_NNs_In_Current_Exp ${NNS_FullList1[$e_i]}"
+            done
+
+            for ((e_i = 0; e_i < $nn2List; e_i++)) do
+                if [ $e_i -eq 0 ] && [ $residue -eq 1 ]; then
+                   Current_Leader_NN=${NNS_FullList2[$e_i]}
+                else
+                   Non_Leader_NNs="$Non_Leader_NNs ${NNS_FullList2[$e_i]}"
+                fi
+                All_NNs_In_Current_Exp="$All_NNs_In_Current_Exp ${NNS_FullList2[$e_i]}"
             done
 
                     for ((e_x = 0; e_x < ${#Benchmark_Types[@]}; e_x++)) do
