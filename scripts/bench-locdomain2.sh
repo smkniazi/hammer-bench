@@ -132,8 +132,10 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
         currentDir="$All_Results_Folder/run_$counter"
         mkdir -p $currentDir
 
-        currentNNIndex=$EXP_START_INDEX
-        while [ $currentNNIndex -le ${#NNS_FullList[@]} ]; do
+        #currentNNIndex=$EXP_START_INDEX
+        #while [ $currentNNIndex -le ${#NNS_FullList[@]} ]; do
+        for currentNNIndex in ${NN_EXP_LIST[@]}
+        do
             shuffle
             Current_Leader_NN=""
             Non_Leader_NNs=""
@@ -143,8 +145,13 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
             let nn1List=$half
             let nn2List=$half+$residue
 
+            let pickLeader=2
+            if [ $residue -eq 0 ]; then
+              let pickLeader=$(( ( RANDOM % 2 )  + 1 ))
+            fi
+
             for ((e_i = 0; e_i < $nn1List; e_i++)) do
-                if [ $e_i -eq 0 ] && [ $residue -eq 0 ]; then
+                if [ $e_i -eq 0 ] && [ $pickLeader -eq 1 ]; then
                    Current_Leader_NN=${NNS_FullList1[$e_i]}
                 else
                    Non_Leader_NNs="$Non_Leader_NNs ${NNS_FullList1[$e_i]}"
@@ -153,7 +160,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
             done
 
             for ((e_i = 0; e_i < $nn2List; e_i++)) do
-                if [ $e_i -eq 0 ] && [ $residue -eq 1 ]; then
+                if [ $e_i -eq 0 ] && [ $pickLeader -eq 2 ]; then
                    Current_Leader_NN=${NNS_FullList2[$e_i]}
                 else
                    Non_Leader_NNs="$Non_Leader_NNs ${NNS_FullList2[$e_i]}"
@@ -222,7 +229,7 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             run
 
                 done
-                currentNNIndex=$(echo "($currentNNIndex + $NN_INCREMENT)" | bc)
+                #currentNNIndex=$(echo "($currentNNIndex + $NN_INCREMENT)" | bc)
         done
 
 done

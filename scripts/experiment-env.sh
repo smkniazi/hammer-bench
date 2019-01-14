@@ -27,13 +27,13 @@ HopsFS_Upload_Exp=true
 CPU_AFFINITY=1-23
 
 #Machines
-DNS_FullList=(`grep -v "^#" datanodes`) 
+DNS_FullList=(`grep -v "^#" datanodes`)
 NNS_FullList=(`grep -v "^#" namenodes`)
 NDB_FullList=(`grep -v "^#" ndb-datanodes`)
 
-BM_Machines_FullList=(`grep -v "^#" experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients. 
+BM_Machines_FullList=(`grep -v "^#" experiment-nodes`)      #These are the machines that run the benchmark application. Basically, these machines are containers for DFSClients.
 DFS_CLIENTS_PER_NAMENODE=900                         #In RAW and INTERLEAVED benchmarks use DFS_CLIENTS_PER_NAMENODE*(No of active namenodes in the experiment) clients to stress the namenodes.
-                                                   #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines. 
+                                                   #These clients are uniformly distributed among the benchmark (BM_Machines_FullList) machines.
                                                    #if DFS_CLIENTS_PER_NAMENODE=1000, 5 namenodes and two benchmark machines (BM_Machines_FullList) then each benchmark machine will have 2500 DFSClients
 TINY_DATANODES_PER_NAMENODE=5                      #No of simulated datanodes for benchmarking the blockreporting system
 
@@ -41,20 +41,21 @@ TINY_DATANODES_PER_NAMENODE=5                      #No of simulated datanodes fo
 #NOTE all experiment related parameters are in master.properties file
 Benchmark_Types=(
           #  RAW                                         #Test raw throughput of individual operations
-            INTERLEAVED                                  #Test synthetic workload from spotify 
-            #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
+            INTERLEAVED                                  #Test synthetic workload from spotify
+            #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs
             ) #space is delimeter
 
+NN_EXP_LIST=(1 6 12 24 36 48 60)
 NN_INCREMENT=111
 EXP_START_INDEX=1
 REPEAT_EXP_TIMES=1
 
 
-All_Results_Folder="/tmp/hops-bm/"                                        #This is where the results are saved. 
-exp_remote_bench_mark_result_dir="/tmp/hops-bm-master-results/"           #This the folder on where the master sotres the results. 
-NumberNdbDataNodes=4                                                      #added to the results of the benchmarks. helps in data aggregation. for HDFS set it to 0             
+All_Results_Folder="/tmp/hops-bm/"                                        #This is where the results are saved.
+exp_remote_bench_mark_result_dir="/tmp/hops-bm-master-results/"           #This the folder on where the master sotres the results.
+NumberNdbDataNodes=4                                                      #added to the results of the benchmarks. helps in data aggregation. for HDFS set it to 0
 
-            
+
 
 
 #HopsFS Distribution Parameters
@@ -64,16 +65,3 @@ HopsFS_Remote_Dist_Folder=/tmp/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
 #full path to java
 JAVA_BIN=java
-
-
-
-
-
-
-
-
-
-
-
-                             
-
