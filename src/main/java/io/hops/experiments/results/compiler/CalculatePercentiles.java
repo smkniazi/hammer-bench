@@ -5,6 +5,7 @@
 package io.hops.experiments.results.compiler;
 
 import com.google.common.primitives.Doubles;
+import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
@@ -83,7 +84,9 @@ public class CalculatePercentiles {
     toProcess.add(BenchmarkOperations.LS_FILE);
     toProcess.add(BenchmarkOperations.DIR_INFO);
     toProcess.add(BenchmarkOperations.FILE_INFO);
-
+    toProcess.add(BenchmarkOperations.DELETE_FILE);
+    toProcess.add(BenchmarkOperations.MKDIRS);
+    
     //gather data for calculating percentiles
     Map<BenchmarkOperations, ArrayList<Long>> allOpsExecutionTimesList = new HashMap<BenchmarkOperations, ArrayList<Long>>();
     for (Object obj : responses) {
@@ -111,7 +114,7 @@ public class CalculatePercentiles {
         List workers = new ArrayList<CalcPercentiles>();
         Map<Double,Double> percentileMap = new ConcurrentHashMap<Double,Double>();
 
-        for (double percen = 10; percen <= 90.0; percen += 10) {
+        /*for (double percen = 10; percen <= 90.0; percen += 10) {
           workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
         }
 
@@ -123,8 +126,14 @@ public class CalculatePercentiles {
 
         for (double percen = 99.1; percen <= 100.0; percen += 0.1) {
           workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
-        }
-
+        }*/
+  
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 50));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 90));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99.9));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99.99));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99.999));
         executor.invokeAll(workers); //block untill all points are calculated
 
         allOpsPercentiles.put(opType, percentileMap);

@@ -122,7 +122,9 @@ public class Logger {
     private boolean running = true;
     private Map<String, Double> speedMap = new HashMap<String, Double>();
     private final int maxSlaves;
-
+    private long firstAggSpeed = 0;
+    private long lastAggSpeed = 0;
+    
     public LogListener(int port, int maxSlaves) {
       this.port = port;
       this.maxSlaves = maxSlaves;
@@ -174,12 +176,25 @@ public class Logger {
           }
         }
 
+        if(firstAggSpeed == 0){
+          firstAggSpeed = System.currentTimeMillis();
+        }
+  
+        if(lastAggSpeed == 0){
+          lastAggSpeed = System.currentTimeMillis();
+        }
+        
+        int seconds =
+            (int) Math.floor(
+                (System.currentTimeMillis() - firstAggSpeed) / 1000.0);
+        
+        
         if(speedMap.size() == maxSlaves ){
           double aggSpeed = 0;
           for(Double speed: speedMap.values()){
             aggSpeed += speed;
           }
-          Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
+          Master.blueColoredText(seconds + " : Current Aggregated Speed is : "+aggSpeed + " : " + maxSlaves);
           speedMap.clear();
         }
       }catch(NumberFormatException e){

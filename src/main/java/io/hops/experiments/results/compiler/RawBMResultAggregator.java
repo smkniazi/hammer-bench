@@ -56,7 +56,13 @@ public class RawBMResultAggregator extends Aggregator{
     }
 
     Map<BenchmarkOperations, RawAggregate> map = allResults.get(rResults.getNoOfExpectedAliveNNs());
-
+  
+    if(rResults.getNoOfExpectedAliveNNs() != rResults.getNoOfAcutallAliveNNs()) {
+      System.err.println("Skip data point for " + rResults.getOperationType()
+          + " Number of alive namenodes " + rResults.getNoOfAcutallAliveNNs() + " < " + rResults.getNoOfExpectedAliveNNs());
+      return;
+    }
+    
     if (map == null) {
       map = new HashMap<BenchmarkOperations, RawAggregate>();
       allResults.put(rResults.getNoOfExpectedAliveNNs(), map);
@@ -326,7 +332,6 @@ public class RawBMResultAggregator extends Aggregator{
     header+="\n";
     allData+=header;
 
-    
     SortedSet<BenchmarkOperations> sorted = new TreeSet<BenchmarkOperations>();
     sorted.addAll(hopsFsCr.avgVals.keySet());
     for (BenchmarkOperations op : sorted) {
@@ -363,7 +368,42 @@ public class RawBMResultAggregator extends Aggregator{
     }
     System.out.println(allData);
     CompileResults.writeToFile(outputFile, allData, false);
-
+  
+  
+    String outputFile2 = outputFolder+"/lines2.txt";
+    String outputFile3 = outputFolder+"/lines3.txt";
+    String allData2="#Operation Avg Min Max \n";
+    String allData3="#Operation Avg Min Max \n";
+    
+    for(BenchmarkOperations op : BenchmarkOperations.values()){
+      if(op.toString().contains("CHMOD") || op.toString().contains("CHOWN")){
+        continue;
+      }
+      if(hopsFsCr.avgVals.containsKey(op)) {
+        if (hopsFsCr.avgVals.get(op).size() == 1 &&
+            hopsFsCr.minVals.get(op).size() == 1
+            && hopsFsCr.maxVals.get(op).size() == 1) {
+          String line2 =
+                  DFSOperationsUtils.round(hopsFsCr.avgVals.get(op).get(0))
+                  + " " +
+                  DFSOperationsUtils.round(hopsFsCr.minVals.get(op).get(0))
+                  + " " +
+                  DFSOperationsUtils.round(hopsFsCr.maxVals.get(op).get(0));
+          allData2 += op.toString() + " " + line2 + "\n";
+          allData3 += line2 + "\n";
+        } else {
+          allData2 += op.toString() + " - - - \n";
+          allData3 +=  "- - - \n";
+        }
+      }else{
+        allData2 += op.toString() + " - - - \n";
+        allData3 +=  "- - - \n";
+      }
+    }
+    
+    System.out.println(allData2);
+    CompileResults.writeToFile(outputFile2, allData2, false);
+    CompileResults.writeToFile(outputFile3, allData3, false);
   }
 
   public static RawBMResults processSlaveResponses(Collection<Object> responses, RawBenchmarkCommand.Request request, Configuration args){
