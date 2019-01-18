@@ -68,7 +68,9 @@ public class Logger {
   public static void resetTimer(){
     lastmsg = System.currentTimeMillis();
   }
-
+  
+  static long firstTime=0;
+  
  public static synchronized void printMsg(String msg) {
     if (enableRemoteLogging && msg.length() > 0 ) {
       try {
@@ -84,7 +86,14 @@ public class Logger {
         DatagramPacket packet = new DatagramPacket(data, data.length,
                 loggerIp, loggerPort);
         socket.send(packet);
-        System.out.println(msg);
+        if(firstTime == 0){
+          firstTime = System.currentTimeMillis();
+        }
+  
+        int seconds =
+            (int) Math.floor(
+                (System.currentTimeMillis() - firstTime) / 1000.0);
+        System.out.println(seconds + ":" + msg);
         os.close();
         outputStream.close();
       } catch (Exception e) { // logging should not crash the client 
@@ -147,7 +156,14 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(DFSOperationsUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          if(firstAggSpeed == 0){
+            firstAggSpeed = System.currentTimeMillis();
+          }
+          int seconds =
+              (int) Math.floor(
+                  (System.currentTimeMillis() - firstAggSpeed) / 1000.0);
+          System.out.println(seconds + ":" + DFSOperationsUtils.format(20,
+              recvPacket.getAddress().getHostName()+" -> ") + msg);
           continuousAggSpeed(recvPacket.getAddress().getHostName(), msg);
           is.close();
           in.close();
