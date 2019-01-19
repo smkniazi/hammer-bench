@@ -16,6 +16,7 @@ kill_java_everywhere="$DIR/internals/kill-all-java-processes-on-all-machines.sh 
 exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
 run_nmon_script="$DIR/internals/run-nmon.sh"
 stop_nmon_script="$DIR/internals/stop-and-collect-nmon.sh"
+get_subtrees="$DIR/getSubtrees.sh"
 
 kill_NNs=false
 randomize_NNs_list=false
@@ -70,6 +71,7 @@ run() {
     source $kill_java_everywhere;      # kills all zombie java processes
  fi
 
+ source $get_subtrees $currentExpDir
  mkdir -p $currentExpDir/nmon
  source $stop_nmon_script $currentExpDir/nmon/
 #END

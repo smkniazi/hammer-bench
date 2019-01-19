@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 OSD_DISK="/dev/sdb"
+#MDS_CACHE_SIZE="2073741824"
+MDS_CACHE_SIZE="17179869184"
 
 OSD_LIST=(`grep -v "^#" osd-nodes`)
 MDS_LIST=(`grep -v "^#" mds-nodes`)
@@ -20,7 +22,7 @@ echo "**** Ceph OSDS ${OSD_NODES} ****"
 echo "**** Ceph MDSs ${MDS_NODES} ****"
 echo "**** Ceph All ${CEPH_NODES} ****"
 
-pssh -H "${CEPH_NODES}"  -l ubuntu -i 'sudo yum install ntp ntpdate ntp-doc -y'
+pssh -H "${CEPH_NODES}"  -l ubuntu -i 'sudo yum install ntp ntpdate ntp-doc jq -y'
 
 sudo rpm -Uhv http://download.ceph.com/rpm-luminous/el7/noarch/ceph-deploy-2.0.1-0.noarch.rpm
 sudo yum update -y && sudo yum install ceph-deploy -y
@@ -45,16 +47,50 @@ for n in ${OSD_NODES[@]}; do
  ceph-deploy osd create --data ${OSD_DISK} ${n}
 done
 
+echo "Change crush map across 3 zones for 12 OSDs"
+
+if [ ${#OSD_LIST[@]} -eq 12 ];
+then
+  sudo ceph osd crush set osd.0 1.0 root=default rack=zone1
+  sudo ceph osd crush set osd.1 1.0 root=default rack=zone1
+  sudo ceph osd crush set osd.2 1.0 root=default rack=zone1
+  sudo ceph osd crush set osd.3 1.0 root=default rack=zone1
+  sudo ceph osd crush set osd.4 1.0 root=default rack=zone2
+  sudo ceph osd crush set osd.5 1.0 root=default rack=zone2
+  sudo ceph osd crush set osd.6 1.0 root=default rack=zone2
+  sudo ceph osd crush set osd.7 1.0 root=default rack=zone2
+  sudo ceph osd crush set osd.8 1.0 root=default rack=zone3
+  sudo ceph osd crush set osd.9 1.0 root=default rack=zone3
+  sudo ceph osd crush set osd.10 1.0 root=default rack=zone3
+  sudo ceph osd crush set osd.11 1.0 root=default rack=zone3
+
+  sudo ceph osd crush rule create-replicated osd-rule default rack
+fi
+
 ceph-deploy mds create ${MDS_NODES}
 
 ceph-deploy pkg --install cephfs-java ${CEPH_NODES}
 
 pssh -H "${CEPH_NODES}"  -l ubuntu -i  'sudo ln -s /lib64/libcephfs_jni.so.1.0.0 /lib64/libcephfs_jni.so'
 
+for n in ${MDS_NODES[@]}; do
+   echo "Increase Cache size for ${n} to ${MDS_CACHE_SIZE}"
+   ssh "ubuntu@${n}" "sudo ceph daemon mds.${n} config set mds_cache_memory_limit ${MDS_CACHE_SIZE}"
+done
+
+
 echo "Create CephFS"
 
-sudo ceph osd pool create cephfs_data 64
-sudo ceph osd pool create cephfs_metadata 128
-sudo ceph osd pool set cephfs_metadata size 2
+if [ ${#OSD_LIST[@]} -eq 12 ];
+then
+  sudo ceph osd pool create cephfs_data 128 128 replicated osd-rule
+  sudo ceph osd pool create cephfs_metadata 256 256 replicated osd-rule
+else
+  sudo ceph osd pool create cephfs_data 128
+  sudo ceph osd pool create cephfs_metadata 256
+fi
+
+
+#sudo ceph osd pool set cephfs_metadata size 2
 
 sudo ceph fs new cephfs cephfs_metadata cephfs_data
