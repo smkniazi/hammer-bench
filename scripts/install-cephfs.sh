@@ -17,6 +17,8 @@ CEPH_NODES=${All_Unique_Hosts[*]}
 OSD_NODES=${OSD_LIST[*]}
 MDS_NODES=${MDS_LIST[*]}
 
+date1=$(date +"%s")
+
 echo "**** Ceph MON ${MON} ****"
 echo "**** Ceph OSDS ${OSD_NODES} ****"
 echo "**** Ceph MDSs ${MDS_NODES} ****"
@@ -35,16 +37,40 @@ ceph-deploy new ${MON}
 
 echo "**** Ceph install on ${CEPH_NODES} ****"
 
-ceph-deploy install ${CEPH_NODES}
+#ceph-deploy install ${CEPH_NODES}
+let i=0
+pids=()
+for n in ${CEPH_NODES[*]}; do
+   echo "install on  ${n} -- ${i}"
+   ceph-deploy install ${n} > "/tmp/ceph-deploy-${n}" &
+   pids[${i}]=$!
+   let i++
+done
+
+for pid in ${pids[*]}; do
+    echo "Waiting for ${pid}"
+    wait $pid
+done
+
 ceph-deploy mon create-initial
 
 ceph-deploy admin ${CEPH_NODES}
 
 ceph-deploy mgr create ${MON}
 
+let i=0
+pids=()
 for n in ${OSD_NODES[@]}; do
  echo "**** Ceph create osd on ${n} ****"
- ceph-deploy osd create --data ${OSD_DISK} ${n}
+ #ceph-deploy osd create --data ${OSD_DISK} ${n}
+ ceph-deploy osd create --data ${OSD_DISK} ${n} > "/tmp/ceph-deploy-osd-${n}" &
+ pids[${i}]=$!
+ let i++
+done
+
+for pid in ${pids[*]}; do
+    echo "Waiting for ${pid}"
+    wait $pid
 done
 
 echo "Change crush map across 3 zones for 12 OSDs"
@@ -69,7 +95,21 @@ fi
 
 ceph-deploy mds create ${MDS_NODES}
 
-ceph-deploy pkg --install cephfs-java ${CEPH_NODES}
+#ceph-deploy pkg --install cephfs-java ${CEPH_NODES}
+
+let i=0
+pids=()
+for n in ${CEPH_NODES[*]}; do
+   echo "install cephfs-java on ${n} -- ${i}"
+   ceph-deploy pkg --install cephfs-java ${n} > "/tmp/ceph-deploy-pkg-${n}" &
+   pids[${i}]=$!
+   let i++
+done
+
+for pid in ${pids[*]}; do
+    echo "Waiting for ${pid}"
+    wait $pid
+done
 
 pssh -H "${CEPH_NODES}"  -l ubuntu -i  'sudo ln -s /lib64/libcephfs_jni.so.1.0.0 /lib64/libcephfs_jni.so'
 
@@ -94,3 +134,8 @@ fi
 #sudo ceph osd pool set cephfs_metadata size 2
 
 sudo ceph fs new cephfs cephfs_metadata cephfs_data
+
+
+date2=$(date +"%s")
+diff=$(($date2-$date1))
+echo "CephFS installed in $(($diff / 60)) minutes and $(($diff % 60)) seconds."
