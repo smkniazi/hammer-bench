@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-mount_cephfs="$DIR/mount-cephfs.sh"
-
 OSD_DISK="/dev/sdb"
 #MDS_CACHE_SIZE="2073741824"
 MDS_CACHE_SIZE="17179869184"
@@ -142,6 +139,8 @@ sudo ceph fs new cephfs cephfs_metadata cephfs_data
 date2=$(date +"%s")
 diff=$(($date2-$date1))
 
-source $mount_cephfs
+echo "Mount CephFS"
+
+pssh -H "${EXP_NODES[*]}"  -l ubuntu -i  "sudo mkdir /mnt/cephfs; sudo mount -t ceph ${MON_NODES[0]}:/ /mnt/cephfs -o name=admin,noshare,noasyncreaddir,secret=`sudo grep "key" /etc/ceph/ceph.client.admin.keyring | awk '{print $3}'`"
 
 echo "CephFS installed in $(($diff / 60)) minutes and $(($diff % 60)) seconds."

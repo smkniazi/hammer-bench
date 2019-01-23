@@ -460,7 +460,16 @@ public class Configuration implements Serializable {
   public String getCephAuthId() {
     return getString(ConfigKeys.CEPH_AUTH_ID_KEY, ConfigKeys.CEPH_AUTH_ID_DEFAULT);
   }
-
+  
+  public boolean isCephSkipKernelCache() {
+    return getBoolean(ConfigKeys.CEPH_SKIP_KERNEL_CACHE_KEY,
+        ConfigKeys.CEPH_SKIP_KERNEL_CACHE_DEFAULT);
+  }
+  
+  public boolean isCephUseHadoopPlugin() {
+    return getBoolean(ConfigKeys.CEPH_USE_HADOOP_PLUGIN_KEY,
+        ConfigKeys.CEPH_USE_HADOOP_PLUGIN_DEFAULT);
+  }
 
   public boolean testFailover(){
     return getBoolean(ConfigKeys.TEST_FAILOVER, ConfigKeys.TEST_FAILOVER_DEFAULT);
@@ -582,6 +591,11 @@ public class Configuration implements Serializable {
       dfsClientConf.setProperty(ConfigKeys.CEPH_ROOT_DIR_KEY, getCephRootDir());
       dfsClientConf.setProperty(ConfigKeys.CEPH_MON_ADDRESS_KEY, getCephMonAddress());
       dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_ID_KEY, getCephAuthId());
+      dfsClientConf.setProperty(ConfigKeys.CEPH_SKIP_KERNEL_CACHE_KEY,
+          Boolean.toString(isCephSkipKernelCache()));
+      dfsClientConf.setProperty(ConfigKeys.CEPH_USE_HADOOP_PLUGIN_KEY,
+          Boolean.toString(isCephUseHadoopPlugin()));
+  
     } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS) {
       System.out.println("Creating config for MapR-FS");
       //FS_DEFAULTFS_KEY is already defined

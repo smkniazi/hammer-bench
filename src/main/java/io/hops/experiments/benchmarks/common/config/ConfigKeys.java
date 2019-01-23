@@ -162,6 +162,12 @@ public class ConfigKeys {
     public static String CEPH_AUTH_ID_KEY = "ceph.auth.id";
     public static String CEPH_AUTH_ID_DEFAULT = "user";
     
+    public static String CEPH_SKIP_KERNEL_CACHE_KEY = "ceph.skipKernelCache";
+    public static boolean CEPH_SKIP_KERNEL_CACHE_DEFAULT = true;
+    
+    public static String CEPH_USE_HADOOP_PLUGIN_KEY = "ceph.useHadoopPlugin";
+    public static boolean CEPH_USE_HADOOP_PLUGIN_DEFAULT = false;
+    
     public static String BR_BENCHMARK_DURATION_KEY = "br.benchmark.duration";
     public static int BR_BENCHMARK_DURATION_DEFAULT = 0;
 

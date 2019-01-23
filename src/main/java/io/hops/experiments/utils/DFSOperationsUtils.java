@@ -18,13 +18,16 @@
 package io.hops.experiments.utils;
 
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.workload.generator.FileTreeFromDiskGenerator;
 import net.smacke.jaydio.DirectRandomAccessFile;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 
 
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,23 +52,47 @@ public class DFSOperationsUtils {
 
     private static AtomicInteger filePoolCount = new AtomicInteger(0);
     private static AtomicInteger dfsClientsCount = new AtomicInteger(0);
-
+    
+    private static Boolean CEPH_USE_HADOOP_PLUGIN = null;
+    private static Boolean CEPH_SKIP_KERNEL_CACHE = null;
+    
     public static FileSystem getDFSClient(Configuration conf) throws IOException {
         if(SERVER_LESS_MODE){
             serverLessModeRandomWait();
             return null;
         }
-        /*FileSystem client = dfsClients.get();
-        if (client == null) {
-            client = (FileSystem) FileSystem.newInstance(conf);
-            dfsClients.set(client);
-           System.out.println(Thread.currentThread().getName()  +
-                " Creating new client. Total: "+ dfsClientsCount.incrementAndGet()+" New Client is: "+client);
-        }else{
-            System.out.println("Reusing Existing Client "+client);
+    
+        if(CEPH_USE_HADOOP_PLUGIN == null) {
+            CEPH_USE_HADOOP_PLUGIN =
+                conf.getBoolean(ConfigKeys.CEPH_USE_HADOOP_PLUGIN_KEY,
+                    ConfigKeys.CEPH_USE_HADOOP_PLUGIN_DEFAULT);
+            System.out.println("Ceph use hadoop plugin : " + CEPH_USE_HADOOP_PLUGIN);
         }
-        return client;*/
-        return null;
+        
+        if(CEPH_SKIP_KERNEL_CACHE == null) {
+            CEPH_SKIP_KERNEL_CACHE =
+                conf.getBoolean(ConfigKeys.CEPH_SKIP_KERNEL_CACHE_KEY,
+                    ConfigKeys.CEPH_SKIP_KERNEL_CACHE_DEFAULT);
+            System.out.println("Ceph skip Kernel Cache : " + CEPH_SKIP_KERNEL_CACHE);
+        }
+        
+        
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            FileSystem client = dfsClients.get();
+            if (client == null) {
+                client = (FileSystem) FileSystem.newInstance(conf);
+                dfsClients.set(client);
+                System.out.println(Thread.currentThread().getName() +
+                    " Creating new client. Total: " +
+                    dfsClientsCount.incrementAndGet() + " New Client is: " +
+                    client);
+            } else {
+                System.out.println("Reusing Existing Client " + client);
+            }
+            return client;
+        }else{
+            return null;
+        }
     }
 
     public static FilePool getFilePool(Configuration conf, String baseDir,
@@ -94,27 +121,30 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
+        
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
+            long size = filePool.getNewFileSize();
+            if (size > 0) {
+                byte[] buffer = new byte[64 * 1024];
+                long read = -1;
+                do {
+                    read = filePool.getFileData(buffer);
+                    if (read > 0) {
+                        out.write(buffer, 0, (int) read);
+                    }
+                } while (read > -1);
+            }
     
-        File file = new File(pathStr);
-        File parentFile = file.getParentFile();
-        if(!parentFile.exists()){
-            parentFile.mkdirs();
+            out.close();
+        }else{
+            File file = new File(pathStr);
+            File parentFile = file.getParentFile();
+            if(!parentFile.exists()){
+                parentFile.mkdirs();
+            }
+            file.createNewFile();
         }
-        file.createNewFile();
-        /*FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
-        long size = filePool.getNewFileSize();
-        if(size > 0){
-            byte[] buffer = new byte[64*1024];
-            long read = -1;
-            do {
-                read = filePool.getFileData(buffer);
-                if(read > 0){
-                    out.write(buffer, 0, (int)read);
-                }
-            }while( read > -1);
-        }
-
-        out.close();*/
     }
 
     public static void readFile(FileSystem dfs, String pathStr) throws IOException {
@@ -123,21 +153,28 @@ public class DFSOperationsUtils {
             return;
         }
         
-        DirectRandomAccessFile filereader =
-            new DirectRandomAccessFile(new File(pathStr), "r");
-        
-        filereader.close();
-        
-        /*FSDataInputStream in = dfs.open(new Path(pathStr));
-        try {
-            byte b;
-            do{
-                b = in.readByte();
-            }while(false);
-        }catch (EOFException e){
-        }finally {
-            in.close();
-        }*/
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            FSDataInputStream in = dfs.open(new Path(pathStr));
+            try {
+                byte b;
+                do {
+                    b = in.readByte();
+                } while (false);
+            } catch (EOFException e) {
+            } finally {
+                in.close();
+            }
+        }else{
+            if(CEPH_SKIP_KERNEL_CACHE) {
+                DirectRandomAccessFile filereader =
+                    new DirectRandomAccessFile(new File(pathStr), "r");
+                filereader.close();
+            }else {
+                FileReader fileReader = new FileReader(new File(pathStr));
+                fileReader.close();
+            }
+    
+        }
     }
 
     public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
@@ -145,10 +182,12 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return true;
         }
-        File file = new File(from.toString());
-        return file.renameTo(new File(to.toString()));
-        
-        //return dfs.rename(from, to);
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            return dfs.rename(from, to);
+        }else{
+            File file = new File(from.toString());
+            return file.renameTo(new File(to.toString()));
+        }
     }
 
     public static boolean deleteFile(FileSystem dfs, String pathStr) throws IOException {
@@ -156,9 +195,12 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return true;
         }
-        File file = new File(pathStr);
-        return file.delete();
-        //return dfs.delete(new Path(pathStr), true);
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            return dfs.delete(new Path(pathStr), true);
+        }else{
+            File file = new File(pathStr);
+            return file.delete();
+        }
     }
     
     public static void ls(FileSystem dfs, String pathStr) throws IOException {
@@ -166,16 +208,22 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        File file = new File(pathStr);
-        if(file.isDirectory()) {
-            file.listFiles();
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            dfs.listStatus(new Path(pathStr));
         }else{
-            DirectRandomAccessFile filereader =
-                new DirectRandomAccessFile(new File(pathStr), "r");
-            filereader.length();
-            filereader.close();
+            File file = new File(pathStr);
+            if(file.isDirectory()) {
+                file.listFiles();
+            }else{
+                if(CEPH_SKIP_KERNEL_CACHE) {
+                    DirectRandomAccessFile filereader =
+                        new DirectRandomAccessFile(new File(pathStr), "r");
+                    filereader.close();
+                }else{
+                    file.listFiles();
+                }
+            }
         }
-       //dfs.listStatus(new Path(pathStr));
     }
     
     public static void getInfo(FileSystem dfs, String pathStr) throws IOException {
@@ -183,16 +231,24 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        File file = new File(pathStr);
-        if(file.isDirectory()){
-            file.getTotalSpace();
+       
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            dfs.getFileStatus(new Path(pathStr));
         }else{
-            DirectRandomAccessFile filereader =
-                new DirectRandomAccessFile(new File(pathStr), "r");
-            filereader.length();
-            filereader.close();
+            File file = new File(pathStr);
+            if(file.isDirectory()){
+                file.lastModified();
+            }else{
+                if(CEPH_SKIP_KERNEL_CACHE) {
+                    DirectRandomAccessFile filereader =
+                        new DirectRandomAccessFile(new File(pathStr), "r");
+                    filereader.length();
+                    filereader.close();
+                }else{
+                    file.length();
+                }
+            }
         }
-       //dfs.getFileStatus(new Path(pathStr));
     }
     
     public static void chmodPath(FileSystem dfs, String pathStr) throws IOException {
@@ -200,12 +256,14 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        File file = new File(pathStr);
-        file.setWritable(true);
-        file.setExecutable(true);
-        file.setReadable(true);
-        
-        //dfs.setPermission(new Path(pathStr), new FsPermission((short)0777));
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            dfs.setPermission(new Path(pathStr), new FsPermission((short)0777));
+        }else{
+            File file = new File(pathStr);
+            file.setWritable(true);
+            file.setExecutable(true);
+            file.setReadable(true);
+        }
     }
     
     public static void mkdirs(FileSystem dfs, String pathStr) throws IOException {
@@ -213,10 +271,13 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        File dir = new File(pathStr);
-        dir.mkdirs();
         
-        //dfs.mkdirs(new Path(pathStr));
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            dfs.mkdirs(new Path(pathStr));
+        }else{
+            File dir = new File(pathStr);
+            dir.mkdirs();
+        }
     }
     
     public static void chown(FileSystem dfs, String pathStr) throws IOException {
@@ -225,6 +286,7 @@ public class DFSOperationsUtils {
             return;
         }
         
+        //Not supported in Ceph
         //dfs.setOwner(new Path(pathStr), System.getProperty("user.name"),
          //   System.getProperty("user.name"));
     }
@@ -234,6 +296,7 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
+        //Not supported in Ceph
         //dfs.setReplication(new Path(pathStr), (short)3);
     }
     
@@ -268,18 +331,25 @@ public class DFSOperationsUtils {
             return;
         }
     
-        DirectRandomAccessFile filereader =
-            new DirectRandomAccessFile(new File(pathStr), "rw");
-    
-        filereader.close();
-        
-        /*FSDataOutputStream out = dfs.append(new Path(pathStr));
-        if (size != 0) {
-            for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 1) {
-                out.writeByte(1);
+        if(CEPH_USE_HADOOP_PLUGIN) {
+            FSDataOutputStream out = dfs.append(new Path(pathStr));
+            if (size != 0) {
+                for (long bytesWritten = 0; bytesWritten < size;
+                     bytesWritten += 1) {
+                    out.writeByte(1);
+                }
+            }
+            out.close();
+        }else{
+            if(CEPH_SKIP_KERNEL_CACHE) {
+                DirectRandomAccessFile filereader =
+                    new DirectRandomAccessFile(new File(pathStr), "rw");
+                filereader.close();
+            }else{
+                FileReader fileReader = new FileReader(new File(pathStr));
+                fileReader.close();
             }
         }
-        out.close();*/
     }
 
     public static int getActiveNameNodesCount(BenchMarkFileSystemName fsName, FileSystem dfs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
