@@ -19,10 +19,12 @@ package io.hops.experiments.utils;
 
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.workload.generator.FileTreeFromDiskGenerator;
+import net.smacke.jaydio.DirectRandomAccessFile;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 
-import java.io.EOFException;
+
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -53,7 +55,7 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return null;
         }
-        FileSystem client = dfsClients.get();
+        /*FileSystem client = dfsClients.get();
         if (client == null) {
             client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
@@ -62,7 +64,8 @@ public class DFSOperationsUtils {
         }else{
             System.out.println("Reusing Existing Client "+client);
         }
-        return client;
+        return client;*/
+        return null;
     }
 
     public static FilePool getFilePool(Configuration conf, String baseDir,
@@ -91,8 +94,14 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-
-        FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
+    
+        File file = new File(pathStr);
+        File parentFile = file.getParentFile();
+        if(!parentFile.exists()){
+            parentFile.mkdirs();
+        }
+        file.createNewFile();
+        /*FSDataOutputStream out = dfs.create(new Path(pathStr), replication);
         long size = filePool.getNewFileSize();
         if(size > 0){
             byte[] buffer = new byte[64*1024];
@@ -105,7 +114,7 @@ public class DFSOperationsUtils {
             }while( read > -1);
         }
 
-        out.close();
+        out.close();*/
     }
 
     public static void readFile(FileSystem dfs, String pathStr) throws IOException {
@@ -113,8 +122,13 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-
-        FSDataInputStream in = dfs.open(new Path(pathStr));
+        
+        DirectRandomAccessFile filereader =
+            new DirectRandomAccessFile(new File(pathStr), "r");
+        
+        filereader.close();
+        
+        /*FSDataInputStream in = dfs.open(new Path(pathStr));
         try {
             byte b;
             do{
@@ -123,7 +137,7 @@ public class DFSOperationsUtils {
         }catch (EOFException e){
         }finally {
             in.close();
-        }
+        }*/
     }
 
     public static boolean renameFile(FileSystem dfs, Path from, Path to) throws IOException {
@@ -131,7 +145,10 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return true;
         }
-        return dfs.rename(from, to);    
+        File file = new File(from.toString());
+        return file.renameTo(new File(to.toString()));
+        
+        //return dfs.rename(from, to);
     }
 
     public static boolean deleteFile(FileSystem dfs, String pathStr) throws IOException {
@@ -139,7 +156,9 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return true;
         }
-        return dfs.delete(new Path(pathStr), true);
+        File file = new File(pathStr);
+        return file.delete();
+        //return dfs.delete(new Path(pathStr), true);
     }
     
     public static void ls(FileSystem dfs, String pathStr) throws IOException {
@@ -147,7 +166,16 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-       dfs.listStatus(new Path(pathStr));
+        File file = new File(pathStr);
+        if(file.isDirectory()) {
+            file.listFiles();
+        }else{
+            DirectRandomAccessFile filereader =
+                new DirectRandomAccessFile(new File(pathStr), "r");
+            filereader.length();
+            filereader.close();
+        }
+       //dfs.listStatus(new Path(pathStr));
     }
     
     public static void getInfo(FileSystem dfs, String pathStr) throws IOException {
@@ -155,7 +183,16 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-       dfs.getFileStatus(new Path(pathStr));
+        File file = new File(pathStr);
+        if(file.isDirectory()){
+            file.getTotalSpace();
+        }else{
+            DirectRandomAccessFile filereader =
+                new DirectRandomAccessFile(new File(pathStr), "r");
+            filereader.length();
+            filereader.close();
+        }
+       //dfs.getFileStatus(new Path(pathStr));
     }
     
     public static void chmodPath(FileSystem dfs, String pathStr) throws IOException {
@@ -163,7 +200,12 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        dfs.setPermission(new Path(pathStr), new FsPermission((short)0777));
+        File file = new File(pathStr);
+        file.setWritable(true);
+        file.setExecutable(true);
+        file.setReadable(true);
+        
+        //dfs.setPermission(new Path(pathStr), new FsPermission((short)0777));
     }
     
     public static void mkdirs(FileSystem dfs, String pathStr) throws IOException {
@@ -171,7 +213,10 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        dfs.mkdirs(new Path(pathStr));
+        File dir = new File(pathStr);
+        dir.mkdirs();
+        
+        //dfs.mkdirs(new Path(pathStr));
     }
     
     public static void chown(FileSystem dfs, String pathStr) throws IOException {
@@ -179,7 +224,9 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        dfs.setOwner(new Path(pathStr), System.getProperty("user.name"), System.getProperty("user.name"));
+        
+        //dfs.setOwner(new Path(pathStr), System.getProperty("user.name"),
+         //   System.getProperty("user.name"));
     }
     
     public static void setReplication(FileSystem dfs, String pathStr) throws IOException {
@@ -187,7 +234,7 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-        dfs.setReplication(new Path(pathStr), (short)3);
+        //dfs.setReplication(new Path(pathStr), (short)3);
     }
     
     public static double round(double val){
@@ -220,14 +267,19 @@ public class DFSOperationsUtils {
             serverLessModeRandomWait();
             return;
         }
-
-        FSDataOutputStream out = dfs.append(new Path(pathStr));
+    
+        DirectRandomAccessFile filereader =
+            new DirectRandomAccessFile(new File(pathStr), "rw");
+    
+        filereader.close();
+        
+        /*FSDataOutputStream out = dfs.append(new Path(pathStr));
         if (size != 0) {
             for (long bytesWritten = 0; bytesWritten < size; bytesWritten += 1) {
                 out.writeByte(1);
             }
         }
-        out.close();
+        out.close();*/
     }
 
     public static int getActiveNameNodesCount(BenchMarkFileSystemName fsName, FileSystem dfs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
