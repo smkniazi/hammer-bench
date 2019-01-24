@@ -139,8 +139,4 @@ sudo ceph fs new cephfs cephfs_metadata cephfs_data
 date2=$(date +"%s")
 diff=$(($date2-$date1))
 
-echo "Mount CephFS"
-
-pssh -H "${EXP_LIST[*]}"  -l ubuntu -i  "sudo mkdir /mnt/cephfs; sudo mount -t ceph ${MON_NODES[0]}:/ /mnt/cephfs -o name=admin,noshare,noasyncreaddir,secret=`sudo grep "key" /etc/ceph/ceph.client.admin.keyring | awk '{print $3}'`"
-
 echo "CephFS installed in $(($diff / 60)) minutes and $(($diff % 60)) seconds."
