@@ -27,10 +27,14 @@ import org.apache.hadoop.fs.Path;
 
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -143,7 +147,21 @@ public class DFSOperationsUtils {
             if(!parentFile.exists()){
                 parentFile.mkdirs();
             }
-            file.createNewFile();
+            long size = filePool.getNewFileSize();
+            if(size > 0){
+                FileOutputStream out = new FileOutputStream(file);
+                byte[] buffer = new byte[64 * 1024];
+                long read = -1;
+                do {
+                    read = filePool.getFileData(buffer);
+                    if (read > 0) {
+                        out.write(buffer, 0, (int) read);
+                    }
+                } while (read > -1);
+                
+            }else {
+                file.createNewFile();
+            }
         }
     }
 
@@ -168,10 +186,19 @@ public class DFSOperationsUtils {
             if(CEPH_SKIP_KERNEL_CACHE) {
                 DirectRandomAccessFile filereader =
                     new DirectRandomAccessFile(new File(pathStr), "r");
+                if(filereader.length() > 0) {
+                    byte[] data = new byte[(int) filereader.length()];
+                    filereader.read(data);
+                }
                 filereader.close();
             }else {
-                FileReader fileReader = new FileReader(new File(pathStr));
-                fileReader.close();
+                File file = new File(pathStr);
+                FileInputStream filereader = new FileInputStream(file);
+                if(file.length() > 0) {
+                    byte[] data = new byte[(int) file.length()];
+                    filereader.read(data);
+                }
+                filereader.close();
             }
     
         }
@@ -344,10 +371,20 @@ public class DFSOperationsUtils {
             if(CEPH_SKIP_KERNEL_CACHE) {
                 DirectRandomAccessFile filereader =
                     new DirectRandomAccessFile(new File(pathStr), "rw");
+                if(size != 0) {
+                    byte[] buffer = new byte[(int) size];
+                    Arrays.fill(buffer, (byte) 1);
+                    filereader.write(buffer);
+                }
                 filereader.close();
             }else{
-                FileReader fileReader = new FileReader(new File(pathStr));
-                fileReader.close();
+                FileOutputStream filereader = new FileOutputStream(new File(pathStr));
+                if(size != 0) {
+                    byte[] buffer = new byte[(int) size];
+                    Arrays.fill(buffer, (byte) 1);
+                    filereader.write(buffer);
+                }
+                filereader.close();
             }
         }
     }

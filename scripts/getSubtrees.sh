@@ -13,6 +13,7 @@ for n in ${MDS_NODES[@]}; do
    ssh $connectStr "sudo ceph daemon mds.${n} get subtrees  > /tmp/${n}-subtrees"
    ssh $connectStr "sudo ceph daemon mds.${n} perf dump  > /tmp/${n}-perf"
    ssh $connectStr "sudo ceph daemon mds.${n} dump_mempools > /tmp/${n}-mempool"
+   ssh $connectStr "sudo cat /proc/slabinfo > /tmp/${n}-slabinfo"
    #ssh $connectStr "sudo ceph daemon mds.${n} perf dump | jq '.mds_mem.rss'; sudo ceph daemon mds.${n} dump_mempools | grep -A 3 mds_co; > /tmp/${n}-memgrep"
    scp $connectStr:"/tmp/${n}-*" $dir
 done
