@@ -91,7 +91,12 @@
       <artifactId>cephfs-hadoop</artifactId>
       <version>0.80.6</version>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20180813</version>
+    </dependency>
     
     <!-- MapR-FS Dependencies -->
 <!--    <dependency>

@@ -98,14 +98,17 @@ public class CompileResults {
             hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults, outputDir);
   }
 
-  public static List<File> findFiles(String path, String suffix) {
-    List<File> allResultFiles = new ArrayList<File>();
+  public static List<File> findFiles(String path, String suffix){
     File root = new File(path);
     if (!root.isDirectory()) {
       System.err.println(path + " is not a directory. Specify a directory that contains all the results");
-      return allResultFiles;
+      return new ArrayList<File>();
     }
-
+    return findFiles(root, suffix);
+  }
+  
+  public static List<File> findFiles(File root, String suffix) {
+    List<File> allResultFiles = new ArrayList<File>();
     List<File> dirs = new ArrayList<File>();
     dirs.add(root);
     while (!dirs.isEmpty()) {
