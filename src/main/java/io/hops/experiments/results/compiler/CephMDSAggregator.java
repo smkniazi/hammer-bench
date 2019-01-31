@@ -120,7 +120,7 @@ public class CephMDSAggregator {
         Arrays.fill(meanArr, 1.0/dp);
         
         expResults.put(dp, Arrays.asList(result.getSpeed(), mdsSpeed,
-            klDivergence(normalized.getValues(), meanArr)));
+            klDivergence(normalized.getValues(), meanArr), result.getAvgOpLatency()));
   
         expbalance.put(dp, normalized);
       }
@@ -132,7 +132,8 @@ public class CephMDSAggregator {
     
     StringBuilder sb = new StringBuilder();
     sb.append("#MDSS " + EXPS.toString() + "\n");
-    sb.append("#MDSS expSpeed mdsSpeed kldiv \n");
+    sb.append("#MDSS expSpeed expSpeedPerMDS mdsSpeed permdsSpeed kldiv " +
+        "avglatency \n");
     for (int dp : EXTENDED_DATAPOINTS) {
       sb.append(dp + " ");
       
@@ -140,9 +141,10 @@ public class CephMDSAggregator {
         
         if(allResults.get(exp).containsKey(dp)) {
           List<Double> res = allResults.get(exp).get(dp);
-          sb.append(res.get(0) + " " + res.get(1) + " " + res.get(2) + " ");
+          sb.append(res.get(0) + " " + (res.get(0)/dp)  + " "+ res.get(1)
+              + " " + (res.get(1)/dp) + " " + res.get(2) + " " + (res.get(3)/1000000) + " ");
         }else{
-          sb.append(" - - - ");
+          sb.append(" - - - - - -");
         }
       }
       sb.append("\n");
