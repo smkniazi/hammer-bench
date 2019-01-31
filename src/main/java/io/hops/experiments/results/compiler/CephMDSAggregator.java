@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,15 +63,15 @@ public class CephMDSAggregator {
       Map<Integer, DescriptiveStatistics> expbalance= new HashMap<Integer,
           DescriptiveStatistics>();
       
-      for (int dp : DATAPOINTS) {
-        File base = new File(baseDir, String.valueOf(dp));
-        File expDir;
-        if (dp == 1 && exp.equals("pining")) {
-          expDir = new File(base, "default");
-        } else {
-          expDir = new File(base, exp);
-        }
-      
+      for (final int dp : DATAPOINTS) {
+        File base = new File(baseDir, exp);
+        File expDir = base.listFiles(new FilenameFilter() {
+          @Override
+          public boolean accept(File dir, String name) {
+            return name.startsWith(dp +"-");
+          }
+        })[0];
+        
         List<File> hopsResulsFiles = CompileResults.findFiles(expDir,
             ConfigKeys.BINARY_RESULT_FILE_NAME);
         if (hopsResulsFiles.size() != 1) {
@@ -153,6 +154,8 @@ public class CephMDSAggregator {
     System.out.println(sb.toString());
     
     //show imbalance fo a a datapoint
+    sb = new StringBuilder();
+    
     final int dp = 24;
     String[] exps = new String[]{"default", "pining"};
     sb.append("#MDS default pining \n");
