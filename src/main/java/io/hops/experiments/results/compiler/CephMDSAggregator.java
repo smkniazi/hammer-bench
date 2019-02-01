@@ -84,6 +84,8 @@ public class CephMDSAggregator {
         InterleavedBMResults result = (InterleavedBMResults) ois.readObject();
       
         DescriptiveStatistics stats = new DescriptiveStatistics();
+  
+        DescriptiveStatistics jlatstats = new DescriptiveStatistics();
         
         List<File> files = CompileResults.findFiles(expDir, "-perf");
         Collections.sort(files, new Comparator<File>() {
@@ -99,6 +101,11 @@ public class CephMDSAggregator {
             int requests = json.getJSONObject("mds_server").getInt(
                 "handle_client_request");
             stats.addValue(requests);
+          }
+          if(json.has("mds_log")){
+            double journal_flush_latency =
+                json.getJSONObject("mds_log").getJSONObject("jlat").getDouble("avgtime") * 1000;
+            jlatstats.addValue(journal_flush_latency);
           }
         }
         
@@ -121,7 +128,8 @@ public class CephMDSAggregator {
         Arrays.fill(meanArr, 1.0/dp);
         
         expResults.put(dp, Arrays.asList(result.getSpeed(), mdsSpeed,
-            klDivergence(normalized.getValues(), meanArr), result.getAvgOpLatency()));
+            klDivergence(normalized.getValues(), meanArr),
+            result.getAvgOpLatency(), jlatstats.getMean()));
   
         expbalance.put(dp, normalized);
       }
@@ -134,7 +142,7 @@ public class CephMDSAggregator {
     StringBuilder sb = new StringBuilder();
     sb.append("#MDSS " + EXPS.toString() + "\n");
     sb.append("#MDSS expSpeed expSpeedPerMDS mdsSpeed permdsSpeed kldiv " +
-        "avglatency \n");
+        "avglatency jounal_flush_latency (jlat)\n");
     for (int dp : EXTENDED_DATAPOINTS) {
       sb.append(dp + " ");
       
@@ -143,9 +151,9 @@ public class CephMDSAggregator {
         if(allResults.get(exp).containsKey(dp)) {
           List<Double> res = allResults.get(exp).get(dp);
           sb.append(res.get(0) + " " + (res.get(0)/dp)  + " "+ res.get(1)
-              + " " + (res.get(1)/dp) + " " + res.get(2) + " " + (res.get(3)/1000000) + " ");
+              + " " + (res.get(1)/dp) + " " + res.get(2) + " " + (res.get(3)/1000000) + " " + res.get(4) + " ");
         }else{
-          sb.append(" - - - - - -");
+          sb.append(" - - - - - - -");
         }
       }
       sb.append("\n");
