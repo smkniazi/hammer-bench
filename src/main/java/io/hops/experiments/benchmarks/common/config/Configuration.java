@@ -515,6 +515,15 @@ public class Configuration implements Serializable {
     return getInt(ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY, ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT);
   }
 
+  public int getNumBuckets(){
+    return getInt(ConfigKeys.BR_NUM_BUCKETS_KEY, ConfigKeys.BR_NUM_BUCKETS_DEFAULT);
+  }
+
+  public boolean ignoreLoadBalancer(){
+    return getBoolean(ConfigKeys.BR_IGNORE_LOAD_BALANCER_KEY,
+            ConfigKeys.BR_IGNORE_LOAD_BALANCER__DEFAULT);
+  }
+
   public List<List<String>> getNameNodeRestartCommands(){
     List<List<String>> commandsPerNN = new ArrayList<List<String>>();
 

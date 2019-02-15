@@ -315,4 +315,10 @@ public class ConfigKeys {
 
     public static final String MASTER_SLAVE_WARMUP_DELAY_KEY= "master.slave.warmup.delay";
     public static final int MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT = 0;
+
+    public static final String BR_NUM_BUCKETS_KEY= "br.num.buckets";
+    public static final int BR_NUM_BUCKETS_DEFAULT = 1000;
+
+    public static final String BR_IGNORE_LOAD_BALANCER_KEY= "br.ignore.load.balancer";
+    public static final boolean BR_IGNORE_LOAD_BALANCER__DEFAULT = true;
 }

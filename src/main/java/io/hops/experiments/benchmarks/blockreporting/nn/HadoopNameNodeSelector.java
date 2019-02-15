@@ -25,6 +25,7 @@ import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.server.namenode.NameNode;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
+import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -83,7 +84,8 @@ class HadoopNameNodeSelector implements BlockReportingNameNodeSelector{
   }
 
   @Override
-  public DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws IOException {
+  public DatanodeProtocol getNameNodeToReportTo(long blocksCount, DatanodeRegistration dnReg,
+                                                boolean ignoreBRLoadBalancer) throws IOException {
     stats++;
     return datanodeProto;
   }

@@ -91,7 +91,6 @@ public class Handshake implements Serializable {
     public int getTreeDepth() {
       return treeDepth;
     }
-    
 
     public long getMaxFilesToCreate() {
       return maxFilesToCreate;
@@ -148,6 +147,7 @@ public class Handshake implements Serializable {
     public boolean isPercentilesEnabled() {
       return percentilesEnabled;
     }
+
   }
   public static class Response implements Serializable {
   }

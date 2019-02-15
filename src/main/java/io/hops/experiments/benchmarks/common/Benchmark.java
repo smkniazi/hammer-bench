@@ -16,7 +16,7 @@
  */
 package io.hops.experiments.benchmarks.common;
 
-//import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
+import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
@@ -75,9 +75,8 @@ public abstract class Benchmark {
                handShake.isFixedDepthTree(), handShake.getTreeDepth(),
               handShake.isPercentilesEnabled(),handShake.getBenchMarkFileSystemName());
     } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
-        throw new UnsupportedOperationException("BR is commented out as it is only supported for hadoop 2.0.4-alpha");
-//         return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
-//              handShake.getBenchMarkFileSystemName());
+         return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
+              handShake.getBenchMarkFileSystemName());
     } else {
       throw new UnsupportedOperationException("Unsupported Benchmark " + handShake.getBenchMarkType());
     }

@@ -24,6 +24,7 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
+import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
 import org.apache.hadoop.hdfs.server.protocol.BlockReport;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
@@ -56,6 +57,10 @@ public class TinyDatanode implements Comparable<String> {
 
   private final BlockReportingNameNodeSelector nameNodeSelector;
 
+  private final boolean ignoreBRLoadBalancing;
+  private final int numBuckets;
+
+
   NamespaceInfo nsInfo;
   DatanodeRegistration dnRegistration;
   DatanodeStorage storage; //only one storage
@@ -77,13 +82,16 @@ public class TinyDatanode implements Comparable<String> {
     return port;
   }
 
-  TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int
-      blockCapacity) throws IOException {
+  TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector,
+               int dnIdx, int blockCapacity,
+               boolean ignoreBRLoadBalancing, int numBuckets) throws IOException {
     this.dnIdx = dnIdx;
     this.blocks = new ArrayList<Block>(
         Collections.nCopies(blockCapacity, (Block) null));
     this.nrBlocks = 0;
     this.nameNodeSelector = nameNodeSelector;
+    this.ignoreBRLoadBalancing = ignoreBRLoadBalancing;
+    this.numBuckets = numBuckets;
   }
 
   @Override
@@ -102,7 +110,9 @@ public class TinyDatanode implements Comparable<String> {
     nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
         new DatanodeID(DNS.getDefaultIP("default"),
-            DNS.getDefaultHost("default", "default"), "", getNodePort(dnIdx),
+            DNS.getDefaultHost("default", "default"),
+            DataNode.generateUuid(),
+            getNodePort(dnIdx),
             DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
             DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
             DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
@@ -117,7 +127,7 @@ public class TinyDatanode implements Comparable<String> {
     //first block reports
     storage = new DatanodeStorage(DatanodeStorage.generateUuid());
     if(!isDataNodePopulated) {
-      firstBlockReport(BlockReport.builder(1000).build());
+      firstBlockReport(BlockReport.builder(numBuckets).build());
     }
   }
 
@@ -164,9 +174,7 @@ public class TinyDatanode implements Comparable<String> {
     for (int idx = blocks.size() - 1; idx >= nrBlocks; idx--) {
       blocks.set(idx, new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0));
     }
-    blockReportList = BlockReport.builder(1000).addAllAsFinalized(blocks)
-        .build();
-
+    blockReportList = BlockReport.builder(numBuckets).addAllAsFinalized(blocks).build();
 
     //first block report
     if(isDataNodePopulated){
@@ -183,10 +191,16 @@ public class TinyDatanode implements Comparable<String> {
   private long[] blockReport(BlockReport blocksReport) throws Exception {
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
-        .getNameNodeToReportTo(blocksReport.getNumberOfBlocks());
+        .getNameNodeToReportTo(blocksReport.getNumberOfBlocks(), dnRegistration, ignoreBRLoadBalancing);
+
 
     long start = Time.now();
     blockReport(nameNodeToReportTo, blocksReport);
+
+    if(!ignoreBRLoadBalancing){
+      nameNodeToReportTo.blockReportCompleted(dnRegistration);
+    }
+
     long end = Time.now();
     return new long[]{start - start1,  end - start};
   }

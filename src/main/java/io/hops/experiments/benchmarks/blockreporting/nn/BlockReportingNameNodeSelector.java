@@ -20,6 +20,7 @@ package io.hops.experiments.benchmarks.blockreporting.nn;
 
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
+import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -38,7 +39,9 @@ public interface BlockReportingNameNodeSelector {
 
   BlockReportingNameNodeHandle getLeader() throws Exception;
 
-  DatanodeProtocol getNameNodeToReportTo(long blocksCount) throws Exception;
+  DatanodeProtocol getNameNodeToReportTo(long blocksCount, DatanodeRegistration dnReg,
+                                         boolean ignoreBRLoadBalancer/*hopsfs only*/) throws
+                                         Exception;
 
   List<BlockReportingNameNodeHandle> getNameNodes() throws Exception;
 

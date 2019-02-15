@@ -30,10 +30,13 @@ public class BlockReportingWarmUp {
     private final int maxBlockSize;
     private final boolean skipCreations;
     private final String databaseConnection;
+    private final boolean ignoreBRLoadBalancer;
+    private final int numBuckets;
 
     public Request(String baseDir, int blocksPerReport,
         int blocksPerFile, int filesPerDir, int replication, int
-        maxBlockSize, boolean skipCreations, String databaseConnection) {
+        maxBlockSize, boolean skipCreations, String databaseConnection,
+        boolean ignoreBRLoadBalancer, int numBuckets) {
       this.baseDir = baseDir;
       this.blocksPerReport = blocksPerReport;
       this.blocksPerFile = blocksPerFile;
@@ -42,6 +45,8 @@ public class BlockReportingWarmUp {
       this.maxBlockSize = maxBlockSize;
       this.skipCreations = skipCreations;
       this.databaseConnection = databaseConnection;
+      this.ignoreBRLoadBalancer = ignoreBRLoadBalancer;
+      this.numBuckets = numBuckets;
     }
 
     public String getDatabaseConnection() {
@@ -74,6 +79,14 @@ public class BlockReportingWarmUp {
 
     public boolean isSkipCreations() {
       return skipCreations;
+    }
+
+    public boolean ignoreBRLoadBalancer() {
+      return ignoreBRLoadBalancer;
+    }
+
+    public int getNumBuckets() {
+      return numBuckets;
     }
 
     @Override

@@ -318,10 +318,16 @@ public class Master {
               config.getFileSizeDistribution(), config.getAppendFileSize(),
               config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
-      warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(), config.getBlockReportingNumOfBlocksPerReport(), config
-              .getBlockReportingNumOfBlocksPerFile(), config
-              .getBlockReportingNumOfFilesPerDir(), config
-              .getReplicationFactor(), config.getBlockReportingMaxBlockSize(), config.isBlockReportingSkipCreations(), config.getBlockReportingPersistDatabase());
+      warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(),
+              config.getBlockReportingNumOfBlocksPerReport(),
+              config.getBlockReportingNumOfBlocksPerFile(),
+              config.getBlockReportingNumOfFilesPerDir(),
+              config.getReplicationFactor(),
+              config.getBlockReportingMaxBlockSize(),
+              config.isBlockReportingSkipCreations(),
+              config.getBlockReportingPersistDatabase(),
+              config.ignoreLoadBalancer(),
+              config.getNumBuckets());
     } else {
       throw new UnsupportedOperationException("Wrong Benchmark type for"
               + " warm up " + config.getBenchMarkType());
