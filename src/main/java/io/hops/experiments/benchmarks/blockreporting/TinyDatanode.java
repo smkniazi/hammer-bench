@@ -69,14 +69,15 @@ public class TinyDatanode implements Comparable<String> {
   BlockReport blockReportList;
   int dnIdx;
 
+  //[S] why?
   /**
-   * Return a a 6 digit integer port.
+   * Return a a 5 digit integer port.
    * This is necessary in order to provide lexocographic ordering.
    * Host names are all the same, the ordering goes by port numbers.
    */
   private static int getNodePort(int num) throws IOException {
-    int port = 100000 + num;
-    if (String.valueOf(port).length() > 6) {
+    int port = 10000 + num;
+    if (String.valueOf(port).length() > 5) {
       throw new IOException("Too many data-nodes");
     }
     return port;

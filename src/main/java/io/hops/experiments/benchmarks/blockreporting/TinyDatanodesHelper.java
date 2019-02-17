@@ -60,22 +60,20 @@ public class TinyDatanodesHelper {
   private DatanodeInfo[] excludedDatanodes = null;
 
   public TinyDatanodesHelper(int slaveId, String databaseConnection) throws SQLException {
-    String [] cnn = databaseConnection.split(":");
     this.slaveId = slaveId;
     dataSource = new MysqlDataSource();
     dataSource.setURL(databaseConnection);
+    createTable();
   }
 
 
-  public static void dropTable(String databaseConnection) throws SQLException {
-    MysqlDataSource dataSource = new MysqlDataSource();
-    dataSource.setURL(databaseConnection);
+  public void createTable() throws SQLException {
     Connection connection = dataSource.getConnection();
     Statement statement = connection.createStatement();
-    System.out.println("Dropping table bench_blockreporting_datanodes");
-    statement.executeUpdate("Drop table if exists  bench_blockreporting_datanodes");
-    System.out.println("Dropped bench_blockreporting_datanodes table");
-    statement.executeUpdate("CREATE TABLE `bench_blockreporting_datanodes` (" +
+//    System.out.println("Dropping table bench_blockreporting_datanodes");
+//    statement.executeUpdate("Drop table if exists  bench_blockreporting_datanodes");
+//    System.out.println("Dropped bench_blockreporting_datanodes table");
+    statement.executeUpdate("CREATE TABLE IF NOT EXISTS `bench_blockreporting_datanodes` (" +
             "  `id` int(11) NOT NULL, " +
             "  `dn` int(11) NOT NULL, " +
             "  `data` varchar(1000) NOT NULL, " +
