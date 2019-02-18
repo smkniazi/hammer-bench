@@ -55,7 +55,7 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
   }
 
   @Override
-  public BlockReportingNameNodeHandle getLeader() throws Exception {
+  public BlockReportingNameNodeHandle getLeader() throws IOException {
     return hopsNameNodesHandles.getLeader();
   }
 

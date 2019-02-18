@@ -37,7 +37,7 @@ public interface BlockReportingNameNodeSelector {
 
   BlockReportingNameNodeHandle getNextNameNodeRPCS() throws Exception;
 
-  BlockReportingNameNodeHandle getLeader() throws Exception;
+  BlockReportingNameNodeHandle getLeader() throws IOException;
 
   DatanodeProtocol getNameNodeToReportTo(long blocksCount, DatanodeRegistration dnReg,
                                          boolean ignoreBRLoadBalancer/*hopsfs only*/) throws

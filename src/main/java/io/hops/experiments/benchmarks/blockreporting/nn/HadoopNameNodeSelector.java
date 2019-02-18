@@ -78,8 +78,7 @@ class HadoopNameNodeSelector implements BlockReportingNameNodeSelector{
   }
 
   @Override
-  public BlockReportingNameNodeHandle getLeader()
-      throws IOException {
+  public BlockReportingNameNodeHandle getLeader() throws IOException {
     return nameNodeHandle;
   }
 

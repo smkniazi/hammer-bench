@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,36 +17,40 @@
  */
 package io.hops.experiments.benchmarks.blockreporting;
 
+import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
+import io.hops.experiments.controller.Logger;
+import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.CreateFlag;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
-import org.apache.hadoop.hdfs.protocol.Block;
-import org.apache.hadoop.hdfs.protocol.DatanodeID;
+import org.apache.hadoop.hdfs.protocol.*;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
-import org.apache.hadoop.hdfs.server.protocol.BlockReport;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeCommand;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
-import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
-import org.apache.hadoop.hdfs.server.protocol.NamespaceInfo;
-import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
-import org.apache.hadoop.hdfs.server.protocol.StorageReport;
+import org.apache.hadoop.hdfs.server.namenode.INode;
+import org.apache.hadoop.hdfs.server.protocol.*;
+import org.apache.hadoop.io.EnumSetWritable;
 import org.apache.hadoop.net.DNS;
 import org.apache.hadoop.util.Time;
 import org.apache.hadoop.util.VersionInfo;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.hops.experiments.benchmarks.blockreporting.nn
-    .BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
-import io.hops.experiments.controller.Logger;
+import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
 
 public class TinyDatanode implements Comparable<String> {
 
@@ -59,23 +63,34 @@ public class TinyDatanode implements Comparable<String> {
 
   private final boolean ignoreBRLoadBalancing;
   private final int numBuckets;
-
+  private final int blksPerFile;
+  private final int threads;
+  private final int blocksPerReport;
+  private final String machineName;
+  private AtomicInteger successfulBlksCreated = new AtomicInteger(0);
+  private AtomicInteger failedOps = new AtomicInteger(0);
+  private final String baseDir;
+  private final int blockSize;
+  private final int filesPerDirectory;
+  private final short replication;
+  private final TinyDatanodesHelper helper;
+  private final TinyDatanodes tinyDatanodes;
 
   NamespaceInfo nsInfo;
   DatanodeRegistration dnRegistration;
   DatanodeStorage storage; //only one storage
   ArrayList<Block> blocks;
-  int nrBlocks; // actual number of blocks
   BlockReport blockReportList;
   int dnIdx;
 
   //[S] why?
+
   /**
    * Return a a 5 digit integer port.
    * This is necessary in order to provide lexocographic ordering.
    * Host names are all the same, the ordering goes by port numbers.
    */
-  private static int getNodePort(int num) throws IOException {
+  private int getNodePort(int num) throws IOException {
     int port = 10000 + num;
     if (String.valueOf(port).length() > 5) {
       throw new IOException("Too many data-nodes");
@@ -84,15 +99,26 @@ public class TinyDatanode implements Comparable<String> {
   }
 
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector,
-               int dnIdx, int blockCapacity,
-               boolean ignoreBRLoadBalancing, int numBuckets) throws IOException {
+               int dnIdx, boolean ignoreBRLoadBalancing, int numBuckets,
+               int blocksPerReport, int blksPerFile, int threads,
+               String baseDir, int blockSize, int filesPerDirectory,
+               short replication, TinyDatanodesHelper helper,
+               TinyDatanodes tinyDatanodes) throws IOException {
     this.dnIdx = dnIdx;
-    this.blocks = new ArrayList<Block>(
-        Collections.nCopies(blockCapacity, (Block) null));
-    this.nrBlocks = 0;
     this.nameNodeSelector = nameNodeSelector;
     this.ignoreBRLoadBalancing = ignoreBRLoadBalancing;
     this.numBuckets = numBuckets;
+    this.blocksPerReport = blocksPerReport;
+    this.blksPerFile = blksPerFile;
+    this.threads = threads;
+    this.blocks = new ArrayList<Block>(blocksPerReport);
+    this.machineName = InetAddress.getLocalHost().getHostName();
+    this.blockSize = blockSize;
+    this.baseDir = baseDir;
+    this.filesPerDirectory = filesPerDirectory;
+    this.replication = replication;
+    this.helper = helper;
+    this.tinyDatanodes = tinyDatanodes;
   }
 
   @Override
@@ -106,29 +132,30 @@ public class TinyDatanode implements Comparable<String> {
 
   void register(boolean isDataNodePopulated) throws Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
+            .getNameNodes();
     // get versions from the namenode
     nsInfo = namenodes.get(0).getDataNodeRPC().versionRequest();
     dnRegistration = new DatanodeRegistration(
-        new DatanodeID(DNS.getDefaultIP("default"),
-            DNS.getDefaultHost("default", "default"),
-            DataNode.generateUuid(),
-            getNodePort(dnIdx),
-            DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
-            DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
-            DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
-        new DataStorage(nsInfo), new ExportedBlockKeys(),
-        VersionInfo.getVersion());
+            new DatanodeID(DNS.getDefaultIP("default"),
+                    DNS.getDefaultHost("default", "default"),
+                    DataNode.generateUuid(),
+                    getNodePort(dnIdx),
+                    DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
+                    DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
+                    DFSConfigKeys.DFS_DATANODE_IPC_DEFAULT_PORT),
+            new DataStorage(nsInfo), new ExportedBlockKeys(),
+            VersionInfo.getVersion());
 
     // register datanode
-    for(BlockReportingNameNodeHandle nn : namenodes) {
+    for (BlockReportingNameNodeHandle nn : namenodes) {
       dnRegistration = nn.getDataNodeRPC().registerDatanode(dnRegistration);
     }
 
     //first block reports
     storage = new DatanodeStorage(DatanodeStorage.generateUuid());
-    if(!isDataNodePopulated) {
-      firstBlockReport(BlockReport.builder(numBuckets).build());
+    if (!isDataNodePopulated) {
+      BlockReport report = BlockReport.builder(numBuckets).build();
+      firstBlockReport(report);
     }
   }
 
@@ -140,13 +167,13 @@ public class TinyDatanode implements Comparable<String> {
     // register datanode
     // TODO:FEDERATION currently a single block pool is supported
     StorageReport[] rep =
-        {new StorageReport(storage, false, DF_CAPACITY,
-            DF_USED, DF_CAPACITY - DF_USED, DF_USED)};
+            {new StorageReport(storage, false, DF_CAPACITY,
+                    DF_USED, DF_CAPACITY - DF_USED, DF_USED)};
 
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
-    for(BlockReportingNameNodeHandle nn : namenodes) {
-      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep, 0, 0, 0, 0, 0 )
+            .getNameNodes();
+    for (BlockReportingNameNodeHandle nn : namenodes) {
+      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep, 0, 0, 0, 0, 0)
               .getCommands();
       if (cmds != null) {
         for (DatanodeCommand cmd : cmds) {
@@ -158,31 +185,130 @@ public class TinyDatanode implements Comparable<String> {
     }
   }
 
-  synchronized boolean addBlock(Block blk) {
-    if (nrBlocks == blocks.size()) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Cannot add block: datanode capacity = " + blocks.size());
-      }
-      return false;
+  public List createWriterThreads() throws Exception {
+    List writers = Lists.newArrayList();
+    for (int idx = 0; idx < threads; idx++) {
+      BlockReportingNameNodeHandle nn = nameNodeSelector.getNextNameNodeRPCS();
+      writers.add(new Writer(idx, nn.getRPCHandle(), nn.getDataNodeRPC()));
     }
-    blocks.set(nrBlocks, blk);
-    nrBlocks++;
-    return true;
+    return writers;
+  }
+
+  private class Writer implements Callable {
+
+    private final int tid;
+    private final ClientProtocol nameNodeProto;
+    private final DatanodeProtocol datanodeProto;
+
+    public Writer(int tid, ClientProtocol nameNodeProto,
+                  DatanodeProtocol datanodeProto) {
+      this.tid = tid;
+      this.nameNodeProto = nameNodeProto;
+      this.datanodeProto = datanodeProto;
+    }
+
+    @Override
+    public Object call() throws Exception {
+      String clientDir = "";
+      if (!baseDir.trim().endsWith("/")) {
+        clientDir = baseDir + File.separator;
+      } else {
+        clientDir = baseDir;
+      }
+      clientDir = clientDir + getClientName(tid) + File.separator;
+      FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
+      String clientName = getClientName(tid);
+
+      while (successfulBlksCreated.get() < blocksPerReport) {
+        try {
+          String fileName = nameGenerator.getNextFileName("br");
+          HdfsFileStatus status = nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
+                  new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.CREATE)),
+                  true, replication, blockSize);
+          ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName,
+                  status.getFileId());
+          nameNodeProto.complete(fileName, clientName, lastBlock, status.getFileId(), null);
+        } catch (Exception e) {
+          failedOps.incrementAndGet();
+          Logger.error(e);
+        }
+      }
+      return null;
+    }
+
+    private String getClientName(int idx) {
+      return "br-client-" + machineName + "_" + dnRegistration.hashCode() + "_" + idx;
+    }
+
+    private ExtendedBlock addBlocks(ClientProtocol nameNodeProto,
+                                    DatanodeProtocol datanodeProto,
+                                    String fileName, String clientName,
+                                    long fileID) throws IOException, SQLException {
+
+      ExtendedBlock prevBlock = null;
+      for (int jdx = 0; jdx < blksPerFile; jdx++) {
+        LocatedBlock loc = null;
+        try {
+          loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes(),
+                  INode.ROOT_PARENT_ID, new String[0]);
+          prevBlock = loc.getBlock();
+          for (DatanodeInfo dnInfo : loc.getLocations()) {
+
+            int dnIdx = Arrays.binarySearch(tinyDatanodes.getAllDatanodes(), dnInfo.getXferAddr());
+            System.out.println("Block " + loc.getBlock().getBlockId() + " is allocated on " + dnInfo + " BS " + tinyDatanodes.getAllDatanodes()[dnIdx].getXferAddr()); tinyDatanodes.getAllDatanodes()[dnIdx].addBlock(loc.getBlock().getLocalBlock());
+            ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
+                    ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
+            StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
+                    tinyDatanodes.getAllDatanodes()[dnIdx].storage.getStorageID(), rdBlocks)};
+            datanodeProto.blockReceivedAndDeleted(tinyDatanodes.getAllDatanodes()[dnIdx].dnRegistration,
+                    loc.getBlock().getBlockPoolId(), report);
+            System.out.println("Send Incrementa report " + loc.getBlock().getBlockId());
+
+            successfulBlksCreated.incrementAndGet();
+            tinyDatanodes.incAllBlksCount();
+            tinyDatanodes.log();
+          }
+        } catch (IndexOutOfBoundsException e) {
+          System.out.println(e);
+          System.out.println("Located block " + Arrays.toString(loc.getLocations()));
+          System.out.println("Excluded Nodes are " + Arrays.toString(helper.getExcludedDatanodes()));
+        }
+      }
+      return prevBlock;
+    }
+  }
+
+  synchronized void addBlock(Block blk) {
+    blocks.add(blk);
   }
 
   void formBlockReport(boolean isDataNodePopulated) throws Exception {
-    // fill remaining slots with blocks that do not exist
-    for (int idx = blocks.size() - 1; idx >= nrBlocks; idx--) {
-      blocks.set(idx, new Block(Long.MAX_VALUE - (blocks.size() - idx), 0, 0));
-    }
     blockReportList = BlockReport.builder(numBuckets).addAllAsFinalized(blocks).build();
 
+    synchronized (nameNodeSelector) {
+      for (int i = 0; i < numBuckets; i++) {
+        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
+                hashToString(blockReportList.getBuckets()[i].getHash()));
+      }
+    }
+
     //first block report
-    if(isDataNodePopulated){
+    if (isDataNodePopulated) {
       firstBlockReport(blockReportList);
     }
 
-    Logger.printMsg("Datanode # "+this.dnIdx+" has generated a block report of size "+blocks.size());
+    Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
+    for (Block blk : blocks) {
+      System.out.println(blk);
+    }
+  }
+
+  public static String hashToString(byte[] hash) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : hash) {
+      sb.append(String.format("%02X", b));
+    }
+    return sb.toString();
   }
 
   long[] blockReport() throws Exception {
@@ -192,113 +318,39 @@ public class TinyDatanode implements Comparable<String> {
   private long[] blockReport(BlockReport blocksReport) throws Exception {
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
-        .getNameNodeToReportTo(blocksReport.getNumberOfBlocks(), dnRegistration, ignoreBRLoadBalancing);
+            .getNameNodeToReportTo(blocksReport.getNumberOfBlocks(), dnRegistration, ignoreBRLoadBalancing);
 
 
     long start = Time.now();
     blockReport(nameNodeToReportTo, blocksReport);
 
-    if(!ignoreBRLoadBalancing){
+    if (!ignoreBRLoadBalancing) {
       nameNodeToReportTo.blockReportCompleted(dnRegistration);
     }
 
     long end = Time.now();
-    return new long[]{start - start1,  end - start};
+    return new long[]{start - start1, end - start};
   }
 
   private void firstBlockReport(BlockReport blocksReport) throws
-      Exception {
+          Exception {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
-        .getNameNodes();
-    for(BlockReportingNameNodeHandle nn : namenodes){
+            .getNameNodes();
+    for (BlockReportingNameNodeHandle nn : namenodes) {
       blockReport(nn.getDataNodeRPC(), blocksReport);
     }
   }
 
   private void blockReport(DatanodeProtocol nameNodeToReportTo,
-      BlockReport blocksReport) throws IOException {
+                           BlockReport blocksReport) throws IOException {
     StorageBlockReport[] report =
-        {new StorageBlockReport(storage, blocksReport)};
+            {new StorageBlockReport(storage, blocksReport)};
     nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),
-        report);
+            report);
   }
 
   @Override
   public int compareTo(String xferAddr) {
     return getXferAddr().compareTo(xferAddr);
   }
-
-//  /**
-//   * Send a heartbeat to the name-node and replicate blocks if requested.
-//   */
-//  @SuppressWarnings("unused")
-//  // keep it for future blockReceived benchmark
-//  int replicateBlocks() throws IOException {
-//    // register datanode
-//    StorageReport[] rep =
-//        {new StorageReport(dnRegistration.getStorageID(), false, DF_CAPACITY,
-//            DF_USED, DF_CAPACITY - DF_USED, DF_USED)};
-//    DatanodeCommand[] cmds =
-//        datanodeProtocol.sendHeartbeat(dnRegistration, rep, 0, 0, 0)
-//            .getCommands();
-//    if (cmds != null) {
-//      for (DatanodeCommand cmd : cmds) {
-//        if (cmd.getAction() == DatanodeProtocol.DNA_TRANSFER) {
-//          // Send a copy of a block to another datanode
-//          BlockCommand bcmd = (BlockCommand) cmd;
-//          return transferBlocks(bcmd.getBlocks(), bcmd.getTargets());
-//        }
-//      }
-//    }
-//    return 0;
-//  }
-//
-//  /**
-//   * Transfer blocks to another data-node.
-//   * Just report on behalf of the other data-node
-//   * that the blocks have been received.
-//   */
-//  private int transferBlocks(Block blocks[], DatanodeInfo xferTargets[][])
-//      throws IOException {
-//    for (int i = 0; i < blocks.length; i++) {
-//      DatanodeInfo blockTargets[] = xferTargets[i];
-//      for (int t = 0; t < blockTargets.length; t++) {
-//        DatanodeInfo dnInfo = blockTargets[t];
-//        DatanodeRegistration receivedDNReg;
-//        receivedDNReg = new DatanodeRegistration(dnInfo,
-//            new DataStorage(nsInfo, dnInfo.getStorageID()),
-//            new ExportedBlockKeys(), VersionInfo.getVersion());
-//        ReceivedDeletedBlockInfo[] rdBlocks =
-//            {new ReceivedDeletedBlockInfo(blocks[i],
-//                ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
-//        StorageReceivedDeletedBlocks[] report =
-//            {new StorageReceivedDeletedBlocks(receivedDNReg.getStorageID(),
-//                rdBlocks)};
-//        datanodeProtocol.blockReceivedAndDeleted(receivedDNReg, nsInfo
-//            .getBlockPoolID(), report);
-//      }
-//    }
-//    return blocks.length;
-//  }
-
-
-  private static String createNewStorageId(int port,int dnIdx) {
-    // It is unlikely that we will create a non-unique storage ID
-    // for the following reasons:
-    // a) SecureRandom is a cryptographically strong random number generator
-    // b) IP addresses will likely differ on different hosts
-    // c) DataNode xfer ports will differ on the same host
-    // d) StorageIDs will likely be generated at different times (in ms)
-    // A conflict requires that all four conditions are violated.
-    // NB: The format of this string can be changed in the future without
-    // requiring that old SotrageIDs be updated.
-    String ip = "unknownIP";
-    try {
-      ip = DNS.getDefaultIP("default");
-    } catch (UnknownHostException ignored) {
-      LOG.warn("Could not find an IP address for the \"default\" inteface.");
-    }
-    return "DS-" + dnIdx + "-" + ip + "-" + port + "-" + dnIdx;
-  }
-
 }
