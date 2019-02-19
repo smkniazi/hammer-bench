@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
-import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -30,8 +29,8 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
 
@@ -94,7 +93,7 @@ public class TinyDatanodes {
       System.out.println("register DN " + idx);
       datanodes[idx] = new TinyDatanode(nameNodeSelector,
                idx, ignoreBRLoadBalancing, numBuckets,
-               blocksPerReport, blocksPerFile, 10 /*threds for creation of blks*/,
+               blocksPerReport, blocksPerFile, 5 /*threds for creation of blks*/,
                baseDir, blockSize, filesPerDirectory,
                replication, helper,
                this);
@@ -143,6 +142,8 @@ public class TinyDatanodes {
       writers.addAll(datanodes[idx].createWriterThreads());
     }
 
+    System.out.println("Workers "+writers.size());
+    executor  = Executors.newFixedThreadPool(writers.size());
     executor.invokeAll(writers);
   }
 

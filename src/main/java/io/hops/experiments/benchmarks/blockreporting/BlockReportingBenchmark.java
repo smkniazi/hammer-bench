@@ -52,7 +52,7 @@ public class BlockReportingBenchmark extends Benchmark {
     super(conf, numThreads,fsName);
     this.slaveId = slaveID;
     this.fsName = fsName;
-    //TODO generate threds and datanodes
+    System.out.println("Num threads are "+numThreads);
   }
 
   @Override
@@ -68,7 +68,9 @@ public class BlockReportingBenchmark extends Benchmark {
             .getDatabaseConnection(), fsName,
             request.ignoreBRLoadBalancer(), request.getNumBuckets(),
             request.isSkipCreations());
+
     datanodes.leaveSafeMode();
+
     long t = Time.now();
     datanodes.generateInput(request.isSkipCreations(), executor);
     Logger.printMsg("WarmUp done in " + (Time.now() - t) / 1000 + " seconds");

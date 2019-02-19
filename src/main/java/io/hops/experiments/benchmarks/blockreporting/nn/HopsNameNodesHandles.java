@@ -60,6 +60,7 @@ public class HopsNameNodesHandles {
   private static ThreadLocal<BlockReportingNameNodeHandle> namnodeHandles = new
           ThreadLocal<BlockReportingNameNodeHandle>();
   private Random rand = new Random(System.currentTimeMillis());
+  private SortedActiveNodeList sanl ;
 
   HopsNameNodesHandles(Configuration configuration, URI defaultUri)
           throws IllegalArgumentException, IOException  {
@@ -76,7 +77,7 @@ public class HopsNameNodesHandles {
             NameNodeProxies.createProxy(config, defaultURI, ClientProtocol.class);
 
     ClientProtocol cp = proxyInfo.getProxy();
-    SortedActiveNodeList sanl = cp.getActiveNamenodesForClient();
+    sanl = cp.getActiveNamenodesForClient();
     for(ActiveNode an : sanl.getSortedActiveNodes()){
 
       BlockReportingNameNodeHandle brn = getHandle(an.getRpcServerAddressForClients());
@@ -105,12 +106,19 @@ public class HopsNameNodesHandles {
       return new BlockReportingNameNodeHandleImpl(cp, dp, address.getAddress().getHostName());
   }
 
-  public BlockReportingNameNodeHandle getNextNameNodeRPCS()
+  public synchronized BlockReportingNameNodeHandle getNextNameNodeRPCS()
           throws  IllegalArgumentException, IOException {
     BlockReportingNameNodeHandle handle = namnodeHandles.get();
     if(handle == null){
+      System.out.println("Creating new handle ");
+      int idx = rand.nextInt(sanl.size());
+      InetSocketAddress address = sanl.getActiveNodes().get(idx).getRpcServerAddressForClients();
+      config.set(ConfigKeys.FS_DEFAULTFS_KEY,
+              "hdfs://" + address.getAddress().getHostName() + ":" + address.getPort());
+
       NameNodeProxies.ProxyAndInfo<ClientProtocol> proxyInfo =
-              NameNodeProxies.createProxy(config, defaultURI, ClientProtocol.class);
+              NameNodeProxies.createProxy(config, FileSystem.getDefaultUri(config),
+                      ClientProtocol.class);
 
       ClientProtocol cp = proxyInfo.getProxy();
       DatanodeProtocol dp = new DatanodeProtocolClientSideTranslatorPB(
@@ -119,6 +127,8 @@ public class HopsNameNodesHandles {
       handle = new BlockReportingNameNodeHandleImpl(cp, dp,
               NameNode.getAddress(config).getAddress().getHostName());
       namnodeHandles.set(handle);
+    } else {
+      System.out.println("Returning existing handle. thread "+Thread.currentThread().getId());
     }
     return handle;
   }

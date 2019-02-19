@@ -24,16 +24,9 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.*;
+import java.sql.*;
+import java.util.Arrays;
 import java.util.List;
 
 public class TinyDatanodesHelper {
@@ -109,7 +102,7 @@ public class TinyDatanodesHelper {
     }
   }
 
-  public DatanodeInfo[] getExcludedDatanodes() throws SQLException {
+  public synchronized DatanodeInfo[] getExcludedDatanodes() throws SQLException {
     if (excludedDatanodes == null) {
 
       Connection connection = dataSource.getConnection();
@@ -133,6 +126,9 @@ public class TinyDatanodesHelper {
       statement.close();
       excludedDatanodes = new DatanodeInfo[datanodeInfos.size()];
       excludedDatanodes = datanodeInfos.toArray(excludedDatanodes);
+      System.out.println("Excluded Nodes Size "+ excludedDatanodes.length
+              + " node(s) are excluded in this operation. "
+              + Arrays.toString(excludedDatanodes));
     }
     return excludedDatanodes;
   }

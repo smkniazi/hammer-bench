@@ -188,8 +188,7 @@ public class TinyDatanode implements Comparable<String> {
   public List createWriterThreads() throws Exception {
     List writers = Lists.newArrayList();
     for (int idx = 0; idx < threads; idx++) {
-      BlockReportingNameNodeHandle nn = nameNodeSelector.getNextNameNodeRPCS();
-      writers.add(new Writer(idx, nn.getRPCHandle(), nn.getDataNodeRPC()));
+      writers.add(new Writer(idx, nameNodeSelector));
     }
     return writers;
   }
@@ -197,43 +196,56 @@ public class TinyDatanode implements Comparable<String> {
   private class Writer implements Callable {
 
     private final int tid;
-    private final ClientProtocol nameNodeProto;
-    private final DatanodeProtocol datanodeProto;
+    private final BlockReportingNameNodeSelector nameNodeSelector;
+    private ClientProtocol nameNodeProto;
+    private DatanodeProtocol datanodeProto;
 
-    public Writer(int tid, ClientProtocol nameNodeProto,
-                  DatanodeProtocol datanodeProto) {
+    public Writer(int tid, BlockReportingNameNodeSelector nameNodeSelector) throws Exception {
       this.tid = tid;
-      this.nameNodeProto = nameNodeProto;
-      this.datanodeProto = datanodeProto;
+      this.nameNodeSelector = nameNodeSelector;
     }
 
     @Override
     public Object call() throws Exception {
-      String clientDir = "";
-      if (!baseDir.trim().endsWith("/")) {
-        clientDir = baseDir + File.separator;
-      } else {
-        clientDir = baseDir;
-      }
-      clientDir = clientDir + getClientName(tid);
-      FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
-      String clientName = getClientName(tid);
 
-      while (successfulBlksCreated.get() < blocksPerReport) {
-        try {
-          String fileName = nameGenerator.getNextFileName("br");
-          HdfsFileStatus status = nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
-                  new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.CREATE)),
-                  true, replication, blockSize);
-          ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName,
-                  status.getFileId());
-          nameNodeProto.complete(fileName, clientName, lastBlock, status.getFileId(), null);
-        } catch (Exception e) {
-          failedOps.incrementAndGet();
-          Logger.error(e);
+      try {
+        BlockReportingNameNodeHandle nn = nameNodeSelector.getNextNameNodeRPCS();
+        this.nameNodeProto = nn.getRPCHandle();
+        this.datanodeProto = nn.getDataNodeRPC();
+
+        String clientDir = "";
+        if (!baseDir.trim().endsWith("/")) {
+          clientDir = baseDir + File.separator;
+        } else {
+          clientDir = baseDir;
         }
+        clientDir = clientDir + getClientName(tid);
+        FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
+        String clientName = getClientName(tid);
+
+        while (successfulBlksCreated.get() < blocksPerReport) {
+          try {
+
+            String fileName = nameGenerator.getNextFileName("br");
+            System.out.println("creating file " + fileName);
+            HdfsFileStatus status = nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
+                    new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.CREATE)),
+                    true, replication, blockSize);
+            ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName,
+                    status.getFileId());
+            nameNodeProto.complete(fileName, clientName, lastBlock, status.getFileId(), null);
+          } catch (IOException e) {
+            failedOps.incrementAndGet();
+            Logger.error(e);
+          } finally {
+
+          }
+        }
+        return null;
+      }catch ( Exception e){
+        Logger.error(e);
+        throw e;
       }
-      return null;
     }
 
     private String getClientName(int idx) {
@@ -262,7 +274,7 @@ public class TinyDatanode implements Comparable<String> {
                     tinyDatanodes.getAllDatanodes()[dnIdx].storage.getStorageID(), rdBlocks)};
             datanodeProto.blockReceivedAndDeleted(tinyDatanodes.getAllDatanodes()[dnIdx].dnRegistration,
                     loc.getBlock().getBlockPoolId(), report);
-            
+
             successfulBlksCreated.incrementAndGet();
             tinyDatanodes.incAllBlksCount();
             tinyDatanodes.log();
@@ -284,17 +296,17 @@ public class TinyDatanode implements Comparable<String> {
   void formBlockReport(boolean isDataNodePopulated) throws Exception {
     blockReportList = BlockReport.builder(numBuckets).addAllAsFinalized(blocks).build();
 
-    synchronized (nameNodeSelector) {
-      for (int i = 0; i < numBuckets; i++) {
-        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
-                hashToString(blockReportList.getBuckets()[i].getHash()));
-      }
-    }
+//    synchronized (nameNodeSelector) {
+//      for (int i = 0; i < numBuckets; i++) {
+//        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
+//                hashToString(blockReportList.getBuckets()[i].getHash()));
+//      }
+//    }
 
-    //first block report
-    if (isDataNodePopulated) {
-      firstBlockReport(blockReportList);
-    }
+      //first block report
+//    if (isDataNodePopulated) {
+//      firstBlockReport(blockReportList);
+//    }
 
     Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
     for (Block blk : blocks) {
