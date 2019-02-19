@@ -215,7 +215,7 @@ public class TinyDatanode implements Comparable<String> {
       } else {
         clientDir = baseDir;
       }
-      clientDir = clientDir + getClientName(tid) + File.separator;
+      clientDir = clientDir + getClientName(tid);
       FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, filesPerDirectory);
       String clientName = getClientName(tid);
 
