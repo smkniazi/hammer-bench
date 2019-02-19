@@ -250,20 +250,19 @@ public class TinyDatanode implements Comparable<String> {
         LocatedBlock loc = null;
         try {
           loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes(),
-                  INode.ROOT_PARENT_ID, new String[0]);
+                  fileID, new String[0]);
           prevBlock = loc.getBlock();
           for (DatanodeInfo dnInfo : loc.getLocations()) {
 
             int dnIdx = Arrays.binarySearch(tinyDatanodes.getAllDatanodes(), dnInfo.getXferAddr());
-            System.out.println("Block " + loc.getBlock().getBlockId() + " is allocated on " + dnInfo + " BS " + tinyDatanodes.getAllDatanodes()[dnIdx].getXferAddr()); tinyDatanodes.getAllDatanodes()[dnIdx].addBlock(loc.getBlock().getLocalBlock());
+            tinyDatanodes.getAllDatanodes()[dnIdx].addBlock(loc.getBlock().getLocalBlock());
             ReceivedDeletedBlockInfo[] rdBlocks = {new ReceivedDeletedBlockInfo(loc.getBlock().getLocalBlock(),
                     ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null)};
             StorageReceivedDeletedBlocks[] report = {new StorageReceivedDeletedBlocks(
                     tinyDatanodes.getAllDatanodes()[dnIdx].storage.getStorageID(), rdBlocks)};
             datanodeProto.blockReceivedAndDeleted(tinyDatanodes.getAllDatanodes()[dnIdx].dnRegistration,
                     loc.getBlock().getBlockPoolId(), report);
-            System.out.println("Send Incrementa report " + loc.getBlock().getBlockId());
-
+            
             successfulBlksCreated.incrementAndGet();
             tinyDatanodes.incAllBlksCount();
             tinyDatanodes.log();

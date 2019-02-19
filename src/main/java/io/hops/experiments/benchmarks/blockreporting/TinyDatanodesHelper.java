@@ -139,6 +139,11 @@ public class TinyDatanodesHelper {
 
   public void writeDataNodesStateToDisk(TinyDatanode[] datanodes) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(DATANODES_STATE));
+
+    //number of datanodes
+    writer.write(Integer.toString(datanodes.length));
+    writer.newLine();
+
     for(int dn=0; dn < datanodes.length; dn++){
       for(Block block : datanodes[dn].blocks){
         if(block != null) {
@@ -154,11 +159,19 @@ public class TinyDatanodesHelper {
   public void readDataNodesStateFromDisk(TinyDatanode[] datanodes) throws IOException {
     BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
     String line = null;
+    reader.readLine(); //ignore first line. it contains number of datanodes
     while ((line = reader.readLine()) != null){
       String[] rs = line.split(",");
       datanodes[Integer.valueOf(rs[0])].addBlock(new Block(Long.valueOf
           (rs[1]), Long.valueOf(rs[2]), Long.valueOf(rs[3])));
     }
     reader.close();
+  }
+
+  public int getDNCountFromDisk() throws IOException {
+    BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
+    String line = reader.readLine();
+    reader.close();
+    return Integer.parseInt(line);
   }
 }

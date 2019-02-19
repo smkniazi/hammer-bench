@@ -63,7 +63,6 @@ public class TinyDatanodes {
                        boolean skipCreation)
           throws IOException, Exception {
     this.baseDir = baseDir;
-    this.nrDatanodes = numOfDataNodes;
     this.blocksPerReport = blocksPerReport;
     this.blocksPerFile = blocksPerFile;
     this.filesPerDirectory = filesPerDirectory;
@@ -71,13 +70,20 @@ public class TinyDatanodes {
     this.blockSize = blockSize;
     this.ignoreBRLoadBalancing = ignoreBRLoadBalancing;
     this.numBuckets = numBuckets;
-    this.datanodes = new TinyDatanode[nrDatanodes];
+    this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);
+
     this.skipCreation = skipCreation;
-    conf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, "ROUND_ROBIN");
+    if(skipCreation){
+      //read the number of datanodes from the stored file
+      this.nrDatanodes = helper.getDNCountFromDisk();
+    }else{
+      this.nrDatanodes = numOfDataNodes;
+    }
+
+    this.datanodes = new TinyDatanode[nrDatanodes];
 
     nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
             .getDefaultUri(conf));
-    this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);
 
     createDatanodes();
   }
@@ -88,7 +94,7 @@ public class TinyDatanodes {
       System.out.println("register DN " + idx);
       datanodes[idx] = new TinyDatanode(nameNodeSelector,
                idx, ignoreBRLoadBalancing, numBuckets,
-               blocksPerReport, blocksPerFile, 1 /*threds for creation of blks*/,
+               blocksPerReport, blocksPerFile, 10 /*threds for creation of blks*/,
                baseDir, blockSize, filesPerDirectory,
                replication, helper,
                this);
@@ -153,7 +159,7 @@ public class TinyDatanodes {
 
   public void log() {
     if (Logger.canILog()) {
-      double percent = ((double)allBlksCount.get() / (double)blocksPerReport*nrDatanodes) * 100;
+      double percent = ((double)allBlksCount.get() / (double)(blocksPerReport*nrDatanodes)) * 100.0;
       Logger.printMsg("Warmup " + DFSOperationsUtils.round(percent) + "% completed");
     }
   }
