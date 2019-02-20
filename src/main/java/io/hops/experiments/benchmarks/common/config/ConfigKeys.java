@@ -177,8 +177,8 @@ public class ConfigKeys {
     public static String BR_MAX_BLOCK_SIZE= "br.max.block.size";
     public static int BR_MAX_BLOCK_SIZE_DEFAULT = 16;
 
-    public static String BR_SKIP_CREATIONS = "br.skip.creations";
-    public static boolean BR_SKIP_CREATIONS_DEFAULT = false;
+    public static String BR_READ_STATE_FROM_DISK = "br.read.state.from.disk";
+    public static boolean BR_READ_STATE_FROM_DISK_DEFAULT = false;
 
     public static String BR_MAX_TIME_BEFORE_NEXT_REPORT =
         "br.max.time.before.nextreport";

@@ -16,50 +16,34 @@
  */
 package io.hops.experiments.controller;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmarkCommand;
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingWarmUp;
+import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.controller.commands.Handshake;
-import io.hops.experiments.controller.commands.KillSlave;
-import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
-import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
-import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
-import io.hops.experiments.controller.commands.WarmUpCommand;
-import io.hops.experiments.benchmarks.common.BMResult;
-import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
-import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
-import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
+import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
+import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
+import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCreateCommand;
+import io.hops.experiments.controller.commands.Handshake;
+import io.hops.experiments.controller.commands.KillSlave;
+import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.results.compiler.InterleavedBMResultsAggregator;
 import io.hops.experiments.results.compiler.RawBMResultAggregator;
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  *
@@ -324,7 +308,7 @@ public class Master {
               config.getBlockReportingNumOfFilesPerDir(),
               config.getReplicationFactor(),
               config.getBlockReportingMaxBlockSize(),
-              config.isBlockReportingSkipCreations(),
+              config.brReadStateFromDisk(),
               config.getBlockReportingPersistDatabase(),
               config.ignoreLoadBalancer(),
               config.getNumBuckets());

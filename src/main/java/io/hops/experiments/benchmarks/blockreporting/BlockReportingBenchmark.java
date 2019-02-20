@@ -67,12 +67,12 @@ public class BlockReportingBenchmark extends Benchmark {
             request.getReplication(), request.getMaxBlockSize(), slaveId, request
             .getDatabaseConnection(), fsName,
             request.ignoreBRLoadBalancer(), request.getNumBuckets(),
-            request.isSkipCreations());
+            request.isBrReadStateFromDisk());
 
     datanodes.leaveSafeMode();
 
     long t = Time.now();
-    datanodes.generateInput(request.isSkipCreations(), executor);
+    datanodes.generateInput(request.isBrReadStateFromDisk(), executor);
     Logger.printMsg("WarmUp done in " + (Time.now() - t) / 1000 + " seconds");
 
     }catch(Exception e){

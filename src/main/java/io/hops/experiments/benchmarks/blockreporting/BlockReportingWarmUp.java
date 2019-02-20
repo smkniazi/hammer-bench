@@ -28,14 +28,14 @@ public class BlockReportingWarmUp {
     private final int filesPerDir;
     private final int replication;
     private final int maxBlockSize;
-    private final boolean skipCreations;
+    private final boolean brReadStateFromDisk;
     private final String databaseConnection;
     private final boolean ignoreBRLoadBalancer;
     private final int numBuckets;
 
     public Request(String baseDir, int blocksPerReport,
         int blocksPerFile, int filesPerDir, int replication, int
-        maxBlockSize, boolean skipCreations, String databaseConnection,
+        maxBlockSize, boolean brReadStateFromDisk, String databaseConnection,
         boolean ignoreBRLoadBalancer, int numBuckets) {
       this.baseDir = baseDir;
       this.blocksPerReport = blocksPerReport;
@@ -43,7 +43,7 @@ public class BlockReportingWarmUp {
       this.filesPerDir = filesPerDir;
       this.replication = replication;
       this.maxBlockSize = maxBlockSize;
-      this.skipCreations = skipCreations;
+      this.brReadStateFromDisk = brReadStateFromDisk;
       this.databaseConnection = databaseConnection;
       this.ignoreBRLoadBalancer = ignoreBRLoadBalancer;
       this.numBuckets = numBuckets;
@@ -77,8 +77,8 @@ public class BlockReportingWarmUp {
       return filesPerDir;
     }
 
-    public boolean isSkipCreations() {
-      return skipCreations;
+    public boolean isBrReadStateFromDisk() {
+      return brReadStateFromDisk;
     }
 
     public boolean ignoreBRLoadBalancer() {

@@ -48,7 +48,7 @@ public class TinyDatanodes {
   private final boolean ignoreBRLoadBalancing;
   private final int numBuckets;
   private final int blockSize;
-  private final boolean skipCreation;
+  private final boolean readStateFromDisk;
   private AtomicInteger allBlksCount = new AtomicInteger(0);
 
   public TinyDatanodes(Configuration conf, String baseDir,
@@ -59,7 +59,7 @@ public class TinyDatanodes {
                        BenchMarkFileSystemName fsName,
                        boolean ignoreBRLoadBalancing,
                        int numBuckets,
-                       boolean skipCreation)
+                       boolean readStateFromDisk)
           throws IOException, Exception {
     this.baseDir = baseDir;
     this.blocksPerReport = blocksPerReport;
@@ -71,8 +71,8 @@ public class TinyDatanodes {
     this.numBuckets = numBuckets;
     this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);
 
-    this.skipCreation = skipCreation;
-    if(skipCreation){
+    this.readStateFromDisk = readStateFromDisk;
+    if(readStateFromDisk){
       //read the number of datanodes from the stored file
       this.nrDatanodes = helper.getDNCountFromDisk();
     }else{
@@ -97,7 +97,7 @@ public class TinyDatanodes {
                baseDir, blockSize, filesPerDirectory,
                replication, helper,
                this);
-      datanodes[idx].register(skipCreation);
+      datanodes[idx].register(readStateFromDisk);
       assert datanodes[idx].getXferAddr().compareTo(prevDNName)
               > 0 : "Data-nodes must be sorted lexicographically.";
       datanodes[idx].sendHeartbeat();

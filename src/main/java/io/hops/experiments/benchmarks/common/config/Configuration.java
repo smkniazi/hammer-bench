@@ -18,21 +18,19 @@ package io.hops.experiments.benchmarks.common.config;
 
 //import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
+import io.hops.experiments.benchmarks.common.BenchmarkType;
+import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
+import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
+import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
-
-import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
-import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
-import io.hops.experiments.benchmarks.common.BenchmarkType;
-import io.hops.experiments.utils.DFSOperationsUtils;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 /**
  *
@@ -140,7 +138,7 @@ public class Configuration implements Serializable {
       }
     }
 
-//    if(!isBlockReportingSkipCreations() && getBenchMarkType() == BenchmarkType.BR) {
+//    if(!brReadStateFromDisk() && getBenchMarkType() == BenchmarkType.BR) {
 //      TinyDatanodesHelper.dropTable(getBlockReportingPersistDatabase());
 //    }
   }
@@ -317,8 +315,8 @@ public class Configuration implements Serializable {
     return getInt(ConfigKeys.BR_NUM_FILES_PER_DIR, ConfigKeys.BR_NUM_FILES_PER_DIR_DEFAULT);
   }
 
-  public boolean isBlockReportingSkipCreations() {
-    return getBoolean(ConfigKeys.BR_SKIP_CREATIONS, ConfigKeys.BR_SKIP_CREATIONS_DEFAULT);
+  public boolean brReadStateFromDisk() {
+    return getBoolean(ConfigKeys.BR_READ_STATE_FROM_DISK, ConfigKeys.BR_READ_STATE_FROM_DISK_DEFAULT);
   }
 
   public int getBlockReportingMaxTimeBeforeNextReport() {
