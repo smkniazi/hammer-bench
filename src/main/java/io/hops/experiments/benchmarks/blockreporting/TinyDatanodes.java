@@ -25,8 +25,11 @@ import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
+import org.apache.hadoop.hdfs.server.datanode.DataNode;
+import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,11 +40,13 @@ import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNam
 public class TinyDatanodes {
 
   private final BlockReportingNameNodeSelector nameNodeSelector;
-  private final int nrDatanodes;
-  private final TinyDatanode[] datanodes;
   private final TinyDatanodesHelper helper;
-  private AtomicInteger allBlksCount = new AtomicInteger(0);
   private final BlockReportingWarmUp.Request wReq;
+  private int nrDatanodes;
+  private TinyDatanode[] datanodes;
+  private List<String> DNUUIDs = new ArrayList<String>();
+  private List<String> DNStorageUUIDs = new ArrayList<String>();
+  private AtomicInteger allBlksCount = new AtomicInteger(0);
 
 
   //datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, WarmUpCommand.Request);
@@ -52,27 +57,34 @@ public class TinyDatanodes {
 
     this.helper = new TinyDatanodesHelper(slaveId, wReq.getDatabaseConnection());
 
-    if(wReq.brReadStateFromDisk()){
-      //read the number of datanodes from the stored file
-      this.nrDatanodes = helper.getDNCountFromDisk();
-    }else{
-      this.nrDatanodes = numOfDataNodes;
-    }
-
-    this.datanodes = new TinyDatanode[nrDatanodes];
-
     nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
             .getDefaultUri(conf));
 
-    createDatanodes();
+    createDatanodes( numOfDataNodes);
   }
 
-  public void createDatanodes() throws Exception {
+  public void createDatanodes(int numOfDataNodes) throws Exception {
+
+    if(wReq.brReadStateFromDisk()){
+      //read the number of datanodes and UUIDs from the stored file
+      nrDatanodes = helper.getUUIDs(DNUUIDs, DNStorageUUIDs);
+    }else{
+      nrDatanodes = numOfDataNodes;
+      for(int i = 0; i < nrDatanodes; i++){
+        DNUUIDs.add(DataNode.generateUuid());
+      }
+      for(int i = 0; i < nrDatanodes; i++){
+        DNStorageUUIDs.add(DatanodeStorage.generateUuid());
+      }
+    }
+
+    datanodes = new TinyDatanode[nrDatanodes];
+
     String prevDNName = "";
     for (int idx = 0; idx < nrDatanodes; idx++) {
       System.out.println("register DN " + idx);
       datanodes[idx] = new TinyDatanode(nameNodeSelector, idx, 5 /*threds for creation of blks*/, helper,
-              this, wReq);
+              this, DNUUIDs.get(idx), DNStorageUUIDs.get(idx), wReq);
       datanodes[idx].register();
       assert datanodes[idx].getXferAddr().compareTo(prevDNName)
               > 0 : "Data-nodes must be sorted lexicographically.";
@@ -108,7 +120,9 @@ public class TinyDatanodes {
     }
 
     //save to disk
-    helper.writeDataNodesStateToDisk(datanodes);
+    if(wReq.writeStateToDisk()) {
+      helper.writeDataNodesStateToDisk(datanodes, DNUUIDs, DNStorageUUIDs);
+    }
   }
 
   private void createFiles(ExecutorService executor) throws Exception {

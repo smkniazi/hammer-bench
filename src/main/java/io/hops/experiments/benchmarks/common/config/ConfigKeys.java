@@ -180,6 +180,9 @@ public class ConfigKeys {
     public static String BR_READ_STATE_FROM_DISK = "br.read.state.from.disk";
     public static boolean BR_READ_STATE_FROM_DISK_DEFAULT = false;
 
+    public static String BR_WRITE_STATE_TO_DISK = "br.write.state.to.disk";
+    public static boolean BR_WRITE_STATE_TO_DISK_DEFAULT = false;
+
     public static String BR_MAX_TIME_BEFORE_NEXT_REPORT =
         "br.max.time.before.nextreport";
     public static int BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT = 5000;

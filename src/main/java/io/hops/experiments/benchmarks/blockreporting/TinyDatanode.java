@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.*;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
-import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
 import org.apache.hadoop.hdfs.server.protocol.*;
 import org.apache.hadoop.io.EnumSetWritable;
@@ -65,9 +64,11 @@ public class TinyDatanode implements Comparable<String> {
   private final TinyDatanodesHelper helper;
   private final TinyDatanodes tinyDatanodes;
   private final BlockReportingWarmUp.Request wReq;
+  private final String DNUUID;
+  private final String storageUUID;
   private BlockReport blockReport;
 
-  protected  NamespaceInfo nsInfo;
+  protected NamespaceInfo nsInfo;
   protected DatanodeRegistration dnRegistration;
   protected DatanodeStorage storage; //only one storage
   protected ArrayList<Block> blocks;
@@ -92,7 +93,8 @@ public class TinyDatanode implements Comparable<String> {
 //                                     5 /*threds for creation of blks*/, helper, this);
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int threads,
                TinyDatanodesHelper helper,
-               TinyDatanodes tinyDatanodes, BlockReportingWarmUp.Request wReq)
+               TinyDatanodes tinyDatanodes, String DNUUID, String storageUUID,
+               BlockReportingWarmUp.Request wReq)
           throws IOException {
     this.wReq = wReq;
     this.dnIdx = dnIdx;
@@ -102,6 +104,8 @@ public class TinyDatanode implements Comparable<String> {
     this.machineName = InetAddress.getLocalHost().getHostName();
     this.helper = helper;
     this.tinyDatanodes = tinyDatanodes;
+    this.DNUUID = DNUUID;
+    this.storageUUID = storageUUID;
   }
 
   @Override
@@ -121,7 +125,7 @@ public class TinyDatanode implements Comparable<String> {
     dnRegistration = new DatanodeRegistration(
             new DatanodeID(DNS.getDefaultIP("default"),
                     DNS.getDefaultHost("default", "default"),
-                    DataNode.generateUuid(),
+                    DNUUID,
                     getNodePort(dnIdx),
                     DFSConfigKeys.DFS_DATANODE_HTTP_DEFAULT_PORT,
                     DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT,
@@ -135,11 +139,11 @@ public class TinyDatanode implements Comparable<String> {
     }
 
     //first block reports
-    storage = new DatanodeStorage(DatanodeStorage.generateUuid());
-    if (wReq.brReadStateFromDisk()) {
-      BlockReport report = BlockReport.builder(wReq.getNumBuckets()).build();
-      firstBlockReport(report);
-    }
+    storage = new DatanodeStorage(storageUUID);
+//    if (wReq.brReadStateFromDisk()) {
+//      BlockReport report = BlockReport.builder(wReq.getNumBuckets()).build();
+//      firstBlockReport(report);
+//    }
   }
 
   /**
@@ -279,12 +283,12 @@ public class TinyDatanode implements Comparable<String> {
   void formBlockReport() throws Exception {
     blockReport = BlockReport.builder(wReq.getNumBuckets()).addAllAsFinalized(blocks).build();
 
-//    synchronized (nameNodeSelector) {
-//      for (int i = 0; i < numBuckets; i++) {
-//        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
-//                hashToString(blockReport.getBuckets()[i].getHash()));
-//      }
-//    }
+    synchronized (nameNodeSelector) {
+      for (int i = 0; i < wReq.getNumBuckets(); i++) {
+        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
+                hashToString(blockReport.getBuckets()[i].getHash()));
+      }
+    }
 
       //first block report
     if (wReq.brReadStateFromDisk()) {

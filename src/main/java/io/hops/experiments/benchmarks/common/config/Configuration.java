@@ -319,6 +319,11 @@ public class Configuration implements Serializable {
     return getBoolean(ConfigKeys.BR_READ_STATE_FROM_DISK, ConfigKeys.BR_READ_STATE_FROM_DISK_DEFAULT);
   }
 
+  public boolean brWriteStateToDisk() {
+    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK,
+            ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
+  }
+
   public int getBlockReportingMaxTimeBeforeNextReport() {
     return getInt(ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT);
   }

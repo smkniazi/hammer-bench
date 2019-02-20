@@ -50,26 +50,26 @@ public abstract class Aggregate {
   }
 
   public double getSpeed() {
-    return DFSOperationsUtils.round(speed.getMean());
+    return speed.getMean();
   }
 
   public double getMaxSpeed() {
-    return DFSOperationsUtils.round(speed.getMax());
+    return speed.getMax();
   }
 
   public double getMinSpeed() {
-    return DFSOperationsUtils.round(speed.getMin());
+    return speed.getMin();
   }
 
   public double getSucessfulOps() {
-    return DFSOperationsUtils.round(sucessfulOps.getMean());
+    return sucessfulOps.getMean();
   }
 
   public double getFailedOps() {
-    return DFSOperationsUtils.round(failedOps.getMean());
+    return failedOps.getMean();
   }
 
   public double getRunDuration() {
-    return DFSOperationsUtils.round(runDuration.getMean());
+    return runDuration.getMean();
   }
 }

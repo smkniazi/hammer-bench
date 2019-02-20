@@ -309,6 +309,7 @@ public class Master {
               config.getReplicationFactor(),
               config.getBlockReportingMaxBlockSize(),
               config.brReadStateFromDisk(),
+              config.brWriteStateToDisk(),
               config.getBlockReportingPersistDatabase(),
               config.ignoreLoadBalancer(),
               config.getNumBuckets());

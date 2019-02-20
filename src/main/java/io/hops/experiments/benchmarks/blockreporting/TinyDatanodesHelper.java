@@ -133,12 +133,20 @@ public class TinyDatanodesHelper {
     return excludedDatanodes;
   }
 
-  public void writeDataNodesStateToDisk(TinyDatanode[] datanodes) throws IOException {
+  public void writeDataNodesStateToDisk(TinyDatanode[] datanodes, List<String> DNUUIDs,
+                                        List<String> StorageUUIDs) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(DATANODES_STATE));
 
     //number of datanodes
     writer.write(Integer.toString(datanodes.length));
     writer.newLine();
+
+    for(int i = 0; i < DNUUIDs.size(); i++){
+      writer.write(DNUUIDs.get(i));
+      writer.write(",");
+      writer.write(StorageUUIDs.get(i));
+      writer.newLine();
+    }
 
     for(int dn=0; dn < datanodes.length; dn++){
       for(Block block : datanodes[dn].blocks){
@@ -155,7 +163,11 @@ public class TinyDatanodesHelper {
   public void readDataNodesStateFromDisk(TinyDatanode[] datanodes) throws IOException {
     BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
     String line = null;
-    reader.readLine(); //ignore first line. it contains number of datanodes
+    //ignore the count and UUIDs
+    line = reader.readLine();
+    for(int i = 0; i < Integer.parseInt(line); i++){
+      reader.readLine(); //skip uuid
+    }
     while ((line = reader.readLine()) != null){
       String[] rs = line.split(",");
       datanodes[Integer.valueOf(rs[0])].addBlock(new Block(Long.valueOf
@@ -164,10 +176,16 @@ public class TinyDatanodesHelper {
     reader.close();
   }
 
-  public int getDNCountFromDisk() throws IOException {
+  public int getUUIDs(List<String> DNUUIDs, List<String> StorageUUIDs) throws IOException {
     BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
     String line = reader.readLine();
+    int count = Integer.parseInt(line);
+    for(int i = 0; i < count; i++){
+      String IDs[] = reader.readLine().split(",");
+      DNUUIDs.add(IDs[0]);
+      StorageUUIDs.add(IDs[1]);
+    }
     reader.close();
-    return Integer.parseInt(line);
+    return count;
   }
 }

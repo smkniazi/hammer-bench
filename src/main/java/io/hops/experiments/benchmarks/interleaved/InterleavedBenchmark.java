@@ -241,7 +241,7 @@ public class InterleavedBenchmark extends Benchmark {
         if (Logger.canILog()) {
           message += DFSOperationsUtils.format(25, "Completed Ops: " + operationsCompleted + " ");
           message += DFSOperationsUtils.format(25, "Failed Ops: " + operationsFailed + " ");
-          message += DFSOperationsUtils.format(25, "Speed: " + speedPSec(operationsCompleted.get(), startTime));
+          message += DFSOperationsUtils.format(25, "Speed: " + DFSOperationsUtils.round(speedPSec(operationsCompleted.get(), startTime)));
 //          if (avgLatency.getN() > 0) {
 //            message += DFSOperationsUtils.format(20, "Avg. Op Latency: " + avgLatency.getMean() + " ms");
 //          }
@@ -317,7 +317,7 @@ public class InterleavedBenchmark extends Benchmark {
   private double speedPSec(long ops, long startTime) {
     long timePassed = (System.currentTimeMillis() - startTime);
     double opsPerMSec = (double) (ops) / (double) timePassed;
-    return DFSOperationsUtils.round(opsPerMSec * 1000);
+    return opsPerMSec * 1000;
   }
 
   FailOverMonitor startFailoverTestDeamon(List<List<String>> commands, long failoverTestDuration, long failoverTestStartTime, long namenodeRestartTP, boolean canIKillNamenodes) {

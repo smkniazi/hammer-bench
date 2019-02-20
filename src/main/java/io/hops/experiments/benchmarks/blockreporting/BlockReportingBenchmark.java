@@ -130,12 +130,12 @@ public class BlockReportingBenchmark extends Benchmark {
 
           if (Logger.canILog()) {
             Logger.printMsg("Successful Rpts: " + successfulOps.get() + ", Failed Rpts: " + failedOps.get() + ", Speed: "
-                    + currentSpeed() + " ops/sec,  Select NN for Rpt [Avg,Min,Max]:  ["
+                    + DFSOperationsUtils.round(currentSpeed()) + " ops/sec,  Select NN for Rpt " + "[Avg,Min,Max]:  ["
                     + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMean())+", "
                     + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMin())+", "
                     + DFSOperationsUtils.round(getNewNameNodeElapsedTime.getMax())+"] "
-                    +" Blk Rept [Avg,Min,Max]: ["+
-                    +DFSOperationsUtils.round(brElapsedTimes.getMean())+", "
+                    +" Blk Rept [Avg,Min,Max]: ["
+                    + DFSOperationsUtils.round(brElapsedTimes.getMean())+", "
                     + DFSOperationsUtils.round(brElapsedTimes.getMin())+", "
                     + DFSOperationsUtils.round(brElapsedTimes.getMax())+"]"
                     );
@@ -152,6 +152,6 @@ public class BlockReportingBenchmark extends Benchmark {
   double currentSpeed() {
     double timePassed = Time.now() - startTime;
     double opsPerMSec = (double) (successfulOps.get()) / timePassed;
-    return DFSOperationsUtils.round(opsPerMSec * 1000);
+    return opsPerMSec * 1000;
   }
 }

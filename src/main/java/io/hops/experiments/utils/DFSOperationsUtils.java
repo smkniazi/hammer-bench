@@ -190,10 +190,8 @@ public class DFSOperationsUtils {
         dfs.setReplication(new Path(pathStr), (short)3);
     }
     
-    public static double round(double val){
-      double round = val * 100;
-      round = Math.ceil(round);
-      return round / 100;
+    public static String round(double val){
+       return String.format("%5s", String.format("%.2f", val));
     }
 
     public static String format(int spaces, String string) {
