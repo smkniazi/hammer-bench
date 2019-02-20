@@ -158,10 +158,28 @@ public class TinyDatanodes {
     Logger.printMsg("Reports " + nameNodeSelector.getReportsStats().toString());
   }
 
+  long lastCount=0;
+  long startTime = 0;
   public void log() {
     if (Logger.canILog()) {
-      double percent = ((double)allBlksCount.get() / (double)(blocksPerReport*nrDatanodes)) * 100.0;
-      Logger.printMsg("Warmup " + DFSOperationsUtils.round(percent) + "% completed");
+      if(startTime == 0){
+        startTime = System.currentTimeMillis();
+      }
+
+      long max = blocksPerReport*nrDatanodes;
+      double percent = ((double)allBlksCount.get() / (double)(max)) * 100.0;
+      long speed = (allBlksCount.get() - lastCount)/5;
+      lastCount = allBlksCount.get();
+
+      double timePassed = startTime - System.currentTimeMillis();
+      double blksPerMs = (allBlksCount.get()/timePassed);
+      double totalTimeRequired = max / blksPerMs;
+      double totalTimeRequiredRemaining = totalTimeRequired - timePassed;
+
+      Logger.printMsg("Warmup " + DFSOperationsUtils.round(percent) +
+              "% completed. Speed "+speed+ " blks/sec. " +
+              "ETA : "+totalTimeRequiredRemaining/1000+" sec");
+
     }
   }
 
