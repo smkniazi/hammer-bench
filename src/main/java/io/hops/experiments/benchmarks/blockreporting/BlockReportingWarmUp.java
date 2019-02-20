@@ -26,7 +26,7 @@ public class BlockReportingWarmUp {
     private final int blocksPerReport;
     private final int blocksPerFile;
     private final int filesPerDir;
-    private final int replication;
+    private final short replication;
     private final int maxBlockSize;
     private final boolean brReadStateFromDisk;
     private final String databaseConnection;
@@ -34,7 +34,7 @@ public class BlockReportingWarmUp {
     private final int numBuckets;
 
     public Request(String baseDir, int blocksPerReport,
-        int blocksPerFile, int filesPerDir, int replication, int
+        int blocksPerFile, int filesPerDir, short replication, int
         maxBlockSize, boolean brReadStateFromDisk, String databaseConnection,
         boolean ignoreBRLoadBalancer, int numBuckets) {
       this.baseDir = baseDir;
@@ -77,7 +77,7 @@ public class BlockReportingWarmUp {
       return filesPerDir;
     }
 
-    public boolean isBrReadStateFromDisk() {
+    public boolean brReadStateFromDisk() {
       return brReadStateFromDisk;
     }
 

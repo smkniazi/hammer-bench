@@ -56,23 +56,18 @@ public class BlockReportingBenchmark extends Benchmark {
   }
 
   @Override
-  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
+  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpReq)
           throws Exception {
     try{
     BlockReportingWarmUp.Request request =
-            (BlockReportingWarmUp.Request) warmUp;
+            (BlockReportingWarmUp.Request) warmUpReq;
 
-    datanodes = new TinyDatanodes(conf, request.getBaseDir(), numThreads,
-            request.getBlocksPerReport(), request.getBlocksPerFile(), request.getFilesPerDir(),
-            request.getReplication(), request.getMaxBlockSize(), slaveId, request
-            .getDatabaseConnection(), fsName,
-            request.ignoreBRLoadBalancer(), request.getNumBuckets(),
-            request.isBrReadStateFromDisk());
+    datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, request);
 
     datanodes.leaveSafeMode();
 
     long t = Time.now();
-    datanodes.generateInput(request.isBrReadStateFromDisk(), executor);
+    datanodes.generateInput(executor);
     Logger.printMsg("WarmUp done in " + (Time.now() - t) / 1000 + " seconds");
 
     }catch(Exception e){

@@ -37,42 +37,22 @@ import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNam
 public class TinyDatanodes {
 
   private final BlockReportingNameNodeSelector nameNodeSelector;
-  private final String baseDir;
   private final int nrDatanodes;
-  private final int blocksPerReport;
-  private final int blocksPerFile;
-  private final int filesPerDirectory;
-  private final short replication;
   private final TinyDatanode[] datanodes;
   private final TinyDatanodesHelper helper;
-  private final boolean ignoreBRLoadBalancing;
-  private final int numBuckets;
-  private final int blockSize;
-  private final boolean readStateFromDisk;
   private AtomicInteger allBlksCount = new AtomicInteger(0);
+  private final BlockReportingWarmUp.Request wReq;
 
-  public TinyDatanodes(Configuration conf, String baseDir,
-                       int numOfDataNodes, int blocksPerReport,
-                       int blocksPerFile, int filesPerDirectory,
-                       int replication, int blockSize, int slaveId,
-                       String databaseConnection,
-                       BenchMarkFileSystemName fsName,
-                       boolean ignoreBRLoadBalancing,
-                       int numBuckets,
-                       boolean readStateFromDisk)
+
+  //datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, WarmUpCommand.Request);
+  public TinyDatanodes(Configuration conf, int numOfDataNodes, int slaveId,
+                       BenchMarkFileSystemName fsName, BlockReportingWarmUp.Request req)
           throws IOException, Exception {
-    this.baseDir = baseDir;
-    this.blocksPerReport = blocksPerReport;
-    this.blocksPerFile = blocksPerFile;
-    this.filesPerDirectory = filesPerDirectory;
-    this.replication = (short) replication;
-    this.blockSize = blockSize;
-    this.ignoreBRLoadBalancing = ignoreBRLoadBalancing;
-    this.numBuckets = numBuckets;
-    this.helper = new TinyDatanodesHelper(slaveId, databaseConnection);
+    this.wReq = req;
 
-    this.readStateFromDisk = readStateFromDisk;
-    if(readStateFromDisk){
+    this.helper = new TinyDatanodesHelper(slaveId, wReq.getDatabaseConnection());
+
+    if(wReq.brReadStateFromDisk()){
       //read the number of datanodes from the stored file
       this.nrDatanodes = helper.getDNCountFromDisk();
     }else{
@@ -91,13 +71,9 @@ public class TinyDatanodes {
     String prevDNName = "";
     for (int idx = 0; idx < nrDatanodes; idx++) {
       System.out.println("register DN " + idx);
-      datanodes[idx] = new TinyDatanode(nameNodeSelector,
-               idx, ignoreBRLoadBalancing, numBuckets,
-               blocksPerReport, blocksPerFile, 5 /*threds for creation of blks*/,
-               baseDir, blockSize, filesPerDirectory,
-               replication, helper,
-               this);
-      datanodes[idx].register(readStateFromDisk);
+      datanodes[idx] = new TinyDatanode(nameNodeSelector, idx, 5 /*threds for creation of blks*/, helper,
+              this, wReq);
+      datanodes[idx].register();
       assert datanodes[idx].getXferAddr().compareTo(prevDNName)
               > 0 : "Data-nodes must be sorted lexicographically.";
       datanodes[idx].sendHeartbeat();
@@ -117,18 +93,18 @@ public class TinyDatanodes {
     return datanodes;
   }
 
-  public void generateInput(boolean skipCreation, ExecutorService executor) throws Exception {
+  public void generateInput(ExecutorService executor) throws Exception {
     // create data-nodes
-    if (skipCreation) {
+    if (wReq.brReadStateFromDisk()) {
+      //load from disk
       helper.readDataNodesStateFromDisk(datanodes);
     } else {
-      //load from disk
       createFiles(executor);
     }
 
     // prepare block reports
     for (int idx = 0; idx < nrDatanodes; idx++) {
-      datanodes[idx].formBlockReport(skipCreation);
+      datanodes[idx].formBlockReport();
     }
 
     //save to disk
@@ -166,7 +142,7 @@ public class TinyDatanodes {
         startTime = System.currentTimeMillis();
       }
 
-      long max = blocksPerReport*nrDatanodes;
+      long max = wReq.getBlocksPerReport()*nrDatanodes;
       double percent = ((double)allBlksCount.get() / (double)(max)) * 100.0;
       long speed = (allBlksCount.get() - lastCount)/5;
       lastCount = allBlksCount.get();
