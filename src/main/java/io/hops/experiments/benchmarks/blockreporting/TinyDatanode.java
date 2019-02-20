@@ -304,9 +304,9 @@ public class TinyDatanode implements Comparable<String> {
 //    }
 
       //first block report
-//    if (isDataNodePopulated) {
-//      firstBlockReport(blockReportList);
-//    }
+    if (isDataNodePopulated) {
+      firstBlockReport(blockReportList);
+    }
 
     Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
     for (Block blk : blocks) {

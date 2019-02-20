@@ -171,14 +171,22 @@ public class TinyDatanodes {
       long speed = (allBlksCount.get() - lastCount)/5;
       lastCount = allBlksCount.get();
 
-      double timePassed = startTime - System.currentTimeMillis();
+      double timePassed = System.currentTimeMillis()- startTime;
       double blksPerMs = (allBlksCount.get()/timePassed);
       double totalTimeRequired = max / blksPerMs;
       double totalTimeRequiredRemaining = totalTimeRequired - timePassed;
 
+      long x = ((long)totalTimeRequiredRemaining/1000);
+      long seconds = ((long) totalTimeRequiredRemaining / 1000) % 60;
+      x /= 60;
+      long minutes = x % 60;
+      x /= 60;
+      long hours = x % 24;
+      String time = String.format("%02d:%02d:%02d", hours,minutes,seconds);
+
       Logger.printMsg("Warmup " + DFSOperationsUtils.round(percent) +
               "% completed. Speed "+speed+ " blks/sec. " +
-              "ETA : "+totalTimeRequiredRemaining/1000+" sec");
+              "ETA : "+time);
 
     }
   }
