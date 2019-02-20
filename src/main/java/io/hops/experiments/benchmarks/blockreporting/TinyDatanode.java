@@ -54,7 +54,7 @@ import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNam
 
 public class TinyDatanode implements Comparable<String> {
 
-  private static final long DF_CAPACITY = 100 * 1024 * 1024;
+  private static final long DF_CAPACITY = Long.MAX_VALUE;
   private static final long DF_USED = 0;
 
   private static final Log LOG = LogFactory.getLog(TinyDatanode.class);
