@@ -138,6 +138,11 @@ public class BMConfiguration implements Serializable {
       }
     }
 
+    if (getBRNumInvalidBuckets() > getNumBuckets()){
+      throw new IllegalArgumentException("Number of invalid buckets cannot be more than the " +
+              "total number of the buckets");
+    }
+
 //    if(!brReadStateFromDisk() && getBenchMarkType() == BenchmarkType.BR) {
 //      TinyDatanodesHelper.dropTable(getBlockReportingPersistDatabase());
 //    }
@@ -300,32 +305,41 @@ public class BMConfiguration implements Serializable {
   }
 
   public int getBlockReportingNumOfBlocksPerReport() {
-    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_REPORT, ConfigKeys.BR_NUM_BLOCKS_PER_REPORT_DEFAULT);
+    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_REPORT_KEY, ConfigKeys.BR_NUM_BLOCKS_PER_REPORT_DEFAULT);
   }
 
   public int getBlockReportingNumOfBlocksPerFile() {
-    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_FILE, ConfigKeys.BR_NUM_BLOCKS_PER_FILE_DEFAULT);
+    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_FILE_KEY, ConfigKeys.BR_NUM_BLOCKS_PER_FILE_DEFAULT);
   }
 
   public int getBlockReportingMaxBlockSize() {
-    return getInt(ConfigKeys.BR_MAX_BLOCK_SIZE, ConfigKeys.BR_MAX_BLOCK_SIZE_DEFAULT);
+    return getInt(ConfigKeys.BR_MAX_BLOCK_SIZE_KEY, ConfigKeys.BR_MAX_BLOCK_SIZE_DEFAULT);
   }
 
   public int getBlockReportingNumOfFilesPerDir() {
-    return getInt(ConfigKeys.BR_NUM_FILES_PER_DIR, ConfigKeys.BR_NUM_FILES_PER_DIR_DEFAULT);
+    return getInt(ConfigKeys.BR_NUM_FILES_PER_DIR_KEY, ConfigKeys.BR_NUM_FILES_PER_DIR_DEFAULT);
   }
 
   public boolean brReadStateFromDisk() {
-    return getBoolean(ConfigKeys.BR_READ_STATE_FROM_DISK, ConfigKeys.BR_READ_STATE_FROM_DISK_DEFAULT);
+    return getBoolean(ConfigKeys.BR_READ_STATE_FROM_DISK_KEY, ConfigKeys.BR_READ_STATE_FROM_DISK_DEFAULT);
   }
 
   public boolean brWriteStateToDisk() {
-    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK, ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
+    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK_KEY, ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
   }
 
   public String brOnDiskStatePath() {
-    return getString(ConfigKeys.BR_ON_DISK_STATE_PATH, ConfigKeys.BR_ON_DISK_STATE_PATH_DEFAULT);
+    return getString(ConfigKeys.BR_ON_DISK_STATE_PATH_KEY, ConfigKeys.BR_ON_DISK_STATE_PATH_DEFAULT);
   }
+
+  public int getBRNumInvalidBuckets() {
+    return getInt(ConfigKeys.BR_NUM_INVALID_BUCKETS_KEY, ConfigKeys.BR_NUM_INVALID_BUCKETS_DEFAULT);
+  }
+
+  public boolean getBRIncludeBlocks() {
+    return getBoolean(ConfigKeys.BR_INCLUDE_BLOCKS_KEY, ConfigKeys.BR_INCLUDE_BLOCKS_DEFAULT);
+  }
+
   public int getBlockReportingMaxTimeBeforeNextReport() {
     return getInt(ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT);
   }

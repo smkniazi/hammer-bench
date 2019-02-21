@@ -76,20 +76,18 @@ public class BlockReportingBenchmark extends Benchmark {
   }
 
   @Override
-  protected BenchmarkCommand.Response processCommandInternal(
-          BenchmarkCommand.Request command)
+  protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command)
           throws IOException, InterruptedException {
-    BlockReportingBenchmarkCommand.Request request =
-            (BlockReportingBenchmarkCommand.Request) command;
 
     List workers = Lists.newArrayList();
     for (int dn = 0; dn < bmConf.getSlaveNumThreads(); dn++) {
-      workers.add(new Reporter(dn, request
-              .getMinTimeBeforeNextReport(), request.getMaxTimeBeforeNextReport()));
+      workers.add(new Reporter(dn,
+              bmConf.getBlockReportingMinTimeBeforeNextReport(),
+              bmConf.getBlockReportingMaxTimeBeforeNextReport()));
     }
 
     startTime = Time.now();
-    executor.invokeAll(workers, request.getBlockReportBenchMarkDuration(), TimeUnit.MILLISECONDS);
+    executor.invokeAll(workers, bmConf.getBlockReportBenchMarkDuration(), TimeUnit.MILLISECONDS);
     double speed = currentSpeed();
     datanodes.printStats();
 

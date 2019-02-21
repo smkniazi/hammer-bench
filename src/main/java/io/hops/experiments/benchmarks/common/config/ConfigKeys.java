@@ -165,25 +165,31 @@ public class ConfigKeys {
     public static String BR_BENCHMARK_DURATION_KEY = "br.benchmark.duration";
     public static int BR_BENCHMARK_DURATION_DEFAULT = 0;
 
-    public static String BR_NUM_BLOCKS_PER_REPORT = "br.blocks.per.report";
+    public static String BR_NUM_BLOCKS_PER_REPORT_KEY = "br.blocks.per.report";
     public static int BR_NUM_BLOCKS_PER_REPORT_DEFAULT = 10;
 
-    public static String BR_NUM_BLOCKS_PER_FILE = "br.blocks.per.file";
+    public static String BR_NUM_BLOCKS_PER_FILE_KEY = "br.blocks.per.file";
     public static int BR_NUM_BLOCKS_PER_FILE_DEFAULT = 10;
 
-    public static String BR_NUM_FILES_PER_DIR = "br.files.per.dir";
+    public static String BR_NUM_FILES_PER_DIR_KEY = "br.files.per.dir";
     public static int BR_NUM_FILES_PER_DIR_DEFAULT = 10;
 
-    public static String BR_MAX_BLOCK_SIZE= "br.max.block.size";
+    public static String BR_MAX_BLOCK_SIZE_KEY = "br.max.block.size";
     public static int BR_MAX_BLOCK_SIZE_DEFAULT = 16;
 
-    public static String BR_READ_STATE_FROM_DISK = "br.read.state.from.disk";
+    public static String BR_READ_STATE_FROM_DISK_KEY = "br.read.state.from.disk";
     public static boolean BR_READ_STATE_FROM_DISK_DEFAULT = false;
 
-    public static String BR_WRITE_STATE_TO_DISK = "br.write.state.to.disk";
+    public static String BR_WRITE_STATE_TO_DISK_KEY = "br.write.state.to.disk";
     public static boolean BR_WRITE_STATE_TO_DISK_DEFAULT = false;
 
-    public static String BR_ON_DISK_STATE_PATH = "br.on.disk.state.path";
+    public static String BR_NUM_INVALID_BUCKETS_KEY = "br.num.invalid.buckets";
+    public static int BR_NUM_INVALID_BUCKETS_DEFAULT = 0;
+
+    public static String BR_INCLUDE_BLOCKS_KEY = "br.include.blocks";
+    public static boolean BR_INCLUDE_BLOCKS_DEFAULT = true;
+
+    public static String BR_ON_DISK_STATE_PATH_KEY = "br.on.disk.state.path";
     public static String BR_ON_DISK_STATE_PATH_DEFAULT = "/tmp/datanodes-state.txt.gz";
 
     public static String BR_MAX_TIME_BEFORE_NEXT_REPORT =

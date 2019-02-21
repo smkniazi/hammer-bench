@@ -22,6 +22,7 @@ import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSe
 import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
+import io.hops.metadata.hdfs.entity.HashBucket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.CreateFlag;
@@ -29,6 +30,7 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.*;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
+import org.apache.hadoop.hdfs.server.blockmanagement.HashBuckets;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
 import org.apache.hadoop.hdfs.server.protocol.*;
 import org.apache.hadoop.io.EnumSetWritable;
@@ -46,6 +48,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
+import static org.apache.hadoop.hdfs.server.blockmanagement.HashBuckets.HASH_LENGTH;
 
 public class TinyDatanode implements Comparable<String> {
 
@@ -266,10 +269,22 @@ public class TinyDatanode implements Comparable<String> {
 
   void formBlockReport() throws Exception {
     BlockReport.Builder brBuilder = BlockReport.builder(bmConf.getNumBuckets());
-    for(Block blk : blocks) {
+    for (Block blk : blocks) {
       brBuilder.addAsFinalized(blk);
     }
     blockReport = brBuilder.build();
+
+    //invliadate buckets
+    for (int i = 0; i < bmConf.getBRNumInvalidBuckets(); i++){
+      blockReport.getBuckets()[i].setHash(new byte[HASH_LENGTH]);
+    }
+
+    if(!bmConf.getBRIncludeBlocks()){
+      
+      blockReport.getBuckets()[i].setHash(new byte[HASH_LENGTH]);
+      ReportedBlock[]
+    }
+
     Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
 
 //    synchronized (nameNodeSelector) {

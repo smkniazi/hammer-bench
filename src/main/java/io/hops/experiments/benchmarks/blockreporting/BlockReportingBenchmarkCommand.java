@@ -23,27 +23,8 @@ import io.hops.experiments.controller.commands.BenchmarkCommand;
 public class BlockReportingBenchmarkCommand {
 
   public static class Request implements BenchmarkCommand.Request{
-    private final long blockReportBenchMarkDuration;
-    private final int minTimeBeforeNextReport;
-    private final int maxTimeBeforeNextReport;
 
-    public Request(long blockReportBenchMarkDuration, int minTimeBeforeNextReport,
-        int maxTimeBeforeNextReport) {
-      this.blockReportBenchMarkDuration = blockReportBenchMarkDuration;
-      this.minTimeBeforeNextReport = minTimeBeforeNextReport;
-      this.maxTimeBeforeNextReport = maxTimeBeforeNextReport;
-    }
-
-    public long getBlockReportBenchMarkDuration() {
-      return blockReportBenchMarkDuration;
-    }
-
-    public int getMinTimeBeforeNextReport() {
-      return minTimeBeforeNextReport;
-    }
-
-    public int getMaxTimeBeforeNextReport() {
-      return maxTimeBeforeNextReport;
+    public Request() {
     }
 
     @Override
