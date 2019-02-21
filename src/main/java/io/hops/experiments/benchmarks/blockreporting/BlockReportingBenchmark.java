@@ -136,6 +136,7 @@ public class BlockReportingBenchmark extends Benchmark {
                     + DFSOperationsUtils.round(brElapsedTimes.getMax())+"]"
                     );
           }
+        } catch (InterruptedException e ){
         } catch (Exception e) {
           failedOps.incrementAndGet();
           System.out.println(e);
