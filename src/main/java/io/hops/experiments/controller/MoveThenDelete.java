@@ -17,7 +17,7 @@
 package io.hops.experiments.controller;
 
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
-import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +29,7 @@ import org.apache.hadoop.fs.Path;
 public class MoveThenDelete {
 
   private org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
-  private Configuration args;
+  private BMConfiguration args;
 
   public static void main(String[] argv) throws Exception {
     
@@ -43,7 +43,7 @@ public class MoveThenDelete {
 
   private void start(String configFilePath, String hdfsFolder)  {
     try {
-      args = new Configuration(configFilePath);
+      args = new BMConfiguration(configFilePath);
       org.apache.hadoop.conf.Configuration conf = createHdfsConf();
 
       // do shit here

@@ -19,6 +19,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 
 import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
 import org.apache.commons.logging.Log;
@@ -63,7 +64,7 @@ public class TinyDatanode implements Comparable<String> {
   private final AtomicInteger failedOps = new AtomicInteger(0);
   private final TinyDatanodesHelper helper;
   private final TinyDatanodes tinyDatanodes;
-  private final BlockReportingWarmUp.Request wReq;
+  private final BMConfiguration bmConf;
   private final String DNUUID;
   private final String storageUUID;
   private BlockReport blockReport;
@@ -94,13 +95,13 @@ public class TinyDatanode implements Comparable<String> {
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int threads,
                TinyDatanodesHelper helper,
                TinyDatanodes tinyDatanodes, String DNUUID, String storageUUID,
-               BlockReportingWarmUp.Request wReq)
+               BMConfiguration bmConf)
           throws IOException {
-    this.wReq = wReq;
+    this.bmConf = bmConf;
     this.dnIdx = dnIdx;
     this.nameNodeSelector = nameNodeSelector;
     this.threads = threads;
-    this.blocks = new ArrayList<Block>(wReq.getBlocksPerReport());
+    this.blocks = new ArrayList<Block>(bmConf.getBlockReportingNumOfBlocksPerReport());
     this.machineName = InetAddress.getLocalHost().getHostName();
     this.helper = helper;
     this.tinyDatanodes = tinyDatanodes;
@@ -201,23 +202,22 @@ public class TinyDatanode implements Comparable<String> {
         this.datanodeProto = nn.getDataNodeRPC();
 
         String clientDir = "";
-        if (!wReq.getBaseDir().trim().endsWith("/")) {
-          clientDir = wReq.getBaseDir() + File.separator;
+        if (!bmConf.getBaseDir().trim().endsWith("/")) {
+          clientDir = bmConf.getBaseDir() + File.separator;
         } else {
-          clientDir = wReq.getBaseDir();
+          clientDir = bmConf.getBaseDir();
         }
         clientDir = clientDir + getClientName(tid);
-        FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, wReq.getFilesPerDir());
+        FileNameGenerator nameGenerator = new FileNameGenerator(clientDir, bmConf.getFilesPerDir());
         String clientName = getClientName(tid);
 
-        while (successfulBlksCreated.get() < wReq.getBlocksPerReport()) {
+        while (successfulBlksCreated.get() < bmConf.getBlockReportingNumOfBlocksPerReport()) {
           try {
 
             String fileName = nameGenerator.getNextFileName("br");
-            System.out.println("creating file " + fileName);
             HdfsFileStatus status = nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
                     new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.CREATE)),
-                    true, (short)wReq.getReplication(), wReq.getMaxBlockSize());
+                    true, (short) bmConf.getReplicationFactor(), bmConf.getBlockReportingMaxBlockSize());
             ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName,
                     status.getFileId());
             nameNodeProto.complete(fileName, clientName, lastBlock, status.getFileId(), null);
@@ -229,7 +229,7 @@ public class TinyDatanode implements Comparable<String> {
           }
         }
         return null;
-      }catch ( Exception e){
+      } catch (Exception e) {
         Logger.error(e);
         throw e;
       }
@@ -245,7 +245,7 @@ public class TinyDatanode implements Comparable<String> {
                                     long fileID) throws IOException, SQLException {
 
       ExtendedBlock prevBlock = null;
-      for (int jdx = 0; jdx < wReq.getBlocksPerFile(); jdx++) {
+      for (int jdx = 0; jdx < bmConf.getBlockReportingNumOfBlocksPerFile(); jdx++) {
         LocatedBlock loc = null;
         try {
           loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes(),
@@ -281,25 +281,26 @@ public class TinyDatanode implements Comparable<String> {
   }
 
   void formBlockReport() throws Exception {
-    blockReport = BlockReport.builder(wReq.getNumBuckets()).addAllAsFinalized(blocks).build();
+    blockReport = BlockReport.builder(bmConf.getNumBuckets()).addAllAsFinalized(blocks).build();
+    Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
 
-    synchronized (nameNodeSelector) {
-      for (int i = 0; i < wReq.getNumBuckets(); i++) {
-        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
-                hashToString(blockReport.getBuckets()[i].getHash()));
-      }
-    }
+//    synchronized (nameNodeSelector) {
+//      for (int i = 0; i < wReq.getNumBuckets(); i++) {
+//        System.out.println("Datanode ID " + dnIdx + " Bucket ID " + i + " Hash " +
+//                hashToString(blockReport.getBuckets()[i].getHash()));
+//      }
+//    }
+//
+//    for (Block blk : blocks) {
+//      System.out.println(blk);
+//    }
 
-      //first block report
-    if (wReq.brReadStateFromDisk()) {
+    //first block report
+    if (bmConf.brReadStateFromDisk()) {
       firstBlockReport(blockReport);
     }
-
-    Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
-    for (Block blk : blocks) {
-      System.out.println(blk);
-    }
   }
+
 
   public static String hashToString(byte[] hash) {
     StringBuilder sb = new StringBuilder();
@@ -316,13 +317,14 @@ public class TinyDatanode implements Comparable<String> {
   private long[] blockReport(BlockReport blocksReport) throws Exception {
     long start1 = Time.now();
     DatanodeProtocol nameNodeToReportTo = nameNodeSelector
-            .getNameNodeToReportTo(blocksReport.getNumberOfBlocks(), dnRegistration, wReq.ignoreBRLoadBalancer());
+            .getNameNodeToReportTo(blocksReport.getNumberOfBlocks(), dnRegistration,
+                    bmConf.ignoreLoadBalancer());
 
 
     long start = Time.now();
     blockReport(nameNodeToReportTo, blocksReport);
 
-    if (!wReq.ignoreBRLoadBalancer()) {
+    if (!bmConf.ignoreLoadBalancer()) {
       nameNodeToReportTo.blockReportCompleted(dnRegistration);
     }
 

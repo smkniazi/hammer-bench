@@ -19,6 +19,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.WarmUpCommand;
@@ -30,6 +31,7 @@ import org.apache.hadoop.util.Time;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -47,6 +49,7 @@ public class BlockReportingBenchmark extends Benchmark {
   private TinyDatanodes datanodes;
   private final int slaveId;
   private final BenchMarkFileSystemName fsName;
+  private BMConfiguration bmConf;
 
   public BlockReportingBenchmark(Configuration conf, int numThreads, int slaveID, BenchMarkFileSystemName fsName) {
     super(conf, numThreads,fsName);
@@ -59,11 +62,10 @@ public class BlockReportingBenchmark extends Benchmark {
   protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpReq)
           throws Exception {
     try{
-    BlockReportingWarmUp.Request request =
-            (BlockReportingWarmUp.Request) warmUpReq;
+    this.bmConf = ((BlockReportingWarmUp.Request) warmUpReq).getBMConf();
 
-    datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, request);
-
+    datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, bmConf);
+    
     datanodes.leaveSafeMode();
 
     long t = Time.now();

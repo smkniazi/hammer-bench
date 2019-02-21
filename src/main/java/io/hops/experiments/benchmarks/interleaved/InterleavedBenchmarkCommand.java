@@ -17,7 +17,7 @@
 package io.hops.experiments.benchmarks.interleaved;
 
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 
@@ -32,13 +32,13 @@ import java.util.List;
 public class InterleavedBenchmarkCommand {
 
     public static class Request implements BenchmarkCommand.Request {
-        private Configuration config;
+        private BMConfiguration config;
 
-        public Request(Configuration config) {
+        public Request(BMConfiguration config) {
           this.config = config;
         }
 
-        public Configuration getConfig(){
+        public BMConfiguration getConfig(){
             return config;
         }
 

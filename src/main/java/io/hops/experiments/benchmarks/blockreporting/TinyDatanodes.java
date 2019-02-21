@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector;
 import io.hops.experiments.benchmarks.blockreporting.nn.NameNodeSelectorFactory;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.utils.DFSOperationsUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -41,7 +42,7 @@ public class TinyDatanodes {
 
   private final BlockReportingNameNodeSelector nameNodeSelector;
   private final TinyDatanodesHelper helper;
-  private final BlockReportingWarmUp.Request wReq;
+  private final BMConfiguration bmConf;
   private int nrDatanodes;
   private TinyDatanode[] datanodes;
   private List<String> DNUUIDs = new ArrayList<String>();
@@ -51,11 +52,11 @@ public class TinyDatanodes {
 
   //datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, WarmUpCommand.Request);
   public TinyDatanodes(Configuration conf, int numOfDataNodes, int slaveId,
-                       BenchMarkFileSystemName fsName, BlockReportingWarmUp.Request req)
+                       BenchMarkFileSystemName fsName, BMConfiguration bmConf)
           throws IOException, Exception {
-    this.wReq = req;
+    this.bmConf = bmConf;
 
-    this.helper = new TinyDatanodesHelper(slaveId, wReq.getDatabaseConnection());
+    this.helper = new TinyDatanodesHelper(slaveId, bmConf.getBlockReportingPersistDatabase());
 
     nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
             .getDefaultUri(conf));
@@ -65,7 +66,7 @@ public class TinyDatanodes {
 
   public void createDatanodes(int numOfDataNodes) throws Exception {
 
-    if(wReq.brReadStateFromDisk()){
+    if(bmConf.brReadStateFromDisk()){
       //read the number of datanodes and UUIDs from the stored file
       nrDatanodes = helper.getUUIDs(DNUUIDs, DNStorageUUIDs);
     }else{
@@ -84,7 +85,7 @@ public class TinyDatanodes {
     for (int idx = 0; idx < nrDatanodes; idx++) {
       System.out.println("register DN " + idx);
       datanodes[idx] = new TinyDatanode(nameNodeSelector, idx, 5 /*threds for creation of blks*/, helper,
-              this, DNUUIDs.get(idx), DNStorageUUIDs.get(idx), wReq);
+              this, DNUUIDs.get(idx), DNStorageUUIDs.get(idx), bmConf);
       datanodes[idx].register();
       assert datanodes[idx].getXferAddr().compareTo(prevDNName)
               > 0 : "Data-nodes must be sorted lexicographically.";
@@ -107,7 +108,7 @@ public class TinyDatanodes {
 
   public void generateInput(ExecutorService executor) throws Exception {
     // create data-nodes
-    if (wReq.brReadStateFromDisk()) {
+    if (bmConf.brReadStateFromDisk()) {
       //load from disk
       helper.readDataNodesStateFromDisk(datanodes);
     } else {
@@ -120,7 +121,7 @@ public class TinyDatanodes {
     }
 
     //save to disk
-    if(wReq.writeStateToDisk()) {
+    if(bmConf.brWriteStateToDisk()) {
       helper.writeDataNodesStateToDisk(datanodes, DNUUIDs, DNStorageUUIDs);
     }
   }
@@ -156,7 +157,7 @@ public class TinyDatanodes {
         startTime = System.currentTimeMillis();
       }
 
-      long max = wReq.getBlocksPerReport()*nrDatanodes;
+      long max = bmConf.getBlockReportingNumOfBlocksPerReport()*nrDatanodes;
       double percent = ((double)allBlksCount.get() / (double)(max)) * 100.0;
       long speed = (allBlksCount.get() - lastCount)/5;
       lastCount = allBlksCount.get();

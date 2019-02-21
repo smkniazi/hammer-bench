@@ -16,11 +16,11 @@
  */
 package io.hops.experiments.benchmarks.interleaved;
 
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.utils.BMOperationsUtils;
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.Benchmark;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
-import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.controller.Logger;
@@ -125,7 +125,7 @@ public class InterleavedBenchmark extends Benchmark {
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws IOException, InterruptedException {
-    io.hops.experiments.benchmarks.common.config.Configuration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
+    BMConfiguration config = ((InterleavedBenchmarkCommand.Request) command).getConfig();
 
     duration = config.getInterleavedBmDuration();
     System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
@@ -176,10 +176,10 @@ public class InterleavedBenchmark extends Benchmark {
     private FileSystem dfs;
     private FilePool filePool;
     private InterleavedMultiFaceCoin opCoin;
-    private io.hops.experiments.benchmarks.common.config.Configuration config = null;
+    private BMConfiguration config = null;
     private long lastMsg = System.currentTimeMillis();
 
-    public Worker(io.hops.experiments.benchmarks.common.config.Configuration config) throws IOException {
+    public Worker(BMConfiguration config) throws IOException {
       this.config = config;
       this.lastMsg = System.currentTimeMillis();
     }

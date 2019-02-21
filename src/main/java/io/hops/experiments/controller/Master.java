@@ -24,7 +24,7 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
-import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
@@ -54,13 +54,13 @@ public class Master {
   Set<InetAddress> misbehavingSlaves = new HashSet<InetAddress>();
   Map<InetAddress, SlaveConnection> slavesConnections = new HashMap<InetAddress, SlaveConnection>();
   List<BMResult> results = new ArrayList<BMResult>();
-  Configuration config;
+  BMConfiguration config;
 
   public static void main(String[] argv) throws Exception {
     String configFilePath = "master.properties";
     if (argv.length == 1) {
       if (argv[0].compareToIgnoreCase("help") == 0) {
-        Configuration.printHelp();
+        BMConfiguration.printHelp();
         System.exit(0);
       } else {
         configFilePath = argv[0];
@@ -72,7 +72,7 @@ public class Master {
   public void start(String configFilePath) throws Exception {
     try {
       System.out.println("*** Starting the master ***");
-      config = new Configuration(configFilePath);
+      config = new BMConfiguration(configFilePath);
 
       removeExistingResultsFiles();
       
@@ -302,17 +302,7 @@ public class Master {
               config.getFileSizeDistribution(), config.getAppendFileSize(),
               config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else if (config.getBenchMarkType() == BenchmarkType.BR) {
-      warmUpCommand = new BlockReportingWarmUp.Request(config.getBaseDir(),
-              config.getBlockReportingNumOfBlocksPerReport(),
-              config.getBlockReportingNumOfBlocksPerFile(),
-              config.getBlockReportingNumOfFilesPerDir(),
-              config.getReplicationFactor(),
-              config.getBlockReportingMaxBlockSize(),
-              config.brReadStateFromDisk(),
-              config.brWriteStateToDisk(),
-              config.getBlockReportingPersistDatabase(),
-              config.ignoreLoadBalancer(),
-              config.getNumBuckets());
+      warmUpCommand = new BlockReportingWarmUp.Request(config);
     } else {
       throw new UnsupportedOperationException("Wrong Benchmark type for"
               + " warm up " + config.getBenchMarkType());

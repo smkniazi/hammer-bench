@@ -21,7 +21,7 @@ import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
-import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 
 import java.io.*;
 import java.util.*;
@@ -133,7 +133,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     CompileResults.writeToFile(outpuFolder + "/interleaved.gnuplot", plot, false);
   }
 
-  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, Configuration args) throws FileNotFoundException, IOException, InterruptedException {
+  public static InterleavedBMResults processInterleavedResults(Collection<Object> responses, BMConfiguration args) throws FileNotFoundException, IOException, InterruptedException {
     Map<BenchmarkOperations, double[][]> allOpsPercentiles = new HashMap<BenchmarkOperations, double[][]>();
     System.out.println("Processing the results ");
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();

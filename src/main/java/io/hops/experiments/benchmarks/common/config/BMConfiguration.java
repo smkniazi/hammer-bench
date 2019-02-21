@@ -36,20 +36,20 @@ import java.util.*;
  *
  * @author salman
  */
-public class Configuration implements Serializable {
+public class BMConfiguration implements Serializable {
 
   private List<InetAddress> listOfSlaves = null;
   private List<String> nameNodeList = null;
   private Properties props = null;
 
-  private Configuration() {
+  private BMConfiguration() {
   }
 
   public static void printHelp() {
-    System.out.println("FU");
+    System.out.println("You are doomed");
   }
 
-  public Configuration(String file) throws FileNotFoundException, IOException, SQLException {
+  public BMConfiguration(String file) throws FileNotFoundException, IOException, SQLException {
     props = loadPropFile(file);
     validateArgs();
   }
@@ -320,10 +320,12 @@ public class Configuration implements Serializable {
   }
 
   public boolean brWriteStateToDisk() {
-    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK,
-            ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
+    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK, ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
   }
 
+  public String brWriteStateToDiskToPath() {
+    return getString(ConfigKeys.BR_WRITE_STATE_TO_DISK_TO_PATH, ConfigKeys.BR_WRITE_STATE_TO_DISK_TO_PATH_DEFAULT);
+  }
   public int getBlockReportingMaxTimeBeforeNextReport() {
     return getInt(ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT);
   }

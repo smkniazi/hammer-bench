@@ -20,7 +20,7 @@ import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmarkCommand;
-import io.hops.experiments.benchmarks.common.config.Configuration;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.utils.DFSOperationsUtils;
 
 import java.io.IOException;
@@ -366,7 +366,7 @@ public class RawBMResultAggregator extends Aggregator{
 
   }
 
-  public static RawBMResults processSlaveResponses(Collection<Object> responses, RawBenchmarkCommand.Request request, Configuration args){
+  public static RawBMResults processSlaveResponses(Collection<Object> responses, RawBenchmarkCommand.Request request, BMConfiguration args){
     DescriptiveStatistics successfulOps = new DescriptiveStatistics();
     DescriptiveStatistics failedOps = new DescriptiveStatistics();
     DescriptiveStatistics speed = new DescriptiveStatistics();
