@@ -53,10 +53,9 @@ public class TinyDatanodes {
   public TinyDatanodes(Configuration conf, BMConfiguration bmConf, int slaveID)
           throws Exception {
     this.bmConf = bmConf;
-
-    this.helper = new TinyDatanodesHelper(slaveID, bmConf.getBlockReportingPersistDatabase());
-
-    nameNodeSelector = NameNodeSelectorFactory.getSelector(bmConf.getBenchMarkFileSystemName(), conf, FileSystem
+    this.helper = new TinyDatanodesHelper(bmConf, slaveID);
+    this.nameNodeSelector = NameNodeSelectorFactory.getSelector(bmConf.getBenchMarkFileSystemName(),
+            conf, FileSystem
             .getDefaultUri(conf));
 
     createDatanodes(bmConf.getSlaveNumThreads());

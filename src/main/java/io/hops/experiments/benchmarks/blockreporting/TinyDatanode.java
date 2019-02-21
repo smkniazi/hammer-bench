@@ -40,11 +40,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
@@ -72,26 +70,13 @@ public class TinyDatanode implements Comparable<String> {
   protected NamespaceInfo nsInfo;
   protected DatanodeRegistration dnRegistration;
   protected DatanodeStorage storage; //only one storage
-  protected ArrayList<Block> blocks;
+  protected Queue<Block> blocks;
   protected final int dnIdx;
 
-  //[S] why?
-
-  /**
-   * Return a a 5 digit integer port.
-   * This is necessary in order to provide lexocographic ordering.
-   * Host names are all the same, the ordering goes by port numbers.
-   */
   private int getNodePort(int num) throws IOException {
-    int port = 10000 + num;
-    if (String.valueOf(port).length() > 5) {
-      throw new IOException("Too many data-nodes");
-    }
-    return port;
+    return 10000 + num;
   }
 
-  //datanodes[idx] = new TinyDatanode(nameNodeSelector, idx,
-//                                     5 /*threds for creation of blks*/, helper, this);
   TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int threads,
                TinyDatanodesHelper helper,
                TinyDatanodes tinyDatanodes, String DNUUID, String storageUUID,
@@ -101,7 +86,7 @@ public class TinyDatanode implements Comparable<String> {
     this.dnIdx = dnIdx;
     this.nameNodeSelector = nameNodeSelector;
     this.threads = threads;
-    this.blocks = new ArrayList<Block>(bmConf.getBlockReportingNumOfBlocksPerReport());
+    this.blocks = new ConcurrentLinkedQueue<Block>();
     this.machineName = InetAddress.getLocalHost().getHostName();
     this.helper = helper;
     this.tinyDatanodes = tinyDatanodes;
@@ -153,7 +138,6 @@ public class TinyDatanode implements Comparable<String> {
    */
   void sendHeartbeat() throws Exception {
     // register datanode
-    // TODO:FEDERATION currently a single block pool is supported
     StorageReport[] rep =
             {new StorageReport(storage, false, DF_CAPACITY,
                     DF_USED, DF_CAPACITY - DF_USED, DF_USED)};
@@ -281,7 +265,11 @@ public class TinyDatanode implements Comparable<String> {
   }
 
   void formBlockReport() throws Exception {
-    blockReport = BlockReport.builder(bmConf.getNumBuckets()).addAllAsFinalized(blocks).build();
+    BlockReport.Builder brBuilder = BlockReport.builder(bmConf.getNumBuckets());
+    for(Block blk : blocks) {
+      brBuilder.addAsFinalized(blk);
+    }
+    blockReport = brBuilder.build();
     Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
 
 //    synchronized (nameNodeSelector) {

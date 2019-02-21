@@ -20,6 +20,7 @@ package io.hops.experiments.benchmarks.blockreporting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -28,6 +29,8 @@ import java.io.*;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class TinyDatanodesHelper {
   /*
@@ -39,8 +42,6 @@ public class TinyDatanodesHelper {
 ) ENGINE=ndbcluster DEFAULT CHARSET=latin1;
    */
 
-  private static final String DATANODES_STATE = "/tmp/datanodes.state";
-
   private static final String SQL_INSERT = "INSERT IGNORE INTO " +
       "bench_blockreporting_datanodes (id, dn, data) values ('%d', '%d', '%s')";
 
@@ -49,13 +50,14 @@ public class TinyDatanodesHelper {
 
   private final int slaveId;
   private final MysqlDataSource dataSource;
-
   private DatanodeInfo[] excludedDatanodes = null;
+  private final BMConfiguration bmConf;
 
-  public TinyDatanodesHelper(int slaveId, String databaseConnection) throws SQLException {
+  public TinyDatanodesHelper(BMConfiguration bmConf, int slaveId) throws SQLException {
     this.slaveId = slaveId;
+    this.bmConf = bmConf;
     dataSource = new MysqlDataSource();
-    dataSource.setURL(databaseConnection);
+    dataSource.setURL(bmConf.getBlockReportingPersistDatabase());
     createTable();
   }
 
@@ -133,9 +135,11 @@ public class TinyDatanodesHelper {
     return excludedDatanodes;
   }
 
-  public void writeDataNodesStateToDisk(TinyDatanode[] datanodes, List<String> DNUUIDs,
+  public void writeDataNodesStateToDisk(TinyDatanode[] datanodes,
+                                        List<String> DNUUIDs,
                                         List<String> StorageUUIDs) throws IOException {
-    BufferedWriter writer = new BufferedWriter(new FileWriter(DATANODES_STATE));
+    GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(new File(bmConf.brOnDiskStatePath())));
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));
 
     //number of datanodes
     writer.write(Integer.toString(datanodes.length));
@@ -161,7 +165,8 @@ public class TinyDatanodesHelper {
   }
 
   public void readDataNodesStateFromDisk(TinyDatanode[] datanodes) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
+    GZIPInputStream zip = new GZIPInputStream(new FileInputStream(new File(bmConf.brOnDiskStatePath())));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(zip, "UTF-8"));
     String line = null;
     //ignore the count and UUIDs
     line = reader.readLine();
@@ -177,7 +182,8 @@ public class TinyDatanodesHelper {
   }
 
   public int getUUIDs(List<String> DNUUIDs, List<String> StorageUUIDs) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(DATANODES_STATE));
+    GZIPInputStream zip = new GZIPInputStream(new FileInputStream(new File(bmConf.brOnDiskStatePath())));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(zip, "UTF-8"));
     String line = reader.readLine();
     int count = Integer.parseInt(line);
     for(int i = 0; i < count; i++){

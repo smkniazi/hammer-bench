@@ -323,8 +323,8 @@ public class BMConfiguration implements Serializable {
     return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK, ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
   }
 
-  public String brWriteStateToDiskToPath() {
-    return getString(ConfigKeys.BR_WRITE_STATE_TO_DISK_TO_PATH, ConfigKeys.BR_WRITE_STATE_TO_DISK_TO_PATH_DEFAULT);
+  public String brOnDiskStatePath() {
+    return getString(ConfigKeys.BR_ON_DISK_STATE_PATH, ConfigKeys.BR_ON_DISK_STATE_PATH_DEFAULT);
   }
   public int getBlockReportingMaxTimeBeforeNextReport() {
     return getInt(ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT);

@@ -183,8 +183,8 @@ public class ConfigKeys {
     public static String BR_WRITE_STATE_TO_DISK = "br.write.state.to.disk";
     public static boolean BR_WRITE_STATE_TO_DISK_DEFAULT = false;
 
-    public static String BR_WRITE_STATE_TO_DISK_TO_PATH = "br.write.state.to.disk.to.path";
-    public static String BR_WRITE_STATE_TO_DISK_TO_PATH_DEFAULT = "/tmp/datanodes-state";
+    public static String BR_ON_DISK_STATE_PATH = "br.on.disk.state.path";
+    public static String BR_ON_DISK_STATE_PATH_DEFAULT = "/tmp/datanodes-state.txt.gz";
 
     public static String BR_MAX_TIME_BEFORE_NEXT_REPORT =
         "br.max.time.before.nextreport";
