@@ -47,15 +47,12 @@ public class BlockReportingBenchmark extends Benchmark {
   private DescriptiveStatistics getNewNameNodeElapsedTime = new DescriptiveStatistics();
   private DescriptiveStatistics brElapsedTimes = new DescriptiveStatistics();
   private TinyDatanodes datanodes;
-  private final int slaveId;
-  private final BenchMarkFileSystemName fsName;
   private BMConfiguration bmConf;
+  private final int slaveId ;
 
-  public BlockReportingBenchmark(Configuration conf, int numThreads, int slaveID, BenchMarkFileSystemName fsName) {
-    super(conf, numThreads,fsName);
+  public BlockReportingBenchmark(Configuration conf, BMConfiguration bmConf, int slaveID) {
+    super(conf, bmConf);
     this.slaveId = slaveID;
-    this.fsName = fsName;
-    System.out.println("Num threads are "+numThreads);
   }
 
   @Override
@@ -63,9 +60,8 @@ public class BlockReportingBenchmark extends Benchmark {
           throws Exception {
     try{
     this.bmConf = ((BlockReportingWarmUp.Request) warmUpReq).getBMConf();
+    datanodes = new TinyDatanodes(conf,  bmConf, slaveId);
 
-    datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, bmConf);
-    
     datanodes.leaveSafeMode();
 
     long t = Time.now();
@@ -87,7 +83,7 @@ public class BlockReportingBenchmark extends Benchmark {
             (BlockReportingBenchmarkCommand.Request) command;
 
     List workers = Lists.newArrayList();
-    for (int dn = 0; dn < numThreads; dn++) {
+    for (int dn = 0; dn < bmConf.getSlaveNumThreads(); dn++) {
       workers.add(new Reporter(dn, request
               .getMinTimeBeforeNextReport(), request.getMaxTimeBeforeNextReport()));
     }

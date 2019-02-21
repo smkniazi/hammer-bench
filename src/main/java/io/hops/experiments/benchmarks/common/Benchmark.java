@@ -18,6 +18,7 @@ package io.hops.experiments.benchmarks.common;
 
 import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmark;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmark;
 import io.hops.experiments.benchmarks.rawthroughput.RawBenchmark;
 import io.hops.experiments.controller.Logger;
@@ -39,16 +40,14 @@ import org.apache.hadoop.fs.FileSystem;
 public abstract class Benchmark {
 
   protected final Configuration conf;
-  protected final int numThreads;
   protected final ExecutorService executor;
   protected AtomicInteger threadsWarmedUp = new AtomicInteger(0);
-  private final BenchMarkFileSystemName fsName;
+  protected final BMConfiguration bmConf;
 
-  public Benchmark(Configuration conf, int numThreads, BenchMarkFileSystemName fsName) {
+  public Benchmark(Configuration conf, BMConfiguration bmConf) {
     this.conf = conf;
-    this.numThreads = numThreads;
-    this.executor = Executors.newFixedThreadPool(numThreads);
-    this.fsName = fsName;
+    this.bmConf = bmConf;
+    this.executor = Executors.newFixedThreadPool(bmConf.getSlaveNumThreads());
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
@@ -65,20 +64,15 @@ public abstract class Benchmark {
     return processCommandInternal(command);
   }
   
-  public static Benchmark getBenchmark(Configuration conf, Handshake.Request handShake) {
-    if (handShake.getBenchMarkType() == BenchmarkType.RAW) {
-      return new RawBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-              handShake.getMaxFilesToCreate(), handShake.isFixedDepthTree(), handShake.getTreeDepth(),
-              handShake.isPercentilesEnabled(), handShake.getBenchMarkFileSystemName());
-    } else if (handShake.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
-      return new InterleavedBenchmark(conf, handShake.getNumThreads(), handShake.getDirPerDir(), handShake.getFilesPerDir(),
-               handShake.isFixedDepthTree(), handShake.getTreeDepth(),
-              handShake.isPercentilesEnabled(),handShake.getBenchMarkFileSystemName());
-    } else if (handShake.getBenchMarkType() == BenchmarkType.BR) {
-         return new BlockReportingBenchmark(conf, handShake.getNumThreads(), handShake.getSlaveId(),
-              handShake.getBenchMarkFileSystemName());
+  public static Benchmark getBenchmark(Configuration conf, BMConfiguration bmConf, int slaveID) {
+    if (bmConf.getBenchMarkType() == BenchmarkType.RAW) {
+      return new RawBenchmark(conf, bmConf);
+    } else if (bmConf.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
+      return new InterleavedBenchmark(conf, bmConf);
+    } else if (bmConf.getBenchMarkType() == BenchmarkType.BR) {
+         return new BlockReportingBenchmark(conf, bmConf, slaveID);
     } else {
-      throw new UnsupportedOperationException("Unsupported Benchmark " + handShake.getBenchMarkType());
+      throw new UnsupportedOperationException("Unsupported Benchmark " + bmConf.getBenchMarkType());
     }
   }
   
@@ -88,47 +82,31 @@ public abstract class Benchmark {
     private FileSystem dfs;
     private FilePool filePool;
     private final int filesToCreate;
-    private final short replicationFactor;
-    private final String fileSizeDistribution;
-    private final String baseDir;
-    private final int dirsPerDir;
-    private final int filesPerDir;
-    private final boolean readFilesFromDisk;
-    private final String diskFilesPath;
-    private final boolean fixedDepthTree;
-    private final int treeDepth;
     private final String stage;
+    private final BMConfiguration bmConf;
 
-    public BaseWarmUp(int filesToCreate, short replicationFactor, String fileSizeDistribution,
-            String baseDir, int dirsPerDir, int filesPerDir,
-            boolean fixedDepthTree, int treeDepth, boolean readFilesFromDisk,
-                      String diskFilesPath, String stage) throws IOException {
+    public BaseWarmUp(int filesToCreate, BMConfiguration bmConf,
+                       String stage) throws IOException {
       this.filesToCreate = filesToCreate;
-      this.fileSizeDistribution = fileSizeDistribution;
-      this.replicationFactor = replicationFactor;
-      this.baseDir = baseDir;
-      this.dirsPerDir = dirsPerDir;
-      this.filesPerDir = filesPerDir;
-      this.fixedDepthTree = fixedDepthTree;
-      this.treeDepth = treeDepth;
       this.stage = stage;
-      this.readFilesFromDisk = readFilesFromDisk;
-      this.diskFilesPath = diskFilesPath;
+      this.bmConf = bmConf;
     }
 
     @Override
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
-      filePool = DFSOperationsUtils.getFilePool(conf, baseDir, dirsPerDir,
-              filesPerDir, fixedDepthTree, treeDepth , fileSizeDistribution,
-              readFilesFromDisk, diskFilesPath);
+      filePool = DFSOperationsUtils.getFilePool(conf,
+              bmConf.getBaseDir(), bmConf.getDirPerDir(),
+              bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
+              bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
+              bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
         try {
           filePath = filePool.getFileToCreate();
           DFSOperationsUtils
-                  .createFile(dfs, filePath, replicationFactor, filePool);
+                  .createFile(dfs, filePath, bmConf.getReplicationFactor(), filePool);
           filePool.fileCreationSucceeded(filePath);
           DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();
@@ -139,7 +117,9 @@ public abstract class Benchmark {
       }
       log();
       threadsWarmedUp.incrementAndGet();
-      while(threadsWarmedUp.get() != numThreads){ // this is to ensure that all the threads in the executor service are started during the warmup phase
+      while(threadsWarmedUp.get() != bmConf.getSlaveNumThreads()){ // this is to ensure that all the threads in
+        // the
+        // executor service are started during the warmup phase
         Thread.sleep(100);
       }
 
@@ -149,7 +129,7 @@ public abstract class Benchmark {
 
     private void log() {
       if (Logger.canILog()) {
-        long totalFilesThatWillBeCreated = filesToCreate * numThreads;
+        long totalFilesThatWillBeCreated = filesToCreate * bmConf.getSlaveNumThreads();
         double percent = (filesCreatedInWarmupPhase.doubleValue() / totalFilesThatWillBeCreated) * 100;
         Logger.printMsg(stage+" " + DFSOperationsUtils.round(percent) + "%");
       }
@@ -160,7 +140,7 @@ public abstract class Benchmark {
     FileSystem fs = DFSOperationsUtils.getDFSClient(conf);
     int actualNNCount = 0;
     try {
-      actualNNCount = DFSOperationsUtils.getActiveNameNodesCount(fsName, fs);
+      actualNNCount = DFSOperationsUtils.getActiveNameNodesCount(bmConf.getBenchMarkFileSystemName(), fs);
     } catch (Exception e) {
       Logger.error(e);
     }

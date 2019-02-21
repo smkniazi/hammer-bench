@@ -366,7 +366,7 @@ public class BMConfiguration implements Serializable {
     return getBoolean(ConfigKeys.ENABLE_REMOTE_LOGGING_KEY, ConfigKeys.ENABLE_REMOTE_LOGGING_DEFAULT);
   }
 
-  public int getRemoteLogginPort() {
+  public int getRemoteLoggingPort() {
     return getInt(ConfigKeys.REMOTE_LOGGING_PORT_KEY, ConfigKeys.REMOTE_LOGGING_PORT_DEFAULT);
   }
 

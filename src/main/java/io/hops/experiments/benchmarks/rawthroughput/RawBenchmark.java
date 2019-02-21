@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,7 +16,9 @@
  */
 package io.hops.experiments.benchmarks.rawthroughput;
 
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.utils.BMOperationsUtils;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -46,59 +48,26 @@ public class RawBenchmark extends Benchmark {
   private AtomicInteger failedOps = new AtomicInteger(0);
   private long phaseStartTime;
   private long phaseDurationInMS;
-  private final long maxFilesToCreate;
-  private String baseDir;
-  private short replicationFactor;
-  private String fileSizeDistribution;
-  private long appendSize;
-  private final int dirsPerDir;
-  private final int filesPerDir;
-  private boolean readFilesFromDisk;
-  private String diskFilesPath;
-  private final int treeDepth;
-  private final boolean fixedDepthTree;
-  private final boolean percentilesEnabled;
   private final ArrayList<Long> opsExeTimes = new ArrayList<Long>();
 
-  public RawBenchmark(Configuration conf, int numThreads, int dirsPerDir, 
-          int filesPerDir, long maxFilesToCreate,
-          boolean fixedDepthTree, int treeDepth,
-          boolean percentilesEnabled, BenchMarkFileSystemName fsName) {
-    super(conf, numThreads, fsName);
-    this.dirsPerDir = dirsPerDir;
-    this.filesPerDir = filesPerDir;
-    this.maxFilesToCreate = maxFilesToCreate;
-    this.fixedDepthTree = fixedDepthTree;
-    this.treeDepth = treeDepth;
-    this.percentilesEnabled = percentilesEnabled;
+  public RawBenchmark(Configuration conf, BMConfiguration bmConf) {
+    super(conf, bmConf);
   }
 
   @Override
-  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpCommand)
+  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request cmd)
           throws IOException, InterruptedException {
-    NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
-    this.replicationFactor = namespaceWarmUp.getReplicationFactor();
-    this.fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
-    this.appendSize = namespaceWarmUp.getAppendSize();
-    this.baseDir = namespaceWarmUp.getBaseDir();
-    this.readFilesFromDisk = namespaceWarmUp.isReadFilesFromDisk();
-    this.diskFilesPath = namespaceWarmUp.getDiskFilsPath();
-
     // Warn up is done in two stages.
     // In the first phase all the parent dirs are created
     // and then in the second stage we create the further
     // file/dir in the parent dir.
 
-    if (namespaceWarmUp.getFilesToCreate() > 1) {
+    if (bmConf.getFilesToCreateInWarmUpPhase() > 1) {
       List workers = new ArrayList<BaseWarmUp>();
       // Stage 1
       threadsWarmedUp.set(0);
-      for (int i = 0; i < numThreads; i++) {
-        Callable worker = new BaseWarmUp(1,
-                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
-                "Warming up. Stage1: Creating Parent Dirs. ");
+      for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
+        Callable worker = new BaseWarmUp(1, bmConf, "Warming up. Stage1: Creating Parent Dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -106,17 +75,14 @@ public class RawBenchmark extends Benchmark {
 
       // Stage 2
       threadsWarmedUp.set(0);
-      for (int i = 0; i < numThreads; i++) {
-        Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate() - 1,
-                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth, readFilesFromDisk, diskFilesPath,
+      for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
+        Callable worker = new BaseWarmUp(bmConf.getFilesToCreateInWarmUpPhase() - 1, bmConf,
                 "Warming up. Stage2: Creating files/dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
-      Logger.printMsg("Finished. Warmup Phase. Created ("+numThreads+"*"+namespaceWarmUp.getFilesToCreate()+") = "+
-              (numThreads*namespaceWarmUp.getFilesToCreate())+" files. ");
+      Logger.printMsg("Finished. Warmup Phase. Created (" + bmConf.getSlaveNumThreads() + "*" + bmConf.getFilesToCreateInWarmUpPhase() + ") = " +
+              (bmConf.getSlaveNumThreads() * bmConf.getFilesToCreateInWarmUpPhase()) + " files. ");
       workers.clear();
     }
     return new NamespaceWarmUp.Response();
@@ -128,13 +94,13 @@ public class RawBenchmark extends Benchmark {
     RawBenchmarkCommand.Request request = (RawBenchmarkCommand.Request) command;
     RawBenchmarkCommand.Response response;
     System.out.println("Starting the " + request.getPhase() + " duration " + request.getDurationInMS());
-    response = startTestPhase(request.getPhase(), request.getDurationInMS(), baseDir);
+    response = startTestPhase(request.getPhase(), request.getDurationInMS(), bmConf.getBaseDir());
     return response;
   }
 
   private RawBenchmarkCommand.Response startTestPhase(BenchmarkOperations opType, long duration, String baseDir) throws InterruptedException, UnknownHostException, IOException {
     List workers = new LinkedList<Callable>();
-    for (int i = 0; i < numThreads; i++) {
+    for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
       Callable worker = new Generic(baseDir, opType);
       workers.add(worker);
     }
@@ -145,13 +111,13 @@ public class RawBenchmark extends Benchmark {
     executor.invokeAll(workers);// blocking call
     long phaseFinishTime = System.currentTimeMillis();
     long actualExecutionTime = (phaseFinishTime - phaseStartTime);
-    
+
     double speed = ((double) successfulOps.get() / (double) actualExecutionTime); // p / ms
     speed = speed * 1000;
 
     RawBenchmarkCommand.Response response =
             new RawBenchmarkCommand.Response(opType,
-            actualExecutionTime, successfulOps.get(), failedOps.get(), speed, getAliveNNsCount(), opsExeTimes);
+                    actualExecutionTime, successfulOps.get(), failedOps.get(), speed, getAliveNNsCount(), opsExeTimes);
     return response;
   }
 
@@ -168,14 +134,17 @@ public class RawBenchmark extends Benchmark {
       this.opType = opType;
     }
 
-    Map<Long, Long> stats = new HashMap<Long,Long>();
+    Map<Long, Long> stats = new HashMap<Long, Long>();
+
     @Override
     public Object call() throws Exception {
-      try{
+      try {
         dfs = DFSOperationsUtils.getDFSClient(conf);
-        filePool = DFSOperationsUtils.getFilePool(conf, baseDir,
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,fileSizeDistribution,readFilesFromDisk, diskFilesPath );
-      }catch(Exception e){
+        filePool = DFSOperationsUtils.getFilePool(conf, bmConf.getBaseDir(),
+                bmConf.getDirPerDir(), bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
+                bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
+                bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
+      } catch (Exception e) {
         Logger.error(e);
         e.printStackTrace();
         throw e;
@@ -183,22 +152,22 @@ public class RawBenchmark extends Benchmark {
       while (true) {
         try {
 
-          String path = BMOperationsUtils.getPath(opType,filePool);
+          String path = BMOperationsUtils.getPath(opType, filePool);
 
-          if (path == null){
+          if (path == null) {
             return null;
-          } else if( (System.currentTimeMillis() - phaseStartTime) > phaseDurationInMS){
+          } else if ((System.currentTimeMillis() - phaseStartTime) > phaseDurationInMS) {
             return null;
-          } else if ( opType == BenchmarkOperations.CREATE_FILE &&
-                  maxFilesToCreate < (long)(successfulOps.get() + filesCreatedInWarmupPhase.get())){
+          } else if (opType == BenchmarkOperations.CREATE_FILE &&
+                  bmConf.getRawBmMaxFilesToCreate() < (long) (successfulOps.get() + filesCreatedInWarmupPhase.get())) {
             return null;
-          } else if( opType == BenchmarkOperations.CREATE_FILE &&
-                  readFilesFromDisk && !filePool.hasMoreFilesToWrite()){
+          } else if (opType == BenchmarkOperations.CREATE_FILE &&
+                  bmConf.getReadFilesFromDisk() && !filePool.hasMoreFilesToWrite()) {
             return null;
           }
 
           long fileSize = -1;
-          if(opType == opType.CREATE_FILE){
+          if (opType == opType.CREATE_FILE) {
             /*For logging file size distribution
             synchronized (this) {
               Long count = stats.get(fileSize);
@@ -208,11 +177,12 @@ public class RawBenchmark extends Benchmark {
           }
 
           long time = 0;
-          if(percentilesEnabled) {
+          if (bmConf.isPercentileEnabled()) {
             time = System.nanoTime();
           }
-          BMOperationsUtils.performOp(dfs,opType,filePool,path,replicationFactor, appendSize);
-          if(percentilesEnabled) {
+          BMOperationsUtils.performOp(dfs, opType, filePool, path, bmConf.getReplicationFactor(),
+                  bmConf.getAppendFileSize());
+          if (bmConf.isPercentileEnabled()) {
             time = System.nanoTime() - time;
           }
           logStats(opType, time);
@@ -226,23 +196,23 @@ public class RawBenchmark extends Benchmark {
       }
     }
 
-    private void logStats(BenchmarkOperations type, long time){
-      if(percentilesEnabled) {
-        synchronized (opsExeTimes){
+    private void logStats(BenchmarkOperations type, long time) {
+      if (bmConf.isPercentileEnabled()) {
+        synchronized (opsExeTimes) {
           opsExeTimes.add(time);
         }
       }
       successfulOps.incrementAndGet();
     }
 
-    private void logMessage(){
+    private void logMessage() {
       // Send a log message once every five second.
       // The logger also tires to rate limit the log messages
       // using the canILog() methods. canILog method is synchronized
       // method. Calling it frequently can slightly impact the performance
       // It is better that each thread call the canILog() method only
       // once every five sec
-      if((System.currentTimeMillis() - lastLog) > 5000){
+      if ((System.currentTimeMillis() - lastLog) > 5000) {
         lastLog = System.currentTimeMillis();
         if (Logger.canILog()) {
           Logger.printMsg("Successful " + opType + " ops " + successfulOps.get() + " Failed ops " + failedOps.get() + " Speed: " + DFSOperationsUtils.round(speedPSec(successfulOps, phaseStartTime)));

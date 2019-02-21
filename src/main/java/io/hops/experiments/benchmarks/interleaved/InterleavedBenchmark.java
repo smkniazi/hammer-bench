@@ -53,52 +53,25 @@ public class InterleavedBenchmark extends Benchmark {
   Map<BenchmarkOperations, AtomicLong> operationsStats = new HashMap<BenchmarkOperations, AtomicLong>();
   HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes = new HashMap<BenchmarkOperations, ArrayList<Long>>();
   SynchronizedDescriptiveStatistics avgLatency = new SynchronizedDescriptiveStatistics();
-  private String fileSizeDistribution;
-  private final int dirsPerDir;
-  private final int filesPerDir;
-  private boolean readFilesFromDisk;
-  private String diskFilesPath;
-  private final boolean percentileEnabled;
 
-
-  private final boolean fixedDepthTree;
-  private final int treeDepth;
-
-  public InterleavedBenchmark(Configuration conf, int numThreads,
-                              int inodesPerDir, int filesPerDir,
-                              boolean fixedDepthTree, int treeDepth,
-                              boolean percentileEnabled,
-                              BenchMarkFileSystemName fsName) {
-    super(conf, numThreads, fsName);
-    this.dirsPerDir = inodesPerDir;
-    this.filesPerDir = filesPerDir;
-    this.fixedDepthTree = fixedDepthTree;
-    this.treeDepth = treeDepth;
-    this.percentileEnabled = percentileEnabled;
+  public InterleavedBenchmark(Configuration conf, BMConfiguration bmConf) {
+    super(conf, bmConf);
   }
 
   @Override
-  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUpCommand)
+  protected WarmUpCommand.Response warmUp(WarmUpCommand.Request cmd)
           throws IOException, InterruptedException {
-    NamespaceWarmUp.Request namespaceWarmUp = (NamespaceWarmUp.Request) warmUpCommand;
-    fileSizeDistribution = namespaceWarmUp.getFileSizeDistribution();
-    readFilesFromDisk = namespaceWarmUp.isReadFilesFromDisk();
-    diskFilesPath = namespaceWarmUp.getDiskFilsPath();
     // Warn up is done in two stages.
     // In the first phase all the parent dirs are created
     // and then in the second stage we create the further
     // file/dir in the parent dir.
 
-    if (namespaceWarmUp.getFilesToCreate() > 1) {
+    if (bmConf.getFilesToCreateInWarmUpPhase() > 1) {
       List workers = new ArrayList<BaseWarmUp>();
       // Stage 1
       threadsWarmedUp.set(0);
-      for (int i = 0; i < numThreads; i++) {
-        Callable worker = new BaseWarmUp(1,
-                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
-                readFilesFromDisk, diskFilesPath, "Warming up. Stage1: Creating Parent Dirs. ");
+      for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
+        Callable worker = new BaseWarmUp(1, bmConf, "Warming up. Stage1: Creating Parent Dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
@@ -106,17 +79,14 @@ public class InterleavedBenchmark extends Benchmark {
 
       // Stage 2
       threadsWarmedUp.set(0);
-      for (int i = 0; i < numThreads; i++) {
-        Callable worker = new BaseWarmUp(namespaceWarmUp.getFilesToCreate() - 1,
-                namespaceWarmUp.getReplicationFactor(), namespaceWarmUp
-                .getFileSizeDistribution(), namespaceWarmUp.getBaseDir(),
-                dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
-                readFilesFromDisk, diskFilesPath, "Warming up. Stage2: Creating files/dirs. ");
+      for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
+        Callable worker = new BaseWarmUp(bmConf.getFilesToCreateInWarmUpPhase() - 1,
+                bmConf, "Warming up. Stage2: Creating files/dirs. ");
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
-      Logger.printMsg("Finished. Warmup Phase. Created ("+numThreads+"*"+namespaceWarmUp.getFilesToCreate()+") = "+
-              (numThreads*namespaceWarmUp.getFilesToCreate())+" files. ");
+      Logger.printMsg("Finished. Warmup Phase. Created ("+bmConf.getSlaveNumThreads()+"*"+bmConf.getFilesToCreateInWarmUpPhase()+") = "+
+              (bmConf.getSlaveNumThreads()*bmConf.getFilesToCreateInWarmUpPhase())+" files. ");
       workers.clear();
     }
 
@@ -130,7 +100,7 @@ public class InterleavedBenchmark extends Benchmark {
     duration = config.getInterleavedBmDuration();
     System.out.println("Starting " + command.getBenchMarkType() + " for duration " + duration);
     List workers = new ArrayList<Worker>();
-    for (int i = 0; i < numThreads; i++) {
+    for (int i = 0; i < bmConf.getSlaveNumThreads(); i++) {
       Callable worker = new Worker(config);
       workers.add(worker);
     }
@@ -187,9 +157,10 @@ public class InterleavedBenchmark extends Benchmark {
     @Override
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
-      filePool = DFSOperationsUtils.getFilePool(conf, config.getBaseDir(),
-              dirsPerDir, filesPerDir, fixedDepthTree, treeDepth,
-              fileSizeDistribution, readFilesFromDisk, diskFilesPath);
+      filePool = DFSOperationsUtils.getFilePool(conf, bmConf.getBaseDir(),
+              bmConf.getDirPerDir(), bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
+              bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
+              bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
       opCoin = new InterleavedMultiFaceCoin(config.getInterleavedBmCreateFilesPercentage(),
               config.getInterleavedBmAppendFilePercentage(),
               config.getInterleavedBmReadFilesPercentage(),
@@ -297,7 +268,7 @@ public class InterleavedBenchmark extends Benchmark {
       if (success) {
         operationsCompleted.incrementAndGet();
         avgLatency.addValue(opExeTime);
-        if (percentileEnabled) {
+        if (bmConf.isPercentileEnabled()) {
           synchronized (opsExeTimes) {
             ArrayList<Long> times = opsExeTimes.get(opType);
             if (times == null) {

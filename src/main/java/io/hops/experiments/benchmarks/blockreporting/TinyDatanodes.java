@@ -30,6 +30,7 @@ import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -49,19 +50,16 @@ public class TinyDatanodes {
   private List<String> DNStorageUUIDs = new ArrayList<String>();
   private AtomicInteger allBlksCount = new AtomicInteger(0);
 
-
-  //datanodes = new TinyDatanodes(conf, numThreads, slaveId, fsName, WarmUpCommand.Request);
-  public TinyDatanodes(Configuration conf, int numOfDataNodes, int slaveId,
-                       BenchMarkFileSystemName fsName, BMConfiguration bmConf)
-          throws IOException, Exception {
+  public TinyDatanodes(Configuration conf, BMConfiguration bmConf, int slaveID)
+          throws Exception {
     this.bmConf = bmConf;
 
-    this.helper = new TinyDatanodesHelper(slaveId, bmConf.getBlockReportingPersistDatabase());
+    this.helper = new TinyDatanodesHelper(slaveID, bmConf.getBlockReportingPersistDatabase());
 
-    nameNodeSelector = NameNodeSelectorFactory.getSelector(fsName, conf, FileSystem
+    nameNodeSelector = NameNodeSelectorFactory.getSelector(bmConf.getBenchMarkFileSystemName(), conf, FileSystem
             .getDefaultUri(conf));
 
-    createDatanodes( numOfDataNodes);
+    createDatanodes(bmConf.getSlaveNumThreads());
   }
 
   public void createDatanodes(int numOfDataNodes) throws Exception {

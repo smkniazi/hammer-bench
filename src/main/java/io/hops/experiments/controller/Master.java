@@ -99,7 +99,7 @@ public class Master {
   }
 
   private void startRemoteLogger(int maxSlaves) {
-    Logger.LogListener listener = new Logger.LogListener(config.getRemoteLogginPort(),maxSlaves);
+    Logger.LogListener listener = new Logger.LogListener(config.getRemoteLoggingPort(),maxSlaves);
     Thread thread = new Thread(listener);
     thread.start();
     System.out.println("Logger started.");
@@ -272,15 +272,7 @@ public class Master {
     //send request
     printMasterLogMessages("Starting Hand Shake Protocol");
     prompt();
-    sendHandshakeToAllSlaves(
-            new Handshake.Request(config.getSlaveNumThreads(), config.getFileSizeDistribution(), config.getAppendFileSize(),
-            config.getReplicationFactor(), config.getBenchMarkType(),
-            config.getBaseDir(),
-            config.isEnableRemoteLogging(), config.getRemoteLogginPort(),
-            config.getDirPerDir(),
-            config.getFilesPerDir(), config.getRawBmMaxFilesToCreate(),
-            config.isFixedDepthTree(), config.getTreeDepth(), config.isPercentileEnabled(),
-            config.getBenchMarkFileSystemName(), config.getFsConfig()));
+    sendHandshakeToAllSlaves(new Handshake.Request(config));
     Collection<Object> allResponses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {

@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.benchmarks.common.config.SlaveArgsReader;
 import io.hops.experiments.controller.commands.BenchmarkCommand;
 import io.hops.experiments.controller.commands.Handshake;
@@ -53,8 +54,8 @@ public class Slave {
     private InetAddress masterIP = null;
     private Benchmark benchmark;
     private SlaveArgsReader args;
-    private Handshake.Request handShake = null;
     private Configuration dfsClientConf;
+    private BMConfiguration bmConf;
 
     public void start(String configFilePath) throws Exception {
         args = new SlaveArgsReader(configFilePath);
@@ -68,23 +69,24 @@ public class Slave {
         System.out.println("Waiting for handshake message ");
         Object obj = receiveRequestFromMaster();
 
+        int slaveId = 0;
         if (obj instanceof Handshake.Request) {
-            handShake = (Handshake.Request) obj;
-            if (handShake.isEnableRemoteLogging()) {
+            bmConf = ((Handshake.Request) obj).getBmConf();
+            slaveId = ((Handshake.Request) obj).getSlaveId();
+            if (bmConf.isEnableRemoteLogging()) {
                 Logger.setEnableRemoteLogging(true);
                 Logger.setLoggerIp(masterIP);
-                Logger.setLoggerPort(handShake.getRemoteLoggingPort());
+                Logger.setLoggerPort(bmConf.getRemoteLoggingPort());
             }
             dfsClientConf = new Configuration();
-            for(Object key : handShake.getFsConfig().keySet()){
+            for(Object key : bmConf.getFsConfig().keySet()){
               String keyStr = (String)key;
-              String val = handShake.getFsConfig().getProperty(keyStr);
+              String val = bmConf.getFsConfig().getProperty(keyStr);
               //Logger.printMsg("Client Settings "+keyStr+" --> "+val);
               dfsClientConf.set(keyStr, val);
             }
             
-
-            benchmark = Benchmark.getBenchmark(dfsClientConf, handShake);
+            benchmark = Benchmark.getBenchmark(dfsClientConf, bmConf, slaveId);
 
             sendResponseToMaster(new Handshake.Response());
         } else {
@@ -97,8 +99,8 @@ public class Slave {
             Object obj = receiveRequestFromMaster();
             if (obj instanceof BenchmarkCommand.Request) {
                 BenchmarkCommand.Request command = (BenchmarkCommand.Request) obj;
-                if (!command.getBenchMarkType().equals(handShake.getBenchMarkType())) {
-                    throw new IllegalStateException("BenchMarkType Mismatch. Expecting " + handShake.getBenchMarkType() + " Got: " + command.getBenchMarkType());
+                if (!command.getBenchMarkType().equals(bmConf.getBenchMarkType())) {
+                    throw new IllegalStateException("BenchMarkType Mismatch. Expecting " + bmConf.getBenchMarkType() + " Got: " + command.getBenchMarkType());
                 }
 
                 sendResponseToMaster(benchmark.processCommand(command));

@@ -18,6 +18,7 @@ package io.hops.experiments.controller.commands;
 
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
+import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -31,101 +32,15 @@ public class Handshake implements Serializable {
 
   public static class Request implements Serializable {
 
-    private int slaveId;
-    private final int numThreads;
-    private final String fileSizeDistribution;
-    private final long appendSize;
-    private final short replicationFactor;
-    private BenchmarkType benchMarkType;
-    private String baseDir;
-    private boolean enableRemoteLogging;
-    private int remoteLoggingPort;
-    private final int dirPerDir;
-    private final int filesPerDir;
-    private final long maxFilesToCreate;
-    private final boolean fixedDepthTree;
-    private final int treeDepth;
-    private final BenchMarkFileSystemName benchMarkFileSystemName;
-    private final Properties fsConfig;
-    private final boolean percentilesEnabled;
+    BMConfiguration bmConf;
+    private  int slaveId;
 
-    public Request(int numThreads, String fileSizeDistribution, long appendSize, short replicationFactor,
-            BenchmarkType benchMarkType, String baseDir,
-            boolean enableRemoteLogging, int remoteLoggingPort,
-            int dirPerDir, int filesPerDir,
-            long maxFilesToCreate,
-            boolean fixedDepthTree,
-            int treeDepth, boolean percentilesEnabled,
-            BenchMarkFileSystemName fsName,
-            Properties fsConfig) {
-      this.numThreads = numThreads;
-      this.fileSizeDistribution = fileSizeDistribution;
-      this.appendSize = appendSize;
-      this.benchMarkType = benchMarkType;
-      this.replicationFactor = replicationFactor;
-      this.baseDir = baseDir;
-      this.enableRemoteLogging = enableRemoteLogging;
-      this.remoteLoggingPort = remoteLoggingPort;
-      this.dirPerDir = dirPerDir;
-      this.filesPerDir = filesPerDir;
-      this.maxFilesToCreate = maxFilesToCreate;
-      this.fixedDepthTree = fixedDepthTree;
-      this.treeDepth = treeDepth;
-      this.benchMarkFileSystemName = fsName;
-      this.fsConfig = fsConfig;
-      this.percentilesEnabled = percentilesEnabled;
+    public Request(BMConfiguration bmConf) {
+      this.bmConf = bmConf;
     }
 
-    public Properties getFsConfig() {
-      return fsConfig;
-    }
-
-    public BenchMarkFileSystemName getBenchMarkFileSystemName() {
-      return benchMarkFileSystemName;
-    }
-
-    public boolean isFixedDepthTree() {
-      return fixedDepthTree;
-    }
-
-    public int getTreeDepth() {
-      return treeDepth;
-    }
-
-    public long getMaxFilesToCreate() {
-      return maxFilesToCreate;
-    }
-
-    public int getFilesPerDir() {
-      return filesPerDir;
-    }
-
-    public int getNumThreads() {
-      return numThreads;
-    }
-
-    public String getFileSizeDistribution() {
-      return fileSizeDistribution;
-    }
-
-    public BenchmarkType getBenchMarkType() {
-      return benchMarkType;
-    }
-
-    public short getReplicationFactor() {
-      return replicationFactor;
-    }
-
-    public String getBaseDir() {
-      return baseDir;
-    }
-
-    public boolean isEnableRemoteLogging() {
-      return enableRemoteLogging;
-    }
-
-    public int getRemoteLoggingPort() {
-      return remoteLoggingPort;
+    public BMConfiguration getBmConf() {
+      return bmConf;
     }
 
     public int getSlaveId() {
@@ -135,20 +50,8 @@ public class Handshake implements Serializable {
     public void setSlaveId(int slaveId) {
       this.slaveId = slaveId;
     }
-
-    public long getAppendSize() {
-      return appendSize;
-    }
-
-    public int getDirPerDir() {
-      return dirPerDir;
-    }
-
-    public boolean isPercentilesEnabled() {
-      return percentilesEnabled;
-    }
-
   }
+
   public static class Response implements Serializable {
   }
 }
