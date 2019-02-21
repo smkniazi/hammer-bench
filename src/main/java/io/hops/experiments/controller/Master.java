@@ -217,10 +217,7 @@ public class Master {
   private void startBlockReportingCommander() throws IOException, ClassNotFoundException {
     System.out.println("Starting BlockReporting Benchmark ...");
     prompt();
-    BlockReportingBenchmarkCommand.Request request = new BlockReportingBenchmarkCommand.Request(config
-            .getBlockReportBenchMarkDuration(), config
-            .getBlockReportingMinTimeBeforeNextReport(), config
-            .getBlockReportingMaxTimeBeforeNextReport());
+    BlockReportingBenchmarkCommand.Request request = new BlockReportingBenchmarkCommand.Request();
 
     sendToAllSlaves(request, 0/*delay*/);
 

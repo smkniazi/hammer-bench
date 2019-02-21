@@ -49,7 +49,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSelector.BlockReportingNameNodeHandle;
-import static org.apache.hadoop.hdfs.server.blockmanagement.HashBuckets.HASH_LENGTH;
 
 public class TinyDatanode implements Comparable<String> {
 
@@ -277,8 +276,7 @@ public class TinyDatanode implements Comparable<String> {
 
     //invliadate buckets
     for (int i = 0; i < bmConf.getBRNumInvalidBuckets(); i++){
-      blockReport.getBuckets()[i].setHash(new byte[HASH_LENGTH]);
-
+      blockReport.getBuckets()[i].setHash(new byte[20]);
     }
 
     //do not send blocks of matching bucket to improve on the `wire` performance
