@@ -66,7 +66,7 @@ public class BlockReportingBenchmark extends Benchmark {
     datanodes.leaveSafeMode();
 
     long t = Time.now();
-    datanodes.generateInput(executor);
+    datanodes.generateInput();
     Logger.printMsg("WarmUp done in " + (Time.now() - t) / 1000 + " seconds");
 
     }catch(Exception e){
