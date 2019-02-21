@@ -103,13 +103,13 @@ public class TinyDatanodes {
     return datanodes;
   }
 
-  public void generateInput(ExecutorService executor) throws Exception {
+  public void generateInput() throws Exception {
     // create data-nodes
     if (bmConf.brReadStateFromDisk()) {
       //load from disk
       helper.readDataNodesStateFromDisk(datanodes);
     } else {
-      createFiles(executor);
+      createFiles();
     }
 
     // prepare block reports
@@ -123,7 +123,8 @@ public class TinyDatanodes {
     }
   }
 
-  private void createFiles(ExecutorService executor) throws Exception {
+  private void createFiles() throws Exception {
+    ExecutorService executor;
     List writers = Lists.newArrayList();
 
     for (int idx = 0; idx < nrDatanodes; idx++) {
@@ -133,6 +134,7 @@ public class TinyDatanodes {
     System.out.println("Workers "+writers.size());
     executor  = Executors.newFixedThreadPool(writers.size());
     executor.invokeAll(writers);
+    executor.shutdown();
   }
 
   long[] executeOp(int dnIdx)

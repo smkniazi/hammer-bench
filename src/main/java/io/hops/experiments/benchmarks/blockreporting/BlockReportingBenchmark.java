@@ -30,6 +30,7 @@ import org.apache.hadoop.util.Time;
 
 
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -136,8 +137,10 @@ public class BlockReportingBenchmark extends Benchmark {
                     + DFSOperationsUtils.round(brElapsedTimes.getMax())+"]"
                     );
           }
+        } catch (ClosedByInterruptException e) {
         } catch (InterruptedException e ){
-        } catch (Exception e) {
+        } catch (IOException e) {
+        }  catch (Exception e) {
           failedOps.incrementAndGet();
           System.out.println(e);
           Logger.error(e);
