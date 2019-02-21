@@ -22,7 +22,6 @@ import io.hops.experiments.benchmarks.blockreporting.nn.BlockReportingNameNodeSe
 import io.hops.experiments.benchmarks.common.config.BMConfiguration;
 import io.hops.experiments.controller.Logger;
 import io.hops.experiments.workload.generator.FileNameGenerator;
-import io.hops.metadata.hdfs.entity.HashBucket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.CreateFlag;
@@ -30,7 +29,6 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.*;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
-import org.apache.hadoop.hdfs.server.blockmanagement.HashBuckets;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
 import org.apache.hadoop.hdfs.server.protocol.*;
 import org.apache.hadoop.io.EnumSetWritable;
@@ -42,7 +40,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -277,13 +278,16 @@ public class TinyDatanode implements Comparable<String> {
     //invliadate buckets
     for (int i = 0; i < bmConf.getBRNumInvalidBuckets(); i++){
       blockReport.getBuckets()[i].setHash(new byte[HASH_LENGTH]);
+
     }
 
+    //do not send blocks of matching bucket to improve on the `wire` performance
     if(!bmConf.getBRIncludeBlocks()){
-      
-      blockReport.getBuckets()[i].setHash(new byte[HASH_LENGTH]);
-      ReportedBlock[]
+      for(int i = bmConf.getBRNumInvalidBuckets(); i < bmConf.getNumBuckets();i++){
+        blockReport.getBuckets()[i].setBlocks(new ReportedBlock[0]);
+      }
     }
+
 
     Logger.printMsg("Datanode # " + this.dnIdx + " has generated a block report of size " + blocks.size());
 
