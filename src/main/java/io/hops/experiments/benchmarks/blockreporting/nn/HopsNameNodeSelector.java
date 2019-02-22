@@ -83,4 +83,9 @@ class HopsNameNodeSelector implements BlockReportingNameNodeSelector {
   public Map<String, Integer> getReportsStats() {
     return stats;
   }
+
+  @Override
+  public void closeAllHandles() {
+    hopsNameNodesHandles.closeAllHandles();
+  }
 }

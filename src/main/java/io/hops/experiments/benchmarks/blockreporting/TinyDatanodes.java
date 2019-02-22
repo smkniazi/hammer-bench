@@ -185,4 +185,7 @@ public class TinyDatanodes {
     allBlksCount.incrementAndGet();
   }
 
+  public void stopProxies() {
+    nameNodeSelector.closeAllHandles();
+  }
 }

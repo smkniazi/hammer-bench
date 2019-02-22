@@ -96,6 +96,11 @@ class HadoopNameNodeSelector implements BlockReportingNameNodeSelector{
   }
 
   @Override
+  public void closeAllHandles() {
+
+  }
+
+  @Override
   public Map<String, Integer> getReportsStats() {
     Map<String, Integer> statsMap = Maps.newHashMap();
     statsMap.put(host, stats);

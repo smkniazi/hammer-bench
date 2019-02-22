@@ -13,6 +13,7 @@ import org.apache.hadoop.hdfs.server.blockmanagement.BRLoadBalancingNonLeaderExc
 import org.apache.hadoop.hdfs.server.namenode.NameNode;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeProtocol;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
+import org.apache.hadoop.ipc.RPC;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -57,8 +58,6 @@ public class HopsNameNodesHandles {
   private BlockReportingNameNodeHandle currentLeader;
   private Map<InetSocketAddress, BlockReportingNameNodeHandle> allHandles =
           new HashMap<InetSocketAddress, BlockReportingNameNodeHandle>();
-  private static ThreadLocal<BlockReportingNameNodeHandle> namnodeHandles = new
-          ThreadLocal<BlockReportingNameNodeHandle>();
   private Random rand = new Random(System.currentTimeMillis());
   private SortedActiveNodeList sanl ;
 
@@ -78,10 +77,9 @@ public class HopsNameNodesHandles {
 
     ClientProtocol cp = proxyInfo.getProxy();
     sanl = cp.getActiveNamenodesForClient();
+
     for(ActiveNode an : sanl.getSortedActiveNodes()){
-
       BlockReportingNameNodeHandle brn = getHandle(an.getRpcServerAddressForClients());
-
       allHandles.put(an.getRpcServerAddressForClients(), brn);
 
        if(currentLeader == null){ //first one is the leader
@@ -90,10 +88,9 @@ public class HopsNameNodesHandles {
     }
   }
 
-  private BlockReportingNameNodeHandle getHandle(InetSocketAddress address)
-          throws IOException {
+  private BlockReportingNameNodeHandle getHandle(InetSocketAddress address) throws IOException {
 
-      System.out.println("Creating a handle for " +
+      System.out.println("Creating a proxies for " +
               address.getAddress().getHostName() + ":" + address.getPort());
 
       config.set(ConfigKeys.FS_DEFAULTFS_KEY,
@@ -108,41 +105,15 @@ public class HopsNameNodesHandles {
 
   public synchronized BlockReportingNameNodeHandle getNextNameNodeRPCS()
           throws  IllegalArgumentException, IOException {
-    BlockReportingNameNodeHandle handle = namnodeHandles.get();
-    if(handle == null){
-      System.out.println("Creating new handle ");
-      int idx = rand.nextInt(sanl.size());
-      InetSocketAddress address = sanl.getActiveNodes().get(idx).getRpcServerAddressForClients();
-      config.set(ConfigKeys.FS_DEFAULTFS_KEY,
-              "hdfs://" + address.getAddress().getHostName() + ":" + address.getPort());
-
-      NameNodeProxies.ProxyAndInfo<ClientProtocol> proxyInfo =
-              NameNodeProxies.createProxy(config, FileSystem.getDefaultUri(config),
-                      ClientProtocol.class);
-
-      ClientProtocol cp = proxyInfo.getProxy();
-      DatanodeProtocol dp = new DatanodeProtocolClientSideTranslatorPB(
-              NameNode.getAddress(config), config);
-
-      handle = new BlockReportingNameNodeHandleImpl(cp, dp,
-              NameNode.getAddress(config).getAddress().getHostName());
-      namnodeHandles.set(handle);
-    } else {
-      System.out.println("Returning existing handle. thread "+Thread.currentThread().getId());
-    }
-    return handle;
+    return getRandomHandle();
   }
 
   public BlockReportingNameNodeHandle getNameNodeToReportTo(long blocksCount,
            DatanodeRegistration nodeReg, boolean ignoreBRLoadBalancer)
           throws  IllegalArgumentException, IOException {
 
-
     if(ignoreBRLoadBalancer){
-      // return random node
-      int index = rand.nextInt(allHandles.size());
-      return (BlockReportingNameNodeHandle)allHandles.values().toArray()[index];
-
+      return getRandomHandle();
     } else {
       try {
         DatanodeProtocol datanodeProto = currentLeader.getDataNodeRPC();
@@ -159,8 +130,22 @@ public class HopsNameNodesHandles {
     return currentLeader;
   }
 
+  private BlockReportingNameNodeHandle getRandomHandle(){
+    int index = rand.nextInt(allHandles.size());
+    return (BlockReportingNameNodeHandle)allHandles.values().toArray()[index];
+  }
+
   public Collection<BlockReportingNameNodeHandle> getNamenodes(){
     return allHandles.values();
   }
+
+  public void closeAllHandles() {
+    for(BlockReportingNameNodeHandle h : allHandles.values()){
+      RPC.stopProxy(h.getDataNodeRPC());
+      RPC.stopProxy(h.getRPCHandle());
+      System.out.println("Closed Proxies for "+h.getHostName());
+    }
+  }
+
 }
 

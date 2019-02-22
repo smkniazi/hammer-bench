@@ -89,8 +89,12 @@ public class BlockReportingBenchmark extends Benchmark {
 
     startTime = Time.now();
     executor.invokeAll(workers, bmConf.getBlockReportBenchMarkDuration(), TimeUnit.MILLISECONDS);
+    executor.shutdown();
     double speed = currentSpeed();
     datanodes.printStats();
+    datanodes.stopProxies();
+
+
 
     return new BlockReportingBenchmarkCommand.Response(successfulOps.get(),
             failedOps.get(), speed, brElapsedTimes.getMean(),

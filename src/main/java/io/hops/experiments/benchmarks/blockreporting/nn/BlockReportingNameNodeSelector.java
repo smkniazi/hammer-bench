@@ -45,5 +45,7 @@ public interface BlockReportingNameNodeSelector {
 
   List<BlockReportingNameNodeHandle> getNameNodes() throws Exception;
 
+  public void closeAllHandles();
+
   Map<String, Integer> getReportsStats();
 }
