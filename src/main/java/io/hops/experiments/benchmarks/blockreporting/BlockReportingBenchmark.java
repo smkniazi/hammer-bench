@@ -78,7 +78,7 @@ public class BlockReportingBenchmark extends Benchmark {
 
   @Override
   protected BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command)
-          throws IOException, InterruptedException {
+          throws Exception {
 
     List workers = Lists.newArrayList();
     for (int dn = 0; dn < bmConf.getSlaveNumThreads(); dn++) {
@@ -94,11 +94,9 @@ public class BlockReportingBenchmark extends Benchmark {
     datanodes.printStats();
     datanodes.stopProxies();
 
-
-
     return new BlockReportingBenchmarkCommand.Response(successfulOps.get(),
             failedOps.get(), speed, brElapsedTimes.getMean(),
-            getNewNameNodeElapsedTime.getMean(),getAliveNNsCount());
+            getNewNameNodeElapsedTime.getMean(),datanodes.getNNCount());
   }
 
   private class Reporter implements Callable {

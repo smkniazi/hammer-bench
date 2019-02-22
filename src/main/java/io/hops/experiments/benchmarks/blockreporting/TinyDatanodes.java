@@ -185,6 +185,10 @@ public class TinyDatanodes {
     allBlksCount.incrementAndGet();
   }
 
+  public int getNNCount() throws Exception {
+    return nameNodeSelector.getNameNodes().size();
+  }
+
   public void stopProxies() {
     nameNodeSelector.closeAllHandles();
   }
