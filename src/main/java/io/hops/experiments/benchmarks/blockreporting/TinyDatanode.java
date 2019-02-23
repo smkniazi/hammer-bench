@@ -59,7 +59,6 @@ public class TinyDatanode implements Comparable<String> {
 
 
   private final BlockReportingNameNodeSelector nameNodeSelector;
-  private final int threads;
   private final String machineName;
   private final AtomicInteger successfulBlksCreated = new AtomicInteger(0);
   private final AtomicInteger failedOps = new AtomicInteger(0);
@@ -80,7 +79,7 @@ public class TinyDatanode implements Comparable<String> {
     return 10000 + num;
   }
 
-  TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx, int threads,
+  TinyDatanode(BlockReportingNameNodeSelector nameNodeSelector, int dnIdx,
                TinyDatanodesHelper helper,
                TinyDatanodes tinyDatanodes, String DNUUID, String storageUUID,
                BMConfiguration bmConf)
@@ -88,7 +87,6 @@ public class TinyDatanode implements Comparable<String> {
     this.bmConf = bmConf;
     this.dnIdx = dnIdx;
     this.nameNodeSelector = nameNodeSelector;
-    this.threads = threads;
     this.blocks = new ConcurrentLinkedQueue<Block>();
     this.machineName = InetAddress.getLocalHost().getHostName();
     this.helper = helper;
@@ -162,7 +160,7 @@ public class TinyDatanode implements Comparable<String> {
 
   public List createWriterThreads() throws Exception {
     List writers = Lists.newArrayList();
-    for (int idx = 0; idx < threads; idx++) {
+    for (int idx = 0; idx < bmConf.getBRWarmupPhaseThreadsPerDN(); idx++) {
       writers.add(new Writer(idx, nameNodeSelector));
     }
     return writers;

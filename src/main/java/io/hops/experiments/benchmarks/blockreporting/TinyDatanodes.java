@@ -81,7 +81,7 @@ public class TinyDatanodes {
     String prevDNName = "";
     for (int idx = 0; idx < nrDatanodes; idx++) {
       System.out.println("register DN " + idx);
-      datanodes[idx] = new TinyDatanode(nameNodeSelector, idx, 5 /*threds for creation of blks*/, helper,
+      datanodes[idx] = new TinyDatanode(nameNodeSelector, idx, helper,
               this, DNUUIDs.get(idx), DNStorageUUIDs.get(idx), bmConf);
       datanodes[idx].register();
       assert datanodes[idx].getXferAddr().compareTo(prevDNName)

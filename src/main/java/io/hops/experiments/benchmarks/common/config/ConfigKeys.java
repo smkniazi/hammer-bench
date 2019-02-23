@@ -189,6 +189,9 @@ public class ConfigKeys {
     public static String BR_INCLUDE_BLOCKS_KEY = "br.include.blocks";
     public static boolean BR_INCLUDE_BLOCKS_DEFAULT = true;
 
+    public static String BR_WARM_UP_PHASE_THREADS_PER_DN_KEY = "br.warmup.phase.threads.per.dn";
+    public static int BR_WARM_UP_PHASE_THREADS_PER_DN_DEFAULT = 5;
+
     public static String BR_ON_DISK_STATE_PATH_KEY = "br.on.disk.state.path";
     public static String BR_ON_DISK_STATE_PATH_DEFAULT = "/tmp/datanodes-state.txt.gz";
 

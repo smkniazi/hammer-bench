@@ -22,6 +22,7 @@ import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.utils.DFSOperationsUtils;
+import org.apache.hadoop.hdfs.DFSClient;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -338,6 +339,11 @@ public class BMConfiguration implements Serializable {
 
   public boolean getBRIncludeBlocks() {
     return getBoolean(ConfigKeys.BR_INCLUDE_BLOCKS_KEY, ConfigKeys.BR_INCLUDE_BLOCKS_DEFAULT);
+  }
+
+  public int getBRWarmupPhaseThreadsPerDN(){
+    return getInt(ConfigKeys.BR_WARM_UP_PHASE_THREADS_PER_DN_KEY,
+            ConfigKeys.BR_WARM_UP_PHASE_THREADS_PER_DN_DEFAULT) ;
   }
 
   public int getBlockReportingMaxTimeBeforeNextReport() {
