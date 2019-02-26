@@ -236,6 +236,7 @@ public class TinyDatanode implements Comparable<String> {
           loc = nameNodeProto.addBlock(fileName, clientName, prevBlock, helper.getExcludedDatanodes(),
                   fileID, new String[0]);
           prevBlock = loc.getBlock();
+          prevBlock.setNumBytes(bmConf.getBlockReportingMaxBlockSize());
           for (DatanodeInfo dnInfo : loc.getLocations()) {
 
             int dnIdx = Arrays.binarySearch(tinyDatanodes.getAllDatanodes(), dnInfo.getXferAddr());
