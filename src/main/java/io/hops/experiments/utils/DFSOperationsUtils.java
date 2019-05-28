@@ -38,7 +38,7 @@ import io.hops.experiments.workload.generator.FileTreeGenerator;
 import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class DFSOperationsUtils {
-
+    private static final boolean READ_WHOLE_FILE = true;
     private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
@@ -119,7 +119,7 @@ public class DFSOperationsUtils {
             byte b;
             do{
                 b = in.readByte();
-            }while(false);
+            } while(READ_WHOLE_FILE);
         }catch (EOFException e){
         }finally {
             in.close();
