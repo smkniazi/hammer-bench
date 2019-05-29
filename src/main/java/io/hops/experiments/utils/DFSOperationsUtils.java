@@ -38,7 +38,9 @@ import io.hops.experiments.workload.generator.FileTreeGenerator;
 import io.hops.experiments.workload.generator.FixeDepthFileTreeGenerator;
 
 public class DFSOperationsUtils {
+    // TODO: move to ConfigKeys
     private static final boolean READ_WHOLE_FILE = true;
+    
     private static final boolean SERVER_LESS_MODE=false; //only for testing. If enabled then the clients will not
     private static Random rand = new Random(System.currentTimeMillis());
                                                         // contact NNs
@@ -116,12 +118,19 @@ public class DFSOperationsUtils {
 
         FSDataInputStream in = dfs.open(new Path(pathStr));
         try {
-            byte b;
-            do{
-                b = in.readByte();
-            } while(READ_WHOLE_FILE);
-        }catch (EOFException e){
-        }finally {
+            if (READ_WHOLE_FILE) {
+                // read file in 64 KB chunks
+                byte[] buffer  = new byte[64*1024];
+                int read = 0;
+                do {
+                    read = in.read(buffer);
+                } while (read>0);    
+            } else {
+                // just open file and read a byte
+                in.readByte();
+            }
+        } catch (EOFException e) {
+        } finally {
             in.close();
         }
     }
