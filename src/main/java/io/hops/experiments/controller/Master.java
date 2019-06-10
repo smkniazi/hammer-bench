@@ -260,7 +260,7 @@ public class Master {
     sendToAllSlaves(request, 0/*delay*/);
 
     Thread.sleep(config.getInterleavedBmDuration());
-    Collection<Object> responses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
+    Collection<Object> responses = receiveFromAllSlaves(120 * 1000 /*sec wait*/);
     InterleavedBMResults result = InterleavedBMResultsAggregator.processInterleavedResults(responses, config);
     printMasterResultMessages(result);
   }
@@ -270,7 +270,7 @@ public class Master {
     printMasterLogMessages("Starting Hand Shake Protocol");
     prompt();
     sendHandshakeToAllSlaves(new Handshake.Request(config));
-    Collection<Object> allResponses = receiveFromAllSlaves(60 * 1000 /*sec wait*/);
+    Collection<Object> allResponses = receiveFromAllSlaves(120 * 1000 /*sec wait*/);
 
     for (Object response : allResponses) {
       if (!(response instanceof Handshake.Response)) {
@@ -318,7 +318,8 @@ public class Master {
 
     sendToAllSlaves(request,0/*delay*/);
 
-    Collection<Object> responses = receiveFromAllSlaves((int) (request.getDurationInMS() + 10 * 1000)/*sec wait*/);
+    Collection<Object> responses =
+            receiveFromAllSlaves((int) (request.getDurationInMS() + 120 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);
