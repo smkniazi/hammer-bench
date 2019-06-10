@@ -30,6 +30,7 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.*;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
+import org.apache.hadoop.hdfs.server.datanode.FinalizedReplica;
 import org.apache.hadoop.hdfs.server.protocol.*;
 import org.apache.hadoop.io.EnumSetWritable;
 import org.apache.hadoop.net.DNS;
@@ -40,10 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -146,7 +144,8 @@ public class TinyDatanode implements Comparable<String> {
     List<BlockReportingNameNodeHandle> namenodes = nameNodeSelector
             .getNameNodes();
     for (BlockReportingNameNodeHandle nn : namenodes) {
-      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep, 0, 0, 0, 0, 0)
+      DatanodeCommand[] cmds = nn.getDataNodeRPC().sendHeartbeat(dnRegistration, rep, 0, 0, 0, 0,
+              0, null)
               .getCommands();
       if (cmds != null) {
         for (DatanodeCommand cmd : cmds) {
@@ -269,7 +268,7 @@ public class TinyDatanode implements Comparable<String> {
   void formBlockReport() throws Exception {
     BlockReport.Builder brBuilder = BlockReport.builder(bmConf.getNumBuckets());
     for (Block blk : blocks) {
-      brBuilder.addAsFinalized(blk);
+      brBuilder.add(new FinalizedReplica(blk, null, null));
     }
     blockReport = brBuilder.build();
 
@@ -281,7 +280,7 @@ public class TinyDatanode implements Comparable<String> {
     //do not send blocks of matching bucket to improve on the `wire` performance
     if(!bmConf.getBRIncludeBlocks()){
       for(int i = bmConf.getBRNumInvalidBuckets(); i < bmConf.getNumBuckets();i++){
-        blockReport.getBuckets()[i].setBlocks(new ReportedBlock[0]);
+        blockReport.getBuckets()[i].setBlocks(BlockListAsLongs.EMPTY);
       }
     }
 
@@ -329,7 +328,7 @@ public class TinyDatanode implements Comparable<String> {
     blockReport(nameNodeToReportTo, blocksReport);
 
     if (!bmConf.ignoreLoadBalancer()) {
-      nameNodeToReportTo.blockReportCompleted(dnRegistration);
+      nameNodeToReportTo.blockReportCompleted(dnRegistration,  new DatanodeStorage[]{storage});
     }
 
     long end = Time.now();
@@ -349,8 +348,23 @@ public class TinyDatanode implements Comparable<String> {
                            BlockReport blocksReport) throws IOException {
     StorageBlockReport[] report =
             {new StorageBlockReport(storage, blocksReport)};
+
+    long reportId = generateUniqueBlockReportId();
     nameNodeToReportTo.blockReport(dnRegistration, nsInfo.getBlockPoolID(),
-            report);
+            report, new BlockReportContext(1, 0, reportId));
+  }
+
+  long prevBlockReportId = 0;
+  Random rand = new Random(System.currentTimeMillis());
+  private long generateUniqueBlockReportId() {
+    // Initialize the block report ID the first time through.
+    // Note that 0 is used on the NN to indicate "uninitialized", so we should
+    // not send a 0 value ourselves.
+    prevBlockReportId++;
+    while (prevBlockReportId == 0) {
+      prevBlockReportId = rand.nextLong();
+    }
+    return prevBlockReportId;
   }
 
   @Override
