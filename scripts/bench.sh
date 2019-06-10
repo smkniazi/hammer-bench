@@ -17,7 +17,7 @@ exp_drop_create_schema="$DIR/internals/drop-create-schema.sh"
 run_nmon_script="$DIR/internals/run-nmon.sh"
 stop_nmon_script="$DIR/internals/stop-and-collect-nmon.sh"
 
-kill_NNs=true
+kill_NNs=false
 randomize_NNs_list=true
 
 #############################################################################################################################
