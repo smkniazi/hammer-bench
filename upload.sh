@@ -1,6 +1,5 @@
 #!/bin/bash
 cd ..
 tar zcf hopsbench.tgz hammer-bench
-scp hopsbench.tgz glassfish@snurran.sics.se:/var/www/hops
+cp hopsbench.tgz ~/code/hops/hopsfs-cloud-dist/ 
 rm hopsbench.tgz
-cd HDFS-Distributed-BenchMark
