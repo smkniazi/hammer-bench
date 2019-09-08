@@ -328,7 +328,8 @@ public class TinyDatanode implements Comparable<String> {
     blockReport(nameNodeToReportTo, blocksReport);
 
     if (!bmConf.ignoreLoadBalancer()) {
-      nameNodeToReportTo.blockReportCompleted(dnRegistration,  new DatanodeStorage[]{storage});
+      nameNodeToReportTo.blockReportCompleted(dnRegistration,  new DatanodeStorage[]{storage},
+              true);
     }
 
     long end = Time.now();
