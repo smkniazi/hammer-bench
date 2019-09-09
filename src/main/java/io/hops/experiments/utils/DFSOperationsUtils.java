@@ -116,10 +116,10 @@ public class DFSOperationsUtils {
 
         FSDataInputStream in = dfs.open(new Path(pathStr));
         try {
-            byte b;
+            byte buffer[] = new byte[1024*1024];
             do{
-                b = in.readByte();
-            }while(false);
+                in.read(buffer);
+            }while(true);
         }catch (EOFException e){
         }finally {
             in.close();
