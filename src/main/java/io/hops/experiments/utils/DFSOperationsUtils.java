@@ -109,17 +109,18 @@ public class DFSOperationsUtils {
     }
 
     public static void readFile(FileSystem dfs, String pathStr) throws IOException {
-        if(SERVER_LESS_MODE){
+        if (SERVER_LESS_MODE) {
             serverLessModeRandomWait();
             return;
         }
 
+        byte[] buf = new byte[1024 * 1024];
         FSDataInputStream in = dfs.open(new Path(pathStr));
+        int read;
         try {
-            byte buffer[] = new byte[1024*1024];
-            do{
-                in.read(buffer);
-            }while(true);
+            while ((read = in.read(buf)) > -1) {
+
+            }
         }catch (EOFException e){
         }finally {
             in.close();
