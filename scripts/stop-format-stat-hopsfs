@@ -1,0 +1,11 @@
+#!/bin/bash
+set -x
+
+sudo systemctl stop namenode
+sudo systemctl stop datanode
+hdfs namenode -format
+sudo rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/cloud/*
+sudo rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/disk/*
+sudo rm -fr /mnt/nvme_ssd0/hops/hadoop/logs/*
+sudo systemctl start namenode
+sudo systemctl start datanode
