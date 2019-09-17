@@ -1,11 +1,12 @@
 #!/bin/bash
 set -x
 
-sudo systemctl stop namenode
-sudo systemctl stop datanode
+sudo -i systemctl stop namenode
+sudo -i systemctl stop datanode
 hdfs namenode -format
-sudo rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/cloud/*
-sudo rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/disk/*
-sudo rm -fr /mnt/nvme_ssd0/hops/hadoop/logs/*
-sudo systemctl start namenode
-sudo systemctl start datanode
+sudo -i rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/cloud/*
+sudo -i rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/disk/*
+sudo -i rm /mnt/nvme_ssd0/hops/hadoop/logs/*
+sudo -i systemctl start namenode
+sudo -i systemctl start datanode
+./set-hdfs-storage-policy.sh / CLOUD
