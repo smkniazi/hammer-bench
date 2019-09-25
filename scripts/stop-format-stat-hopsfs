@@ -9,5 +9,5 @@ sudo -i rm -fr /mnt/nvme_ssd0/hops/hopsdata/hdfs/dn/disk/*
 sudo -i rm /mnt/nvme_ssd0/hops/hadoop/logs/*
 sudo -i systemctl start namenode
 sudo -i systemctl start datanode
-./set-hdfs-storage-policy.sh / CLOUD
+#./set-hdfs-storage-policy.sh / CLOUD
 systemctl status namenode datanode
