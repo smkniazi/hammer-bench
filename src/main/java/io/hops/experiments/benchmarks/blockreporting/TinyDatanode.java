@@ -201,7 +201,8 @@ public class TinyDatanode implements Comparable<String> {
             String fileName = nameGenerator.getNextFileName("br");
             HdfsFileStatus status = nameNodeProto.create(fileName, FsPermission.getDefault(), clientName,
                     new EnumSetWritable<CreateFlag>(EnumSet.of(CreateFlag.CREATE, CreateFlag.CREATE)),
-                    true, (short) bmConf.getReplicationFactor(), bmConf.getBlockReportingMaxBlockSize());
+                    true, (short) bmConf.getReplicationFactor(),
+                    bmConf.getBlockReportingMaxBlockSize(), null);
             ExtendedBlock lastBlock = addBlocks(nameNodeProto, datanodeProto, fileName, clientName,
                     status.getFileId());
             nameNodeProto.complete(fileName, clientName, lastBlock, status.getFileId(), null);
