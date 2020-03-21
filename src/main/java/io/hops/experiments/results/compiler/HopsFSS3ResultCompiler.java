@@ -38,12 +38,18 @@ public class HopsFSS3ResultCompiler {
   public static void main(String[] args) throws Exception {
     File baseDir = new File("/Volumes/Data/src/hops-papers/hopsfs/hopsfs-s3" +
         "/results");
-    
+    //processRaw(baseDir);
+    processPercentiles(baseDir);
+    System.exit(0);
+  }
+  
+  
+  private static void processRaw(File baseDir) throws Exception{
     File hopsfsDir = new File(baseDir,"hopsfs");
     File S3Dir = new File(baseDir,"S3/5-nodes");
   
     Map<String, Map<BenchmarkOperations, Double>> s3Results = processS3(S3Dir);
-    
+  
     Map<String, Map<BenchmarkOperations, RawAggregate>> hopsfsWithSmallFiles
         = process(new File(hopsfsDir, "baseline/withdata-small-files-enabled"));
   
@@ -59,7 +65,7 @@ public class HopsFSS3ResultCompiler {
     List<Map<String, Map<BenchmarkOperations, RawAggregate>>> results =
         Arrays.asList(hopsfsNoSmallFiles, hopsfsWithSmallFiles,
             hopsfsS3WithNoCache, hopsfsS3WithCache);
-    
+  
     StringBuffer sbRead = new StringBuffer();
     StringBuffer sbWrite = new StringBuffer();
     sbRead.append("#data S3 HopsFS-no-sm HopsFS-sm HopsFS-S3-no-c " +
@@ -70,7 +76,7 @@ public class HopsFSS3ResultCompiler {
     for(String datapoint : DATAPOINTS){
       sbRead.append(datapoint.toUpperCase().replaceAll("-", "") + " ");
       sbWrite.append(datapoint.toUpperCase().replaceAll("-", "") + " ");
-  
+    
       Map<BenchmarkOperations, Double> s3Data = s3Results.get(datapoint);
       if(s3Data != null){
         sbWrite.append(s3Data.get(BenchmarkOperations.CREATE_FILE) + " ");
@@ -79,7 +85,7 @@ public class HopsFSS3ResultCompiler {
         sbWrite.append("- ");
         sbRead.append("- ");
       }
-      
+    
       for(Map<String, Map<BenchmarkOperations, RawAggregate>> result : results){
         Map<BenchmarkOperations, RawAggregate> aggMap = result.get(datapoint);
         if(aggMap != null){
@@ -93,13 +99,13 @@ public class HopsFSS3ResultCompiler {
       sbRead.append("\n");
       sbWrite.append("\n");
     }
-    
+  
     System.out.println("READ.dat");
     System.out.println(sbRead.toString());
   
     System.out.println();
     System.out.println();
-    
+  
     System.out.println("Write.dat");
     System.out.println(sbWrite.toString());
   }
@@ -174,5 +180,29 @@ public class HopsFSS3ResultCompiler {
       }
     }
     return results;
+  }
+  
+  private static void processPercentiles(File baseDir) throws Exception{
+    File percentilesDir = new File(baseDir, "hopsfs/percentiles");
+    List<String> subdirs = Arrays.asList("hopsfs-base", "hopsfs-s3-cache" +
+        "-enabled");
+    List<String> opDirs = Arrays.asList("read-op", "write-op");
+    for(String s : subdirs){
+      for(String op: opDirs){
+        File dir = new File(percentilesDir, s + "/" + op);
+        File[] exps = dir.listFiles();
+        for(File exp : exps){
+          if(exp.getName().startsWith(".")){
+            continue;
+          }
+          File source = new File(exp, "run_1");
+          File dst =new File(exp, "out");
+          dst.mkdirs();
+          System.out.println("Calculate percentiles for " + exp);
+          new CalculatePercentiles().doShit(source.getAbsolutePath(), dst.getAbsolutePath(),
+              exp.getName(), 5);
+        }
+      }
+    }
   }
 }

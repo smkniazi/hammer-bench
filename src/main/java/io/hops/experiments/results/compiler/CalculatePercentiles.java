@@ -42,7 +42,7 @@ public class CalculatePercentiles {
     new CalculatePercentiles().doShit(argv[0], argv[1], argv[2], Integer.parseInt(argv[3]));
   }
   
-  private void doShit(String src, String dst, String prefix, int noOfThreads) throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException {
+  public void doShit(String src, String dst, String prefix, int noOfThreads) throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException {
     this.executor = Executors.newFixedThreadPool(noOfThreads);
     List<File> files = CompileResults.findFiles(src, ConfigKeys.RAW_RESPONSE_FILE_EXT);
     List<InterleavedBenchmarkCommand.Response> responses = new ArrayList<InterleavedBenchmarkCommand.Response>();
@@ -72,7 +72,7 @@ public class CalculatePercentiles {
     }
     System.out.println("Starting to process raw data ");
     processResponses(responses, dst , prefix );
-    System.exit(0);
+    //System.exit(0);
   }
 
   private void processResponses(List<InterleavedBenchmarkCommand.Response> responses, String path, String workloadName) throws IOException, InterruptedException {
@@ -128,12 +128,16 @@ public class CalculatePercentiles {
           workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
         }*/
   
-        workers.add(new CalcPercentiles(percentileMap, toDouble, 50));
+        for (double percen = 1; percen <= 100.0; percen += 1) {
+          workers.add(new CalcPercentiles(percentileMap, toDouble, percen));
+        }
+        
+       /* workers.add(new CalcPercentiles(percentileMap, toDouble, 50));
         workers.add(new CalcPercentiles(percentileMap, toDouble, 90));
         workers.add(new CalcPercentiles(percentileMap, toDouble, 99));
         workers.add(new CalcPercentiles(percentileMap, toDouble, 99.9));
         workers.add(new CalcPercentiles(percentileMap, toDouble, 99.99));
-        workers.add(new CalcPercentiles(percentileMap, toDouble, 99.999));
+        workers.add(new CalcPercentiles(percentileMap, toDouble, 99.999));*/
         executor.invokeAll(workers); //block untill all points are calculated
 
         allOpsPercentiles.put(opType, percentileMap);
