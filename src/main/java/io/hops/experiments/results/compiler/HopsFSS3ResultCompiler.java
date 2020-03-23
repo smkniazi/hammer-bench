@@ -20,16 +20,25 @@ import com.google.common.io.Files;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class HopsFSS3ResultCompiler {
   final static String[] DATAPOINTS = {"1-kb", "8-kb", "64-kb", "128-kb", "256-kb",
@@ -38,8 +47,9 @@ public class HopsFSS3ResultCompiler {
   public static void main(String[] args) throws Exception {
     File baseDir = new File("/Volumes/Data/src/hops-papers/hopsfs/hopsfs-s3" +
         "/results");
-    processRaw(baseDir);
+    //processRaw(baseDir);
     //processPercentiles(baseDir);
+    processS3Percentile(baseDir);
     System.exit(0);
   }
   
@@ -226,4 +236,90 @@ public class HopsFSS3ResultCompiler {
       }
     }
   }
+  
+  private static void processS3Percentile(File baseDir) throws Exception{
+    File s3Dir = new File(baseDir, "S3/latency");
+    ExecutorService executor = Executors.newFixedThreadPool(20);
+    for(String datapoint : DATAPOINTS){
+      File runsDir = new File(s3Dir, datapoint);
+      if(runsDir.exists()){
+        System.out.println("process " + runsDir);
+        File out = new File(runsDir, "out");
+        out.mkdirs();
+        processS3Percentile(executor, runsDir, "GET.percentile", out);
+        processS3Percentile(executor, runsDir, "PUT.percentile", out);
+      }
+    }
+    executor.shutdown();
+  }
+  
+  
+  private static void processS3Percentile(ExecutorService executor,File dir,
+      String suffix, File out) throws Exception{
+    List<File> runs =
+        CompileResults.findFiles(dir.getAbsolutePath(),
+            suffix);
+    
+    if(runs.size() != 5){
+      throw new IllegalArgumentException("There should 5 " + suffix + "files");
+    }
+    
+    List<Double> values = new ArrayList<>();
+    for(File run : runs){
+      List<String> lines = Files.readLines(run, Charset.defaultCharset());
+      List<Double> lv =
+          lines.stream().map(Double::parseDouble).collect(Collectors.toList());
+      values.addAll(lv);
+    }
+  
+    double[] valuesArr = values.stream().mapToDouble(d -> d).toArray();
+    
+    List workers = new ArrayList<CalcPercentiles>();
+    Map<Double,Double> percentileMap = new ConcurrentHashMap<Double,Double>();
+    
+    for (double percen = 1; percen <= 100.0; percen += 1) {
+      workers.add(new CalcPercentiles(percentileMap, valuesArr, percen));
+    }
+  
+    executor.invokeAll(workers);
+  
+    StringBuffer sb = new StringBuffer();
+    sb.append("#percentitle milisec\n");
+    sb.append("0 0\n");
+    
+    for (double percen = 1; percen <= 100.0; percen += 1) {
+      sb.append(percen +" " + percentileMap.get(percen) + " \n");
+    }
+    
+    FileWriter writer = new FileWriter(new File(out, suffix + ".dat"), false);
+    writer.write(sb.toString());
+    writer.close();
+  }
+  
+   static class CalcPercentiles implements Callable {
+    
+    final double[] data;
+    final double point;
+    final  Map<Double,Double> values;
+    CalcPercentiles(Map<Double,Double> values, double[] data, double point){
+      this.data = data;
+      this.point = point;
+      this.values= values;
+    }
+    
+    @Override
+    public Object call() throws Exception {
+      Percentile p = new Percentile();
+      double value = p.evaluate(data, point);
+      if(values.get(point) == null){
+        values.put(point, value);
+        System.out.println(" Percentile " + point + " Value: " + value+" ms ");
+      }else{
+        throw new IllegalStateException("Don't calculate same data point twice");
+      }
+      return null;
+    }
+  }
+  
+  
 }
