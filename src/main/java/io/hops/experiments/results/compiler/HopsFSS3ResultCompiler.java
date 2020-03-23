@@ -38,15 +38,15 @@ public class HopsFSS3ResultCompiler {
   public static void main(String[] args) throws Exception {
     File baseDir = new File("/Volumes/Data/src/hops-papers/hopsfs/hopsfs-s3" +
         "/results");
-    //processRaw(baseDir);
-    processPercentiles(baseDir);
+    processRaw(baseDir);
+    //processPercentiles(baseDir);
     System.exit(0);
   }
   
   
   private static void processRaw(File baseDir) throws Exception{
     File hopsfsDir = new File(baseDir,"hopsfs");
-    File S3Dir = new File(baseDir,"S3/5-nodes");
+    File S3Dir = new File(baseDir,"S3/throughput");
   
     Map<String, Map<BenchmarkOperations, Double>> s3Results = processS3(S3Dir);
   
@@ -152,25 +152,46 @@ public class HopsFSS3ResultCompiler {
   private static Map<String, Map<BenchmarkOperations, Double>> processS3(File S3Dir) throws Exception{
     Map<String,Map<BenchmarkOperations, Double>> results = new HashMap<String, Map<BenchmarkOperations, Double>>();
     for(String datapoint : DATAPOINTS){
-      File run = new File(S3Dir, datapoint + ".txt");
-      if(run.exists()){
-        List<String> lines = Files.readLines(run, Charset.defaultCharset());
+      File runsDir = new File(S3Dir, datapoint);
+      if(runsDir.exists()){
+        List<File> runs = CompileResults.findFiles(runsDir.getAbsolutePath(),
+            "result.txt");
+        if(runs.size() != 10){
+          throw new IllegalArgumentException("There should 10 result.txt " +
+              "files");
+        }
+        
         double puts = 0;
         double gets = 0;
-        for(String line : lines){
-          String l = line.trim();
-          if(l.isEmpty() || l.startsWith("Run")){
-            continue;
+        
+        for(File run : runs){
+          List<String> lines = Files.readLines(run, Charset.defaultCharset());
+  
+          int noPutsPerRun = 0;
+          int noGetsPerRun = 0;
+          
+          for(String line : lines){
+            String l = line.trim();
+            if(l.isEmpty() || !l.startsWith("Test")){
+              continue;
+            }
+    
+            if(l.startsWith("Test: PUT")){
+              String[] slines = l.split(" ");
+              puts += Double.valueOf(slines[6]);
+              noPutsPerRun++;
+            }
+    
+            if(l.startsWith("Test: GET")){
+              String[] slines = l.split(" ");
+              gets += Double.valueOf(slines[6]);
+              noGetsPerRun++;
+            }
           }
           
-          if(l.startsWith("Test: PUT")){
-            String[] slines = l.split(" ");
-            puts += Double.valueOf(slines[6]);
-          }
-  
-          if(l.startsWith("Test: GET")){
-            String[] slines = l.split(" ");
-            gets += Double.valueOf(slines[6]);
+          if(noGetsPerRun != 1 || noPutsPerRun != 1){
+            throw new IllegalArgumentException("Result file should have only " +
+                "one put and one get");
           }
         }
         Map<BenchmarkOperations, Double> runResults = new HashMap<BenchmarkOperations, Double>();
