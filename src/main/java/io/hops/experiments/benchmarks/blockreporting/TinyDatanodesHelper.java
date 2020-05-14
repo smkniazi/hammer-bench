@@ -176,7 +176,7 @@ public class TinyDatanodesHelper {
     while ((line = reader.readLine()) != null){
       String[] rs = line.split(",");
       datanodes[Integer.valueOf(rs[0])].addBlock(new Block(Long.valueOf
-          (rs[1]), Long.valueOf(rs[2]), Long.valueOf(rs[3])));
+          (rs[1]), Long.valueOf(rs[2]), Long.valueOf(rs[3]), ""));
     }
     reader.close();
   }
