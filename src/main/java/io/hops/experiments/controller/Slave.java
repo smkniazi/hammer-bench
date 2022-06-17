@@ -117,12 +117,14 @@ public class Slave {
     }
 
     private Object receiveRequestFromMaster() throws IOException, ClassNotFoundException {
+        System.out.println("Waiting is new request");
         connectionWithMaster.setReceiveBufferSize(ConfigKeys.BUFFER_SIZE);
         ObjectInputStream recvFromMaster =  new ObjectInputStream(connectionWithMaster.getInputStream());
         Object obj = recvFromMaster.readObject();
         if (obj instanceof KillSlave) {
             System.exit(0);
         }
+        System.out.println("Request received");
         return obj;
     }
 

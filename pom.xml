@@ -49,13 +49,13 @@
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
-      <version>2.8.2.10-SNAPSHOT</version>
+      <version>3.2.0.4-EE-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>2.8.2.10-SNAPSHOT</version>
+      <version>3.2.0.4-EE-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
 
@@ -104,22 +104,17 @@
 
   <repositories>
     <repository>
-      <id>hops-repository</id>
-      <name>Hops Repository</name>
-      <url>https://bbc1.sics.se/archiva/repository/Hops/</url>
+      <id>HopsEE</id>
+      <name>Hops Release Repository</name>
+      <url>https://nexus.hops.works/repository/hops-artifacts</url>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
-    <!-- MapR-FS Repo -->
-    <!--<repository>
-          <id>MapR-Repo</id>
-          <name>MapR-Repo</name>
-          <url>http://repository.mapr.com/maven/</url>
-        </repository>-->
   </repositories>
 
   <build>

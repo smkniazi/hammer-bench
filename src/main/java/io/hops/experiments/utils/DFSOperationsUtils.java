@@ -55,6 +55,16 @@ public class DFSOperationsUtils {
         }
         FileSystem client = dfsClients.get();
         if (client == null) {
+            conf.set("fs.defaultFS", "hdfs://rpc.namenode.service.consul:8020" );
+            conf.setBoolean("ipc.server.ssl.enabled", true);
+            conf.set("hadoop.ssl.hostname.verifier", "ALLOW_ALL");
+            conf.set("hadoop.rpc.socket.factory.class.default","org.apache.hadoop.net.HopsSSLSocketFactory");
+            conf.set("hadoop.ssl.enabled.protocols", "TLSv1.2,TLSv1.1,TLSv1,SSLv3");
+            conf.set("client.rpc.ssl.enabled.protocol","TLSv1.2");
+            conf.set("hops.tls.superuser-material-directory", "/srv/hops/super_crypto/${USER}");
+            conf.set("client.materialize.directory", "/srv/hops/certs-dir/transient");
+            conf.set("hadoop.proxyuser.hdfs.hosts", "*");
+            conf.set("hadoop.proxyuser.hdfs.groups", "*");
             client = (FileSystem) FileSystem.newInstance(conf);
             dfsClients.set(client);
            System.out.println(Thread.currentThread().getName()  +

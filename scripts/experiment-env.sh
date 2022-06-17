@@ -40,8 +40,8 @@ TINY_DATANODES_PER_NAMENODE=5                      #No of simulated datanodes fo
 #experiments to run
 #NOTE all experiment related parameters are in master.properties file
 Benchmark_Types=(
-            RAW                                         #Test raw throughput of individual operations
-            #INTERLEAVED                                  #Test synthetic workload from spotify 
+            #RAW                                         #Test raw throughput of individual operations
+            INTERLEAVED                                  #Test synthetic workload from spotify 
             #BR                                          #Block report testing. Set the hart beat time for the datanodes to Long.MAX_VALUE. We use a datanode class that does not send HBs  
             ) #space is delimeter
 
@@ -58,8 +58,8 @@ NumberNdbDataNodes=4                                                      #added
 
 
 #HopsFS Distribution Parameters
-HopsFS_User=nzo
-NameNodeRpcPort=26801
+HopsFS_User=hdfs
+NameNodeRpcPort=8020
 HopsFS_Remote_Dist_Folder=/tmp/hopsfs
 Datanode_Data_Dir=$HopsFS_Remote_Dist_Folder/Data
 #full path to java

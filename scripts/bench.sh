@@ -40,7 +40,7 @@ run() {
   sed -i 's|benchmark.type.*|benchmark.type='$BenchMark'|g'                         $exp_master_prop_file
   sed -i 's|num.slave.threads.*|num.slave.threads='$ClientsPerSlave'|g'             $exp_master_prop_file
   sed -i 's|results.dir.*|results.dir='$exp_remote_bench_mark_result_dir'|g'        $exp_master_prop_file      
-  sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
+#  sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
   sed -i 's|no.of.ndb.datanodes=.*|no.of.ndb.datanodes='$NumberNdbDataNodes'|g'     $exp_master_prop_file
 #  sed -i 's|warmup.phase.wait.time=.*|warmup.phase.wait.time='$EXP_WARM_UP_TIME'|g' $exp_master_prop_file

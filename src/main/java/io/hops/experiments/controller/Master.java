@@ -492,10 +492,11 @@ public class Master {
 
       if (isSlaveHealthy(socket.getInetAddress())) {
         try {
-          printMasterLogMessages("SEND " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
+          printMasterLogMessages("SENDING " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
           socket.setSendBufferSize(ConfigKeys.BUFFER_SIZE);
           ObjectOutputStream sendToSlave = new ObjectOutputStream(socket.getOutputStream());
           sendToSlave.writeObject(obj);
+          printMasterLogMessages("SENT " + obj.getClass().getCanonicalName() + " to " + socket.getInetAddress());
         } catch (Exception e) {
           handleMisBehavingSlave(socket.getInetAddress());
         }
