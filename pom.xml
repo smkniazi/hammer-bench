@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>se.sics.hop</groupId>
-  <artifactId>hop-experiments</artifactId>
+  <groupId>ai.hopsworks</groupId>
+  <artifactId>hammer-bench</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
@@ -44,82 +44,55 @@
       <version>2.6</version>
     </dependency>
 
-
-    <!-- Hops Dependencies -->
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
-      <version>2.8.2.10-SNAPSHOT</version>
+      <version>3.2.0.8-EE-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>2.8.2.10-SNAPSHOT</version>
+      <version>3.2.0.8-EE-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
-
-      <!-- HDFS Dependencies -->
-<!--    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <version>2.0.4-alpha</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>2.0.4-alpha</version>
-      <type>jar</type>
-    </dependency>
--->    
-    
-    <!-- CephFS Dependencies -->
-<!--    <dependency>
-      <groupId>com.ceph</groupId>
-      <artifactId>libcephfs</artifactId>
-      <version>0.80.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.ceph.fs</groupId>
-      <artifactId>cephfs-hadoop</artifactId>
-      <version>0.80.5</version>
-    </dependency>-->
-    
-    
-    <!-- MapR-FS Dependencies -->
-<!--    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>2.4.1-mapr-1408</version>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20080701</version>
-    </dependency>-->
 
   </dependencies>
 
   <repositories>
     <repository>
-      <id>hops-repository</id>
-      <name>Hops Repository</name>
-      <url>https://bbc1.sics.se/archiva/repository/Hops/</url>
+      <id>HopsEE</id>
+      <name>Hops Release Repository</name>
+      <url>https://nexus.hops.works/repository/hops-artifacts</url>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
+        <updatePolicy>interval:15</updatePolicy>
       </snapshots>
     </repository>
-    <!-- MapR-FS Repo -->
-    <!--<repository>
-          <id>MapR-Repo</id>
-          <name>MapR-Repo</name>
-          <url>http://repository.mapr.com/maven/</url>
-        </repository>-->
+    
+    <repository>
+      <id>hops-release</id>
+      <name>Hops Release Repository</name>
+      <url>https://archiva.hops.works/repository/Hops/</url>
+      <snapshots>
+       <enabled>false</enabled>
+       <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>hops-snapshot-repository</id>
+      <name>Hops Snapshot Repository</name>
+      <url>https://archiva.hops.works/repository/Hops/</url>
+      <releases>
+       <enabled>true</enabled>
+      </releases>
+      <snapshots>
+       <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
   </repositories>
 
   <build>

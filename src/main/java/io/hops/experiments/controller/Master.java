@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,15 +16,12 @@
  */
 package io.hops.experiments.controller;
 
-import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
-import io.hops.experiments.benchmarks.blockreporting.BlockReportingBenchmarkCommand;
-import io.hops.experiments.benchmarks.blockreporting.BlockReportingWarmUp;
 import io.hops.experiments.benchmarks.common.BMResult;
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.benchmarks.common.commands.NamespaceWarmUp;
-import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.common.config.BMConfiguration;
+import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBenchmarkCommand;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
@@ -36,14 +33,27 @@ import io.hops.experiments.controller.commands.WarmUpCommand;
 import io.hops.experiments.results.compiler.InterleavedBMResultsAggregator;
 import io.hops.experiments.results.compiler.RawBMResultAggregator;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -75,7 +85,7 @@ public class Master {
       config = new BMConfiguration(configFilePath);
 
       removeExistingResultsFiles();
-      
+
       startRemoteLogger(config.getSlavesList().size());
 
       connectSlaves();
@@ -88,7 +98,7 @@ public class Master {
       startCommander();
 
       generateResultsFile();
-      
+
       printAllResults();
     } catch (Exception e) {
       e.printStackTrace();
@@ -99,7 +109,7 @@ public class Master {
   }
 
   private void startRemoteLogger(int maxSlaves) {
-    Logger.LogListener listener = new Logger.LogListener(config.getRemoteLoggingPort(),maxSlaves);
+    Logger.LogListener listener = new Logger.LogListener(config.getRemoteLoggingPort(), maxSlaves);
     Thread thread = new Thread(listener);
     thread.start();
     System.out.println("Logger started.");
@@ -110,8 +120,6 @@ public class Master {
       startRawCommander();
     } else if (config.getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       startInterleavedCommander();
-    } else if (config.getBenchMarkType() == BenchmarkType.BR) {
-      startBlockReportingCommander();
     } else {
       throw new IllegalStateException("Unsupported Benchmark ");
     }
@@ -122,141 +130,103 @@ public class Master {
 
     if (config.getRawBmMkdirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.MKDIRS, config.getRawBmMkdirPhaseDuration()));
+        BenchmarkOperations.MKDIRS, config.getRawBmMkdirPhaseDuration()));
     }
 
     if (config.getRawBmFilesCreationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCreateCommand.Request(
-              config.getRawBmMaxFilesToCreate(),
-              BenchmarkOperations.CREATE_FILE,
-              config.getRawBmFilesCreationPhaseDuration()));
+        config.getRawBmMaxFilesToCreate(),
+        BenchmarkOperations.CREATE_FILE,
+        config.getRawBmFilesCreationPhaseDuration()));
     }
 
     if (config.getRawBmAppendFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.APPEND_FILE,
-              config.getRawBmAppendFilePhaseDuration()));
+        BenchmarkOperations.APPEND_FILE,
+        config.getRawBmAppendFilePhaseDuration()));
     }
 
     if (config.getRawBmReadFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.READ_FILE,
-              config.getRawBmReadFilesPhaseDuration()));
+        BenchmarkOperations.READ_FILE,
+        config.getRawBmReadFilesPhaseDuration()));
     }
 
     if (config.getRawBmLsFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.LS_FILE,
-              config.getRawBmLsFilePhaseDuration()));
+        BenchmarkOperations.LS_FILE,
+        config.getRawBmLsFilePhaseDuration()));
     }
 
     if (config.getRawBmLsDirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.LS_DIR,
-              config.getRawBmLsDirPhaseDuration()));
+        BenchmarkOperations.LS_DIR,
+        config.getRawBmLsDirPhaseDuration()));
     }
 
     if (config.getRawBmChmodFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.CHMOD_FILE,
-              config.getRawBmChmodFilesPhaseDuration()));
+        BenchmarkOperations.CHMOD_FILE,
+        config.getRawBmChmodFilesPhaseDuration()));
     }
 
     if (config.getRawBmChmodDirsPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.CHMOD_DIR,
-              config.getRawBmChmodDirsPhaseDuration()));
+        BenchmarkOperations.CHMOD_DIR,
+        config.getRawBmChmodDirsPhaseDuration()));
     }
 
     if (config.getRawBmSetReplicationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.SET_REPLICATION,
-              config.getRawBmSetReplicationPhaseDuration()));
+        BenchmarkOperations.SET_REPLICATION,
+        config.getRawBmSetReplicationPhaseDuration()));
     }
 
     if (config.getRawBmGetFileInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.FILE_INFO,
-              config.getRawBmGetFileInfoPhaseDuration()));
+        BenchmarkOperations.FILE_INFO,
+        config.getRawBmGetFileInfoPhaseDuration()));
     }
 
     if (config.getRawBmGetDirInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.DIR_INFO,
-              config.getRawBmGetDirInfoPhaseDuration()));
+        BenchmarkOperations.DIR_INFO,
+        config.getRawBmGetDirInfoPhaseDuration()));
     }
 
 
     if (config.getRawFileChangeUserPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.CHOWN_FILE,
-              config.getRawFileChangeUserPhaseDuration()));
+        BenchmarkOperations.CHOWN_FILE,
+        config.getRawFileChangeUserPhaseDuration()));
     }
 
 
     if (config.getRawDirChangeUserPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.CHOWN_DIR,
-              config.getRawDirChangeUserPhaseDuration()));
+        BenchmarkOperations.CHOWN_DIR,
+        config.getRawDirChangeUserPhaseDuration()));
     }
 
 
     if (config.getRawBmRenameFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.RENAME_FILE,
-              config.getRawBmRenameFilesPhaseDuration()));
+        BenchmarkOperations.RENAME_FILE,
+        config.getRawBmRenameFilesPhaseDuration()));
     }
 
     if (config.getRawBmDeleteFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-              BenchmarkOperations.DELETE_FILE,
-              config.getRawBmDeleteFilesPhaseDuration()));
+        BenchmarkOperations.DELETE_FILE,
+        config.getRawBmDeleteFilesPhaseDuration()));
     }
-  }
-
-  private void startBlockReportingCommander() throws IOException, ClassNotFoundException {
-    System.out.println("Starting BlockReporting Benchmark ...");
-    prompt();
-    BlockReportingBenchmarkCommand.Request request = new BlockReportingBenchmarkCommand.Request();
-
-    sendToAllSlaves(request, 0/*delay*/);
-
-    Collection<Object> responses = receiveFromAllSlaves(Integer.MAX_VALUE);
-    DescriptiveStatistics successfulOps = new DescriptiveStatistics();
-    DescriptiveStatistics failedOps = new DescriptiveStatistics();
-    DescriptiveStatistics speed = new DescriptiveStatistics();
-    DescriptiveStatistics avgTimePerReport = new DescriptiveStatistics();
-    DescriptiveStatistics avgTimeTogetANewNameNode = new DescriptiveStatistics();
-    DescriptiveStatistics noOfNNs = new DescriptiveStatistics();
-
-    for (Object obj : responses) {
-      if (!(obj instanceof BlockReportingBenchmarkCommand.Response)) {
-        throw new IllegalStateException("Wrong response received from the client");
-      } else {
-        BlockReportingBenchmarkCommand.Response response = (BlockReportingBenchmarkCommand.Response) obj;
-        successfulOps.addValue(response.getSuccessfulOps());
-        failedOps.addValue(response.getFailedOps());
-        speed.addValue(response.getSpeed());
-        avgTimePerReport.addValue(response.getAvgTimePerReport());
-        avgTimeTogetANewNameNode.addValue(response.getAvgTimeTogetNewNameNode());
-        noOfNNs.addValue(response.getNnCount());
-      }
-    }
-
-    BlockReportBMResults result = new BlockReportBMResults(config.getNamenodeCount(),
-            (int)Math.floor(noOfNNs.getMean()),
-            config.getNdbNodesCount(),
-            speed.getSum(), successfulOps.getSum(),
-            failedOps.getSum(), avgTimePerReport.getMean(), avgTimeTogetANewNameNode.getMean());
-
-    printMasterResultMessages(result);
   }
 
   private void startInterleavedCommander() throws IOException, ClassNotFoundException, InterruptedException {
     System.out.println("Starting Interleaved Benchmark ...");
     prompt();
     InterleavedBenchmarkCommand.Request request =
-            new InterleavedBenchmarkCommand.Request(config);
+      new InterleavedBenchmarkCommand.Request(config);
     sendToAllSlaves(request, 0/*delay*/);
 
     Thread.sleep(config.getInterleavedBmDuration());
@@ -281,26 +251,23 @@ public class Master {
   }
 
   private void warmUpSlaves()
-          throws IOException, ClassNotFoundException, SQLException {
+    throws IOException, ClassNotFoundException, SQLException {
     printMasterLogMessages("Warming Up ... ");
     prompt();
     WarmUpCommand.Request warmUpCommand = null;
     if (config.getBenchMarkType() == BenchmarkType.INTERLEAVED
-            || config.getBenchMarkType() == BenchmarkType.RAW) {
+      || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
-              config.getFileSizeDistribution(), config.getAppendFileSize(),
-              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
-    } else if (config.getBenchMarkType() == BenchmarkType.BR) {
-      warmUpCommand = new BlockReportingWarmUp.Request(config);
+        config.getFileSizeDistribution(), config.getAppendFileSize(),
+        config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else {
       throw new UnsupportedOperationException("Wrong Benchmark type for"
-              + " warm up " + config.getBenchMarkType());
+        + " warm up " + config.getBenchMarkType());
     }
 
     sendToAllSlaves(warmUpCommand, config.getSlaveWarmUpDelay()/*delay*/);
 
     Collection<Object> allResponses = receiveFromAllSlaves(config.getWarmUpPhaseWaitTime());
-
     for (Object response : allResponses) {
       if (!(response instanceof WarmUpCommand.Response)) {
         throw new IllegalStateException("Disobedient slave. Sent me something other than hand shake response");
@@ -311,15 +278,15 @@ public class Master {
 
   public void startRawBenchmarkPhase(RawBenchmarkCommand.Request request) throws IOException, InterruptedException, ClassNotFoundException {
     printMasterLogMessages("Starting " + request.getPhase() + " using "
-            + config.getSlaveNumThreads() * config.getSlavesList().size()
-            + " client(s). Time phase duration "
-            + request.getDurationInMS() / (double) (1000 * 60) + " mins");
+      + config.getSlaveNumThreads() * config.getSlavesList().size()
+      + " client(s). Time phase duration "
+      + request.getDurationInMS() / (double) (1000 * 60) + " mins");
     prompt();
 
-    sendToAllSlaves(request,0/*delay*/);
+    sendToAllSlaves(request, 0/*delay*/);
 
     Collection<Object> responses =
-            receiveFromAllSlaves((int) (request.getDurationInMS() + 120 * 1000)/*sec wait*/);
+      receiveFromAllSlaves((int) (request.getDurationInMS() + 120 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);
@@ -339,14 +306,14 @@ public class Master {
         }
       }
       if (misbehavingSlaves.size() > config.getMaxSlavesFailureThreshold()) {
-        printMasterLogMessages("*** Too many slaves failed. Abort test. Failed Slaves Count "+misbehavingSlaves.size()+" Threshold: "+ config.getMaxSlavesFailureThreshold());
+        printMasterLogMessages("*** Too many slaves failed. Abort test. Failed Slaves Count " + misbehavingSlaves.size() + " Threshold: " + config.getMaxSlavesFailureThreshold());
         System.exit(-1);
       }
     }
   }
 
   private void sendHandshakeToAllSlaves(Handshake.Request handshake) throws
-          IOException {
+    IOException {
     if (!slavesConnections.isEmpty()) {
       int slaveId = 0;
       for (InetAddress slave : slavesConnections.keySet()) {
@@ -362,14 +329,16 @@ public class Master {
       for (InetAddress slave : slavesConnections.keySet()) {
         SlaveConnection conn = slavesConnections.get(slave);
         conn.sendToSlave(obj);
-        try{
+        try {
           Thread.sleep(delay);
-        }catch(InterruptedException e){}
+        } catch (InterruptedException e) {
+        }
       }
     }
   }
 
   private Collection<Object> receiveFromAllSlaves(int timeout) throws ClassNotFoundException, UnknownHostException, IOException {
+    System.out.println("Waiting for responses");
     Map<InetAddress, Object> responses = new HashMap<InetAddress, Object>();
     if (!slavesConnections.isEmpty()) {
       for (InetAddress slave : slavesConnections.keySet()) {
@@ -377,6 +346,7 @@ public class Master {
         Object obj = conn.recvFromSlave(timeout);
         if (obj != null) {
           responses.put(slave, obj);
+          System.out.println("Received one response");
         }
       }
     }
@@ -398,45 +368,45 @@ public class Master {
     blueColoredText(result.toString());
     results.add(result);
   }
-  
-  private void removeExistingResultsFiles() throws IOException{
+
+  private void removeExistingResultsFiles() throws IOException {
     File dir = new File(config.getResultsDir());
-    if(dir.exists()){
-       FileUtils.deleteDirectory(dir);
+    if (dir.exists()) {
+      FileUtils.deleteDirectory(dir);
     }
     dir.mkdirs();
   }
 
   private void generateResultsFile() throws FileNotFoundException, IOException {
-    
+
     String filePath = config.getResultsDir();
     filePath += ConfigKeys.BINARY_RESULT_FILE_NAME;
-    printMasterLogMessages("Writing results to "+filePath);
+    printMasterLogMessages("Writing results to " + filePath);
     FileOutputStream fout = new FileOutputStream(filePath);
     ObjectOutputStream oos = new ObjectOutputStream(fout);
     for (BMResult result : results) {
       oos.writeObject(result);
     }
     oos.close();
-    
-    
+
+
     filePath = config.getResultsDir();
     filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
-    printMasterLogMessages("Writing results to "+filePath);
+    printMasterLogMessages("Writing results to " + filePath);
     FileWriter out = new FileWriter(filePath, false);
     for (BMResult result : results) {
       out.write(result.toString() + "\n");
     }
     out.close();
 
-    if(config.getBenchMarkType() == BenchmarkType.RAW && config.isPercentileEnabled()){
+    if (config.getBenchMarkType() == BenchmarkType.RAW && config.isPercentileEnabled()) {
       for (BMResult result : results) {
         RawBMResults rawResult = (RawBMResults) result;
         filePath = config.getResultsDir();
-        filePath += rawResult.getOperationType()+".csv";
+        filePath += rawResult.getOperationType() + ".csv";
         out = new FileWriter(filePath, false);
-        for(long l : rawResult.getLatencies()){
-          out.write(((double)l/1000000.0)+"\n");
+        for (long l : rawResult.getLatencies()) {
+          out.write(((double) l / 1000000.0) + "\n");
         }
         out.close();
       }
@@ -457,14 +427,14 @@ public class Master {
     System.out.println("\n\n\n");
     System.out.println("************************ All Results ************************");
     System.out.println("\n\n\n");
-    
+
     String filePath = config.getResultsDir();
-    if(!filePath.endsWith("/")){
+    if (!filePath.endsWith("/")) {
       filePath += "/";
     }
     filePath += ConfigKeys.TEXT_RESULT_FILE_NAME;
-    
-    printMasterLogMessages("Reading results from "+filePath);
+
+    printMasterLogMessages("Reading results from " + filePath);
     BufferedReader br = new BufferedReader(new FileReader(filePath));
     try {
 

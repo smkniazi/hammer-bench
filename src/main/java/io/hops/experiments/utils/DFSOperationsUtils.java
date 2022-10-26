@@ -241,8 +241,6 @@ public class DFSOperationsUtils {
             Method method = filesystem.getMethod("getNameNodesCount");
             Object ret = method.invoke(dfs);
             return (Integer) ret;
-        } else if (fsName == BenchMarkFileSystemName.HDFS) {
-            return 1;
         } else {
             throw new UnsupportedOperationException("Implement get namenode count for other filesystems");
         }

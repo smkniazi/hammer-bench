@@ -21,6 +21,6 @@
     #Build Experiments
     CMD="mvn "	    
     if [ $HopsFS_Rebuild_Exp_Src = true -a $HopsFS_Upload_Exp = true ]; then
-    	CMD="$CMD clean assembly:assembly -f $HopsFS_Src_Folder/pom.xml"  
+    	CMD="$CMD clean assembly:assembly -f $Dist_Dir/pom.xml"  
         $CMD
     fi

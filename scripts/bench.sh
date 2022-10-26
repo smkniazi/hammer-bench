@@ -129,16 +129,10 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                         
                         DNS_FullList_STR=""
                         HBTime=3
-                        if [ $BenchMark = "BR" ]; then
-                            DNS_FullList_STR=""
-                            HBTime=9223372036854775807
-                        else
-                            for ((e_dn = 0; e_dn < ${#DNS_FullList[@]}; e_dn++)) do
-                                DNS_FullList_STR="$DNS_FullList_STR ${DNS_FullList[$e_dn]}"
-                            done
-                            HBTime=3
-                        fi
-                
+                        for ((e_dn = 0; e_dn < ${#DNS_FullList[@]}; e_dn++)) do
+                            DNS_FullList_STR="$DNS_FullList_STR ${DNS_FullList[$e_dn]}"
+                        done
+                        HBTime=3
 
                         currentDirBM="$currentDir/$BenchMark"
                         mkdir -p $currentDirBM
@@ -149,14 +143,8 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
                             
                             ClientsPerSlave=1
                             EXP_WARM_UP_TIME=600000 #10 mins
-                            if [ $BenchMark = "BR" ]; then
-                                TotalClients=$(echo "scale=2; ($TotalNNCount * $TINY_DATANODES_PER_NAMENODE)" | bc)
-                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)                              
-                                EXP_WARM_UP_TIME=3600000 #1hr
-                            else
-                                TotalClients=$(echo "scale=2; ($TotalNNCount * $DFS_CLIENTS_PER_NAMENODE)" | bc)
-                                ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)
-                            fi
+                            TotalClients=$(echo "scale=2; ($TotalNNCount * $DFS_CLIENTS_PER_NAMENODE)" | bc)
+                            ClientsPerSlave=$(echo "scale=2; ($TotalClients)/$TotalSlaves" | bc)
                             
                             #ceiling
                             ClientsPerSlave=$(echo "scale=2; ($ClientsPerSlave + 0.5) " | bc)

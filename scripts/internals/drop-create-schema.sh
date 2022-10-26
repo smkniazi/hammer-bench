@@ -22,12 +22,3 @@ echo "Attempting to import the database"
 $command  $com_mysql_clusterj_database < $DIR/../../hops-metadata-dal-impl-ndb/schema/schema.sql 
 echo "Schema dropped and recreated."
 
-
-#create an additional table for BR Benchmarks
-if [ $BenchMark = "BR" ]; then
- echo "Attempting to drop and create table for Block Reporting"
- $command  $com_mysql_clusterj_database < $DIR/br.sql
- echo "Truncate and create table Finished"
-
- sed -i 's|br.persist.database=.*|br.persist.database='$io_hops_metadata_ndb_mysqlserver_host:$io_hops_metadata_ndb_mysqlserver_port:$com_mysql_clusterj_database'|g'   $DIR/../master.properties
-fi

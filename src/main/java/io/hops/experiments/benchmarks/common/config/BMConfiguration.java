@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,24 +17,31 @@
 package io.hops.experiments.benchmarks.common.config;
 
 //import io.hops.experiments.benchmarks.blockreporting.TinyDatanodesHelper;
+
 import io.hops.experiments.benchmarks.common.BenchMarkFileSystemName;
 import io.hops.experiments.benchmarks.common.BenchmarkType;
 import io.hops.experiments.benchmarks.common.coin.FileSizeMultiFaceCoin;
 import io.hops.experiments.benchmarks.interleaved.coin.InterleavedMultiFaceCoin;
 import io.hops.experiments.utils.DFSOperationsUtils;
-import org.apache.hadoop.hdfs.DFSClient;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 /**
- *
  * @author salman
  */
 public class BMConfiguration implements Serializable {
@@ -89,59 +96,54 @@ public class BMConfiguration implements Serializable {
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages
       new InterleavedMultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
-              getInterleavedBmAppendFilePercentage(),
-              getInterleavedBmReadFilesPercentage(),
-              getInterleavedBmRenameFilesPercentage(),
-              getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
-              getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
-              getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
-              getInterleavedBmSetReplicationPercentage(),
-              getInterleavedBmGetFileInfoPercentage(),
-              getInterleavedBmGetDirInfoPercentage(),
-              getInterleavedBmFileChangeOwnerPercentage(),
-              getInterleavedBmDirChangeOwnerPercentage());
+        getInterleavedBmAppendFilePercentage(),
+        getInterleavedBmReadFilesPercentage(),
+        getInterleavedBmRenameFilesPercentage(),
+        getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
+        getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
+        getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
+        getInterleavedBmSetReplicationPercentage(),
+        getInterleavedBmGetFileInfoPercentage(),
+        getInterleavedBmGetDirInfoPercentage(),
+        getInterleavedBmFileChangeOwnerPercentage(),
+        getInterleavedBmDirChangeOwnerPercentage());
     }
 
-    if (getBenchMarkType() == BenchmarkType.BR
-            && (getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS
-            && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS)) {
-      throw new IllegalStateException("Block report benchmark is only supported for HDFS and HopsFS");
-    }
-
-    if(testFailover()){
-      if(getBenchMarkType() != BenchmarkType.INTERLEAVED){
+    if (testFailover()) {
+      if (getBenchMarkType() != BenchmarkType.INTERLEAVED) {
         throw new IllegalArgumentException("Failover Testing is only supported for interleaved benchmark");
       }
-      if(getBenchMarkFileSystemName() != BenchMarkFileSystemName.HDFS && getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS){
+      if (getBenchMarkFileSystemName() != BenchMarkFileSystemName.HopsFS) {
         throw new IllegalArgumentException("Failover Testing is only supported for HDFS and HopsFS.");
       }
 //      if(getSlavesList().size()!=1){
 //        throw new IllegalArgumentException("Failover Testing is only supported with one slave.");
 //      }
-      if(getHadoopUser()==null){
+
+      if (getHadoopUser() == null) {
         throw new IllegalArgumentException("Hadoop user is not set.");
       }
-      if(getHadoopSbin()==null){
+      if (getHadoopSbin() == null) {
         throw new IllegalArgumentException("Hadoop sbin folder is not set.");
       }
-      if(getFailOverNameNodes().size()==0){
+      if (getFailOverNameNodes().size() == 0) {
         throw new IllegalArgumentException("Hadoop namenodes are not set.");
       }
-      if(getNameNodeRestartCommands().size()==0){
+      if (getNameNodeRestartCommands().size() == 0) {
         throw new IllegalArgumentException("Hadoop failover commands are not set properly.");
       }
-      if(getFailOverTestStartTime() > getFailOverTestDuration()){
+      if (getFailOverTestStartTime() > getFailOverTestDuration()) {
         throw new IllegalArgumentException("Failover start time can not be greater than failover test duration");
       }
-      if(getInterleavedBmDuration() < (getFailOverTestStartTime()+getFailOverTestDuration())){
-        throw new IllegalArgumentException(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY+" + "+ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY
-                +" should be greater than "+ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
+      if (getInterleavedBmDuration() < (getFailOverTestStartTime() + getFailOverTestDuration())) {
+        throw new IllegalArgumentException(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY + " + " + ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY
+          + " should be greater than " + ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
       }
     }
 
-    if (getBRNumInvalidBuckets() > getNumBuckets()){
+    if (getBRNumInvalidBuckets() > getNumBuckets()) {
       throw new IllegalArgumentException("Number of invalid buckets cannot be more than the " +
-              "total number of the buckets");
+        "total number of the buckets");
     }
 
 //    if(!brReadStateFromDisk() && getBenchMarkType() == BenchmarkType.BR) {
@@ -250,6 +252,7 @@ public class BMConfiguration implements Serializable {
   public long getRawBmLsDirPhaseDuration() {
     return getLong(ConfigKeys.RAW_LS_DIR_PHASE_DURATION_KEY, ConfigKeys.RAW_LS_DIR_PHASE_DURATION_DEFAULT);
   }
+
   public static String INTERLEAVED_WORKLOAD_NAME_KEY = "interleaved.workload.name";
   public static double INTERLEAVED_WORKLOAD_NAME_DEFAULT = 0;
 
@@ -301,61 +304,8 @@ public class BMConfiguration implements Serializable {
     return getBigDecimal(ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_KEY, ConfigKeys.INTLVD_APPEND_FILE_PERCENTAGE_DEFAULT);
   }
 
-  public int getBlockReportBenchMarkDuration() {
-    return getInt(ConfigKeys.BR_BENCHMARK_DURATION_KEY, ConfigKeys.BR_BENCHMARK_DURATION_DEFAULT);
-  }
-
-  public int getBlockReportingNumOfBlocksPerReport() {
-    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_REPORT_KEY, ConfigKeys.BR_NUM_BLOCKS_PER_REPORT_DEFAULT);
-  }
-
-  public int getBlockReportingNumOfBlocksPerFile() {
-    return getInt(ConfigKeys.BR_NUM_BLOCKS_PER_FILE_KEY, ConfigKeys.BR_NUM_BLOCKS_PER_FILE_DEFAULT);
-  }
-
-  public int getBlockReportingMaxBlockSize() {
-    return getInt(ConfigKeys.BR_MAX_BLOCK_SIZE_KEY, ConfigKeys.BR_MAX_BLOCK_SIZE_DEFAULT);
-  }
-
-  public int getBlockReportingNumOfFilesPerDir() {
-    return getInt(ConfigKeys.BR_NUM_FILES_PER_DIR_KEY, ConfigKeys.BR_NUM_FILES_PER_DIR_DEFAULT);
-  }
-
-  public boolean brReadStateFromDisk() {
-    return getBoolean(ConfigKeys.BR_READ_STATE_FROM_DISK_KEY, ConfigKeys.BR_READ_STATE_FROM_DISK_DEFAULT);
-  }
-
-  public boolean brWriteStateToDisk() {
-    return getBoolean(ConfigKeys.BR_WRITE_STATE_TO_DISK_KEY, ConfigKeys.BR_WRITE_STATE_TO_DISK_DEFAULT);
-  }
-
-  public String brOnDiskStatePath() {
-    return getString(ConfigKeys.BR_ON_DISK_STATE_PATH_KEY, ConfigKeys.BR_ON_DISK_STATE_PATH_DEFAULT);
-  }
-
   public int getBRNumInvalidBuckets() {
     return getInt(ConfigKeys.BR_NUM_INVALID_BUCKETS_KEY, ConfigKeys.BR_NUM_INVALID_BUCKETS_DEFAULT);
-  }
-
-  public boolean getBRIncludeBlocks() {
-    return getBoolean(ConfigKeys.BR_INCLUDE_BLOCKS_KEY, ConfigKeys.BR_INCLUDE_BLOCKS_DEFAULT);
-  }
-
-  public int getBRWarmupPhaseThreadsPerDN(){
-    return getInt(ConfigKeys.BR_WARM_UP_PHASE_THREADS_PER_DN_KEY,
-            ConfigKeys.BR_WARM_UP_PHASE_THREADS_PER_DN_DEFAULT) ;
-  }
-
-  public int getBlockReportingMaxTimeBeforeNextReport() {
-    return getInt(ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT);
-  }
-
-  public int getBlockReportingMinTimeBeforeNextReport() {
-    return getInt(ConfigKeys.BR_MIN_TIME_BEFORE_NEXT_REPORT, ConfigKeys.BR_MIN_TIME_BEFORE_NEXT_REPORT_DEFAULT);
-  }
-
-  public String getBlockReportingPersistDatabase() {
-    return getString(ConfigKeys.BR_PERSIST_DATABASE, ConfigKeys.BR_PERSIST_DATABASE_DEFAULT);
   }
 
   public short getReplicationFactor() {
@@ -386,13 +336,17 @@ public class BMConfiguration implements Serializable {
     return getBoolean(ConfigKeys.ENABLE_REMOTE_LOGGING_KEY, ConfigKeys.ENABLE_REMOTE_LOGGING_DEFAULT);
   }
 
+  public boolean isSSLEnabled() {
+    return getBoolean(ConfigKeys.IPC_SERVER_SSL_ENABLED_KEY, ConfigKeys.IPC_SERVER_SSL_ENABLED_DEFAULT);
+  }
+
   public int getRemoteLoggingPort() {
     return getInt(ConfigKeys.REMOTE_LOGGING_PORT_KEY, ConfigKeys.REMOTE_LOGGING_PORT_DEFAULT);
   }
 
   public String getResultsDir() {
-    String filePath =  getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
-    if(!filePath.endsWith("/")){
+    String filePath = getString(ConfigKeys.RESULTS_DIR_KEY, ConfigKeys.RESULTS_DIR_DEFAULT);
+    if (!filePath.endsWith("/")) {
       filePath += "/";
     }
     return filePath;
@@ -412,14 +366,6 @@ public class BMConfiguration implements Serializable {
 
   public String getNameNodeRpcAddress() {
     return getString(ConfigKeys.FS_DEFAULTFS_KEY, ConfigKeys.FS_DEFAULTFS_DEFAULT);
-  }
-
-  public String getNameNodeSelectorPolicy() {
-    return getString(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_DEFAULT);
-  }
-
-  public long getNameNodeRefreshRate() {
-    return getLong(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT);
   }
 
   public int getDirPerDir() {
@@ -462,65 +408,40 @@ public class BMConfiguration implements Serializable {
     return getBoolean(ConfigKeys.GENERATE_PERCENTILES_KEY, ConfigKeys.GENERATE_PERCENTILES_DEFAULT);
   }
 
-  public String getFsCephImp() {
-    return getString(ConfigKeys.FS_CEPH_IMPL_KEY, ConfigKeys.FS_CEPH_IMPL_DEFAULT);
-  }
-
-  public String getCephAuthKeyRing() {
-    return getString(ConfigKeys.CEPH_AUTH_KEYRING_KEY, ConfigKeys.CEPH_AUTH_KEYRING_DEFAULT);
-  }
-
-  public String getCephConfigFile() {
-    return getString(ConfigKeys.CEPH_CONF_FILE_KEY, ConfigKeys.CEPH_CONF_FILE_DEFAULT);
-  }
-
-  public String getCephRootDir() {
-    return getString(ConfigKeys.CEPH_ROOT_DIR_KEY, ConfigKeys.CEPH_ROOT_DIR_DEFAULT);
-  }
-
-  public String getCephMonAddress() {
-    return getString(ConfigKeys.CEPH_MON_ADDRESS_KEY, ConfigKeys.CEPH_MON_ADDRESS_DEFAULT);
-  }
-
-  public String getCephAuthId() {
-    return getString(ConfigKeys.CEPH_AUTH_ID_KEY, ConfigKeys.CEPH_AUTH_ID_DEFAULT);
-  }
-
-
-  public boolean testFailover(){
+  public boolean testFailover() {
     return getBoolean(ConfigKeys.TEST_FAILOVER, ConfigKeys.TEST_FAILOVER_DEFAULT);
   }
 
-  public long getNameNodeRestartTimePeriod(){
+  public long getNameNodeRestartTimePeriod() {
     return getLong(ConfigKeys.RESTART_NAMENODE_AFTER_KEY, ConfigKeys.RESTART_NAMENODE_AFTER_DEFAULT);
   }
 
-  public long getFailOverTestStartTime(){
+  public long getFailOverTestStartTime() {
     return getLong(ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY, ConfigKeys.FAIL_OVER_TEST_START_TIME_DEFAULT);
   }
 
-  public long getFailOverTestDuration(){
+  public long getFailOverTestDuration() {
     return getLong(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY, ConfigKeys.FAIL_OVER_TEST_DURATION_DEFAULT);
   }
 
-  public String getNamenodeKillerHost(){
+  public String getNamenodeKillerHost() {
     return getString(ConfigKeys.NAMENOE_KILLER_HOST_KEY, ConfigKeys.NAMENOE_KILLER_HOST_DEFAULT);
   }
 
-  public boolean getReadFilesFromDisk(){
+  public boolean getReadFilesFromDisk() {
     return getBoolean(ConfigKeys.READ_FILES_FROM_DISK, ConfigKeys.READ_FILES_FROM_DISK_DEFAULT);
   }
 
-  public String getDiskNameSpacePath(){
+  public String getDiskNameSpacePath() {
     return getString(ConfigKeys.DISK_FILES_PATH, ConfigKeys.DISK_FILES_PATH_DEFAULT);
   }
 
-  public List<String> getFailOverNameNodes(){
+  public List<String> getFailOverNameNodes() {
     List<String> namenodesList = new LinkedList<String>();
-    String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES,ConfigKeys.FAILOVER_NAMENODES_DEFAULT);
-    if(namenodes != null){
+    String namenodes = getString(ConfigKeys.FAILOVER_NAMENODES, ConfigKeys.FAILOVER_NAMENODES_DEFAULT);
+    if (namenodes != null) {
       StringTokenizer st = new StringTokenizer(namenodes, ",");
-      while(st.hasMoreElements()){
+      while (st.hasMoreElements()) {
         String namenode = st.nextToken();
         namenodesList.add(namenode);
       }
@@ -528,33 +449,28 @@ public class BMConfiguration implements Serializable {
     return namenodesList;
   }
 
-  public String getHadoopSbin(){
+  public String getHadoopSbin() {
     return getString(ConfigKeys.HADOOP_SBIN, ConfigKeys.HADOOP_SBIN_DEFAULT);
   }
 
-  public String getHadoopUser(){
-    return getString(ConfigKeys.HADOOP_USER,ConfigKeys.HADOOP_USER_DEFAULT);
+  public String getHadoopUser() {
+    return getString(ConfigKeys.HADOOP_USER, ConfigKeys.HADOOP_USER_DEFAULT);
   }
 
-  public int getSlaveWarmUpDelay(){
+  public int getSlaveWarmUpDelay() {
     return getInt(ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY, ConfigKeys.MASTER_SLAVE_WARMUP_DELAY_KEY_DEFAULT);
   }
 
-  public int getNumBuckets(){
+  public int getNumBuckets() {
     return getInt(ConfigKeys.BR_NUM_BUCKETS_KEY, ConfigKeys.BR_NUM_BUCKETS_DEFAULT);
   }
 
-  public boolean ignoreLoadBalancer(){
-    return getBoolean(ConfigKeys.BR_IGNORE_LOAD_BALANCER_KEY,
-            ConfigKeys.BR_IGNORE_LOAD_BALANCER__DEFAULT);
-  }
-
-  public List<List<String>> getNameNodeRestartCommands(){
+  public List<List<String>> getNameNodeRestartCommands() {
     List<List<String>> commandsPerNN = new ArrayList<List<String>>();
 
-    String commandsStr = getString(ConfigKeys.NAMENOE_RESTART_COMMANDS,ConfigKeys.NAMENOE_RESTART_COMMANDS_DEFAULT);
+    String commandsStr = getString(ConfigKeys.NAMENOE_RESTART_COMMANDS, ConfigKeys.NAMENOE_RESTART_COMMANDS_DEFAULT);
 
-    if(commandsStr!=null) {
+    if (commandsStr != null) {
       if (getHadoopSbin() != null) {
         commandsStr = commandsStr.replaceAll("HADOOP_SBIN", getHadoopSbin());
       }
@@ -563,62 +479,41 @@ public class BMConfiguration implements Serializable {
         commandsStr = commandsStr.replaceAll("HADOOP_USER", getHadoopUser());
       }
 
-      for(String namenode: getFailOverNameNodes()){
+      for (String namenode : getFailOverNameNodes()) {
         String commandTmp = new String(commandsStr);
         commandTmp = commandTmp.replaceAll("NAMENODE", namenode);
 
         StringTokenizer st = new StringTokenizer(commandTmp, ",");
         List<String> commands = new LinkedList<String>();
-        while(st.hasMoreElements()){
+        while (st.hasMoreElements()) {
           commands.add(st.nextToken());
         }
         commandsPerNN.add(commands);
-        }
       }
+    }
 
     return commandsPerNN;
-  }
-
-  public String getDfsNameService(){
-    return getString(ConfigKeys.DFS_NAMESERVICES, ConfigKeys.DFS_NAMESERVICES_DEFAULT);
   }
 
   public Properties getFsConfig() {
     Properties dfsClientConf = new Properties();
     dfsClientConf.setProperty(ConfigKeys.FS_DEFAULTFS_KEY, getNameNodeRpcAddress());
-    if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HDFS) {
-      System.out.println("Creating config for HDFS");
-      dfsClientConf.setProperty("dfs.ha.namenodes."+getDfsNameService(),props.getProperty("dfs.ha.namenodes."+getDfsNameService()));
-      dfsClientConf.setProperty("dfs.nameservices",props.getProperty("dfs.nameservices"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn1"));
-      dfsClientConf.setProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2",props.getProperty("dfs.namenode.rpc-address."+getDfsNameService()+".nn2"));
-      dfsClientConf.setProperty("dfs.client.failover.proxy.provider."+getDfsNameService(),props.getProperty("dfs.client.failover.proxy.provider."+getDfsNameService()));
-    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
+    if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
-      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY,
-              Long.toString(getNameNodeRefreshRate()));
-      dfsClientConf.setProperty(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY,
-              getNameNodeSelectorPolicy());
-      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY,
-              Integer.toString(getInt(ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT)));
-      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,
-              Long.toString(getLong(ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY,ConfigKeys.DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT)));
-      dfsClientConf.setProperty(ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB,
-              Boolean.toString(getBoolean(ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB, ConfigKeys.DFS_STORE_SMALL_FILES_IN_DB_DEFAULT)));
       dfsClientConf.setProperty(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY,
-              Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
-      dfsClientConf.setProperty(ConfigKeys.DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_KEY, Integer.toString(ConfigKeys.DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_DEFAULT));
-    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.CephFS) {
-      System.out.println("Creating config for CephFS");
-      dfsClientConf.setProperty(ConfigKeys.FS_CEPH_IMPL_KEY, getFsCephImp());
-      dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_KEYRING_KEY, getCephAuthKeyRing());
-      dfsClientConf.setProperty(ConfigKeys.CEPH_CONF_FILE_KEY, getCephConfigFile());
-      dfsClientConf.setProperty(ConfigKeys.CEPH_ROOT_DIR_KEY, getCephRootDir());
-      dfsClientConf.setProperty(ConfigKeys.CEPH_MON_ADDRESS_KEY, getCephMonAddress());
-      dfsClientConf.setProperty(ConfigKeys.CEPH_AUTH_ID_KEY, getCephAuthId());
-    } else if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.MapRFS) {
-      System.out.println("Creating config for MapR-FS");
-      //FS_DEFAULTFS_KEY is already defined
+        Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
+
+      if (isSSLEnabled()) {
+        dfsClientConf.setProperty("ipc.server.ssl.enabled", "true");
+        dfsClientConf.setProperty("hadoop.ssl.hostname.verifier", "ALLOW_ALL");
+        dfsClientConf.setProperty("hadoop.rpc.socket.factory.class.default", "org.apache.hadoop.net.HopsSSLSocketFactory");
+        dfsClientConf.setProperty("hadoop.ssl.enabled.protocols", "TLSv1.2,TLSv1.1,TLSv1,SSLv3");
+        dfsClientConf.setProperty("client.rpc.ssl.enabled.protocol", "TLSv1.2");
+        dfsClientConf.setProperty("hops.tls.superuser-material-directory", "/srv/hops/super_crypto/${USER}");
+        dfsClientConf.setProperty("client.materialize.directory", "/srv/hops/certs-dir/transient");
+        dfsClientConf.setProperty("hadoop.proxyuser.hdfs.hosts", "*");
+        dfsClientConf.setProperty("hadoop.proxyuser.hdfs.groups", "*");
+      }
     } else {
       throw new UnsupportedOperationException(getBenchMarkFileSystemName() + " is not yet supported");
     }
@@ -647,7 +542,7 @@ public class BMConfiguration implements Serializable {
 
   private String getString(String key, String defaultVal) {
     String val = props.getProperty(key, defaultVal);
-    if(val != null){
+    if (val != null) {
       val.trim();
     }
     return val;

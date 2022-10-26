@@ -15,15 +15,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-CPU_AFFINITY=
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-nohup JAVA_BIN  -Dlog4j.configuration=file:$DIR/log4j.properties  -Xmx10g -cp $DIR/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.controller.Slave  $DIR/slave.properties &> hops-slave.log &
-PID=$!
 
-for tid in $(ps --no-headers -ww -p "$PID" -L -olwp | sed 's/$/ /' | tr  -d '\n')
-do
-   taskset -pc $CPU_AFFINITY "${tid}"  > /dev/null
-done
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+nohup JAVA_BIN  -Dlog4j.configuration=file:$DIR/log4j.properties  -Xmx10g -cp $DIR/hammer-bench.jar  io.hops.experiments.controller.Slave  $DIR/slave.properties &> hops-slave.log &
+PID=$!
 
 killer="$DIR/kill-slave.sh"
 rm -rf $killer

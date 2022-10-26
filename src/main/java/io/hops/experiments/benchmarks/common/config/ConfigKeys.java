@@ -24,7 +24,7 @@ package io.hops.experiments.benchmarks.common.config;
 public class ConfigKeys {
     
     public static final String BENCHMARK_FILE_SYSTEM_NAME_KEY = "benchmark.filesystem.name";
-    public static final String BENCHMARK_FILE_SYSTEM_NAME_DEFAULT = "HDFS";
+    public static final String BENCHMARK_FILE_SYSTEM_NAME_DEFAULT = "HopsFS";
   
     public static final int BUFFER_SIZE = 4*1024*1024; 
     
@@ -144,67 +144,8 @@ public class ConfigKeys {
     public static String INTLVD_DIR_CHANGE_USER_PERCENTAGE_KEY = "interleaved.dir.change.user.percentage";
     public static double INTLVD_DIR_CHANGE_USER_PERCENTAGE_DEFAULT = 0;     
         
-    public static String FS_CEPH_IMPL_KEY = "fs.ceph.impl";
-    public static String FS_CEPH_IMPL_DEFAULT = "org.apache.hadoop.fs.ceph.CephFileSystem";
-    
-    public static String CEPH_AUTH_KEYRING_KEY = "ceph.auth.keyring";
-    public static String CEPH_AUTH_KEYRING_DEFAULT = "/etc/ceph/ceph.client.admin.keyring";
-    
-    public static String CEPH_CONF_FILE_KEY = "ceph.conf.file";
-    public static String CEPH_CONF_FILE_DEFAULT = "/etc/ceph/ceph.conf";
-    
-    public static String CEPH_ROOT_DIR_KEY = "ceph.root.dir";
-    public static String CEPH_ROOT_DIR_DEFAULT = "/";
-            
-    public static String CEPH_MON_ADDRESS_KEY = "ceph.mon.address";
-    public static String CEPH_MON_ADDRESS_DEFAULT = "machine:6789";
-    
-    public static String CEPH_AUTH_ID_KEY = "ceph.auth.id";
-    public static String CEPH_AUTH_ID_DEFAULT = "user";
-    
-    public static String BR_BENCHMARK_DURATION_KEY = "br.benchmark.duration";
-    public static int BR_BENCHMARK_DURATION_DEFAULT = 0;
-
-    public static String BR_NUM_BLOCKS_PER_REPORT_KEY = "br.blocks.per.report";
-    public static int BR_NUM_BLOCKS_PER_REPORT_DEFAULT = 10;
-
-    public static String BR_NUM_BLOCKS_PER_FILE_KEY = "br.blocks.per.file";
-    public static int BR_NUM_BLOCKS_PER_FILE_DEFAULT = 10;
-
-    public static String BR_NUM_FILES_PER_DIR_KEY = "br.files.per.dir";
-    public static int BR_NUM_FILES_PER_DIR_DEFAULT = 10;
-
-    public static String BR_MAX_BLOCK_SIZE_KEY = "br.max.block.size";
-    public static int BR_MAX_BLOCK_SIZE_DEFAULT = 16;
-
-    public static String BR_READ_STATE_FROM_DISK_KEY = "br.read.state.from.disk";
-    public static boolean BR_READ_STATE_FROM_DISK_DEFAULT = false;
-
-    public static String BR_WRITE_STATE_TO_DISK_KEY = "br.write.state.to.disk";
-    public static boolean BR_WRITE_STATE_TO_DISK_DEFAULT = false;
-
     public static String BR_NUM_INVALID_BUCKETS_KEY = "br.num.invalid.buckets";
     public static int BR_NUM_INVALID_BUCKETS_DEFAULT = 0;
-
-    public static String BR_INCLUDE_BLOCKS_KEY = "br.include.blocks";
-    public static boolean BR_INCLUDE_BLOCKS_DEFAULT = true;
-
-    public static String BR_WARM_UP_PHASE_THREADS_PER_DN_KEY = "br.warmup.phase.threads.per.dn";
-    public static int BR_WARM_UP_PHASE_THREADS_PER_DN_DEFAULT = 5;
-
-    public static String BR_ON_DISK_STATE_PATH_KEY = "br.on.disk.state.path";
-    public static String BR_ON_DISK_STATE_PATH_DEFAULT = "/tmp/datanodes-state.txt.gz";
-
-    public static String BR_MAX_TIME_BEFORE_NEXT_REPORT =
-        "br.max.time.before.nextreport";
-    public static int BR_MAX_TIME_BEFORE_NEXT_REPORT_DEFAULT = 5000;
-
-    public static String BR_MIN_TIME_BEFORE_NEXT_REPORT =
-        "br.min.time.before.nextreport";
-    public static int BR_MIN_TIME_BEFORE_NEXT_REPORT_DEFAULT = 1000;
-
-    public static String BR_PERSIST_DATABASE = "br.persist.database";
-    public static String BR_PERSIST_DATABASE_DEFAULT = "example.com:3306";
 
     public static String REPLICATION_FACTOR_KEY = "replication.factor";
     public static short  REPLICATION_FACTOR_DEFAULT = 3;
@@ -275,29 +216,11 @@ public class ConfigKeys {
     public static String FS_DEFAULTFS_KEY = "fs.defaultFS";
     public static String FS_DEFAULTFS_DEFAULT = "";
 
-    public static String DFS_NAMESERVICES = "dfs.nameservices";
-    public static String DFS_NAMESERVICES_DEFAULT = "mycluster";
-
-    public static String DFS_NAMENODE_SELECTOR_POLICY_KEY="dfs.namenode.selector-policy";
-    public static String DFS_NAMENODE_SELECTOR_POLICY_DEFAULT="RANDOM_STICKY";
-    
-    public static String DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY="dfs.client.refresh.namenode.list";
-    public static long   DFS_CLIENT_REFRESH_NAMENODE_LIST_DEFAULT=60*60*1000;
-
-    public static String DFS_CLIENT_MAX_RETRIES_ON_FAILURE_KEY="dfs.clinet.max.retires.on.failure";
-    public static int   DFS_CLIENT_MAX_RETRIES_ON_FAILURE_DEFAULT=5;
-
-    public static String DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_KEY="dfs.client.initial.wait.on.retry";
-    public static long   DFS_CLIENT_INITIAL_WAIT_ON_FAILURE_DEFAULT=0;
-
-    public static String DFS_STORE_SMALL_FILES_IN_DB =  "dfs.store.small.files.in.db";
-    public static final boolean DFS_STORE_SMALL_FILES_IN_DB_DEFAULT = false;
-
     public static final String DFS_DB_FILE_MAX_SIZE_KEY = "dfs.db.file.max.size";
-    public static final int DFS_DB_FILE_MAX_SIZE_DEFAULT = 32*1024; // 32KB
+    public static final int DFS_DB_FILE_MAX_SIZE_DEFAULT = 64*1024; // 32KB
 
-    public static final String DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_KEY = "dsf.client.delay.before.file.close";
-    public static final int DFS_CLIENT_DELAY_BEFORE_FILE_CLOSE_DEFAULT = 0;
+    public static final String IPC_SERVER_SSL_ENABLED_KEY = "ipc.server.ssl.enabled";
+    public static final boolean IPC_SERVER_SSL_ENABLED_DEFAULT = true;
 
     //failover test
     public static String TEST_FAILOVER= "test.failover";
@@ -333,7 +256,4 @@ public class ConfigKeys {
 
     public static final String BR_NUM_BUCKETS_KEY= "br.num.buckets";
     public static final int BR_NUM_BUCKETS_DEFAULT = 1000;
-
-    public static final String BR_IGNORE_LOAD_BALANCER_KEY= "br.ignore.load.balancer";
-    public static final boolean BR_IGNORE_LOAD_BALANCER__DEFAULT = true;
 }

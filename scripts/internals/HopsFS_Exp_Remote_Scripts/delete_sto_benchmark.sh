@@ -16,5 +16,5 @@
 #   limitations under the License.
 #
 export HADOOP_CLIENT_OPTS=-Xmx256m
-../bin/hadoop jar hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar io.hops.experiments.benchmarks.DeleteDir $*
+../bin/hadoop jar hammer-bench.jar io.hops.experiments.benchmarks.DeleteDir $*
 

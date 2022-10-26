@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,7 +18,6 @@ package io.hops.experiments.results.compiler;
 
 import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.benchmarks.common.BMResult;
-import io.hops.experiments.benchmarks.blockreporting.BlockReportBMResults;
 import io.hops.experiments.benchmarks.interleaved.InterleavedBMResults;
 import io.hops.experiments.benchmarks.rawthroughput.RawBMResults;
 import io.hops.experiments.results.compiler.RawBMResultAggregator.CompiledResults;
@@ -41,13 +40,13 @@ import java.util.List;
  */
 public class CompileResults {
   @Option(name = "-hdfs", usage = "Location of result files for HDFS")
-  private static String hdfsInputDir = "/non-existant-path" ;
+  private static String hdfsInputDir = "/non-existant-path";
 
   @Option(name = "-hopsFS", usage = "Location of result files for HopsFS")
-  private static String hopsInputDir = "/non-existant-path" ;
+  private static String hopsInputDir = "/non-existant-path";
 
   @Option(name = "-output", usage = "Location of output dir")
-  private static String outputDir = "/non-existant-path" ;
+  private static String outputDir = "/non-existant-path";
 
   @Option(name = "-force", usage = "Also take in to account failed experiments")
   private static boolean force = false;
@@ -71,31 +70,30 @@ public class CompileResults {
 
 
   }
+
   private void doShit(String[] argv) throws FileNotFoundException, IOException, ClassNotFoundException {
     parseArgs(argv);
 
-    File dir = new File(outputDir );
+    File dir = new File(outputDir);
     if (!dir.exists()) {
       dir.mkdirs();
     }
 
     RawBMResultAggregator hdfsRawAggregatredResults = new RawBMResultAggregator();
     InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults = new InterleavedBMResultsAggregator();
-    BlockReportBMResultsAggregator hdfsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
-    
+
     RawBMResultAggregator hopsRawAggregatredResults = new RawBMResultAggregator();
     InterleavedBMResultsAggregator hopsInterleavedAggregatedResults = new InterleavedBMResultsAggregator();
-    BlockReportBMResultsAggregator hopsBlockReportAggregatedResults = new BlockReportBMResultsAggregator();
 
-    
-    List<File> hdfsResulsFiles = findFiles(hdfsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
-    List<File> hopsResulsFiles = findFiles(hopsInputDir,ConfigKeys.BINARY_RESULT_FILE_NAME);
+
+    List<File> hdfsResulsFiles = findFiles(hdfsInputDir, ConfigKeys.BINARY_RESULT_FILE_NAME);
+    List<File> hopsResulsFiles = findFiles(hopsInputDir, ConfigKeys.BINARY_RESULT_FILE_NAME);
     System.out.println("Processing HDFS Files");
-    parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults);
+    parseFiles(hdfsResulsFiles, hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults);
     System.out.println("Processing Hops Files");
-    parseFiles(hopsResulsFiles, hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults);
-    generateOutputFiles(hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults, hdfsBlockReportAggregatedResults,
-            hopsRawAggregatredResults, hopsInterleavedAggregatedResults, hopsBlockReportAggregatedResults, outputDir);
+    parseFiles(hopsResulsFiles, hopsRawAggregatredResults, hopsInterleavedAggregatedResults);
+    generateOutputFiles(hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults,
+      hopsRawAggregatredResults, hopsInterleavedAggregatedResults, outputDir);
   }
 
   public static List<File> findFiles(String path, String suffix) {
@@ -130,20 +128,18 @@ public class CompileResults {
   }
 
   private void parseFiles(List<File> files, RawBMResultAggregator rawAggregatredResults,
-          InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults)
-          throws FileNotFoundException, IOException, ClassNotFoundException {
+                          InterleavedBMResultsAggregator interleavedAggregatedResults)
+    throws FileNotFoundException, IOException, ClassNotFoundException {
     for (File file : files) {
       System.out.println("Processing File " + file);
-      parsetFile(file, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults);
+      parsetFile(file, rawAggregatredResults, interleavedAggregatedResults);
     }
   }
 
   private void parsetFile(File file,
-          RawBMResultAggregator rawAggregatredResults,
-          InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults)
-          throws FileNotFoundException, IOException, ClassNotFoundException {
+                          RawBMResultAggregator rawAggregatredResults,
+                          InterleavedBMResultsAggregator interleavedAggregatedResults)
+    throws FileNotFoundException, IOException, ClassNotFoundException {
     FileInputStream fin = new FileInputStream(file);
     ObjectInputStream ois = new ObjectInputStream(fin);
 
@@ -154,12 +150,12 @@ public class CompileResults {
           System.out.println("Wrong binary file " + file);
           System.exit(0);
         } else {
-          if(!validateResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults)){
-            System.err.println(file+" Contains Invalid/Inconsistant results");
-           if(!force) {
-             System.err.println(file+" Will be ignored. ");
-             return;
-           }
+          if (!validateResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults)) {
+            System.err.println(file + " Contains Invalid/Inconsistant results");
+            if (!force) {
+              System.err.println(file + " Will be ignored. ");
+              return;
+            }
           }
         }
       }
@@ -178,7 +174,7 @@ public class CompileResults {
           System.out.println("Wrong binary file " + file);
           System.exit(0);
         } else {
-          processResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults, blockReportAggregatedResults);
+          processResult((BMResult) obj, rawAggregatredResults, interleavedAggregatedResults);
         }
       }
     } catch (EOFException e) {
@@ -187,16 +183,13 @@ public class CompileResults {
     fin.close();
   }
 
-  private  boolean validateResult(BMResult result,
-          RawBMResultAggregator rawAggregatredResults,
-          InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults) {
+  private boolean validateResult(BMResult result,
+                                 RawBMResultAggregator rawAggregatredResults,
+                                 InterleavedBMResultsAggregator interleavedAggregatedResults) {
     if (result instanceof RawBMResults) {
       return rawAggregatredResults.validate((RawBMResults) result);
     } else if (result instanceof InterleavedBMResults) {
       return interleavedAggregatedResults.validate((InterleavedBMResults) result);
-    } else if (result instanceof BlockReportBMResults) {
-      return blockReportAggregatedResults.validate((BlockReportBMResults) result);
     } else {
       System.err.println("Wrong type of recode read.");
       System.exit(0);
@@ -205,15 +198,12 @@ public class CompileResults {
   }
 
   private void processResult(BMResult result,
-          RawBMResultAggregator rawAggregatredResults,
-          InterleavedBMResultsAggregator interleavedAggregatedResults,
-          BlockReportBMResultsAggregator blockReportAggregatedResults) {
+                             RawBMResultAggregator rawAggregatredResults,
+                             InterleavedBMResultsAggregator interleavedAggregatedResults) {
     if (result instanceof RawBMResults) {
       rawAggregatredResults.processRecord((RawBMResults) result);
     } else if (result instanceof InterleavedBMResults) {
       interleavedAggregatedResults.processRecord((InterleavedBMResults) result);
-    } else if (result instanceof BlockReportBMResults) {
-      blockReportAggregatedResults.processRecord((BlockReportBMResults) result);
     } else {
       System.err.println("Wrong type of recode read.");
       System.exit(0);
@@ -221,35 +211,28 @@ public class CompileResults {
   }
 
   private void generateOutputFiles(RawBMResultAggregator hdfsRawAggregatredResults,
-          InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults,
-          BlockReportBMResultsAggregator hdfsBlockReportAggregatedResults,
-          RawBMResultAggregator hopsRawAggregatredResults,
-          InterleavedBMResultsAggregator hopsInterleavedAggregatedResults,
-          BlockReportBMResultsAggregator hopsBlockReportAggregatedResults, 
-          String outputDir) throws IOException {
+                                   InterleavedBMResultsAggregator hdfsInterleavedAggregatedResults,
+                                   RawBMResultAggregator hopsRawAggregatredResults,
+                                   InterleavedBMResultsAggregator hopsInterleavedAggregatedResults,
+                                   String outputDir) throws IOException {
 
     CompiledResults hdfsRawCr = hdfsRawAggregatredResults.processAllRecords();
     CompiledResults hopsRawCr = hopsRawAggregatredResults.processAllRecords();
     RawBMResultAggregator.combineHDFSandHopsFS(hdfsRawCr, hopsRawCr, outputDir);
 
-    
-    InterleavedBMResultsAggregator.combineResults(
-            hdfsInterleavedAggregatedResults.getResults(),
-            hopsInterleavedAggregatedResults.getResults(),
-            outputDir);
 
-    
-    BlockReportBMResultsAggregator.combineResults(hdfsBlockReportAggregatedResults.getResults(), 
-            hopsBlockReportAggregatedResults.getResults(),
-            outputDir);
+    InterleavedBMResultsAggregator.combineResults(
+      hdfsInterleavedAggregatedResults.getResults(),
+      hopsInterleavedAggregatedResults.getResults(),
+      outputDir);
   }
-  
+
   public static void writeToFile(String file, String msg, boolean append) throws IOException {
     FileWriter out = new FileWriter(file, append);
     out.write(msg);
     out.close();
   }
-  
+
   protected static String format(String val) {
     return String.format("%1$-20s", val);
   }

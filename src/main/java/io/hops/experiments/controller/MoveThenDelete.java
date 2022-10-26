@@ -80,8 +80,6 @@ public class MoveThenDelete {
   private org.apache.hadoop.conf.Configuration createHdfsConf() {
     org.apache.hadoop.conf.Configuration dfsClientConf = new org.apache.hadoop.conf.Configuration();
     dfsClientConf.set(ConfigKeys.FS_DEFAULTFS_KEY, args.getNameNodeRpcAddress());
-    dfsClientConf.set(ConfigKeys.DFS_CLIENT_REFRESH_NAMENODE_LIST_KEY, Long.toString(args.getNameNodeRefreshRate()));
-    dfsClientConf.set(ConfigKeys.DFS_NAMENODE_SELECTOR_POLICY_KEY, args.getNameNodeSelectorPolicy());
     return dfsClientConf;
   }
 }

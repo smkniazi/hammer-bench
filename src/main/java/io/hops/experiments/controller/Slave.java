@@ -60,12 +60,12 @@ public class Slave {
     public void start(String configFilePath) throws Exception {
         args = new SlaveArgsReader(configFilePath);
         connect();
-        handShakeWithMaster(); 
+        handShakeWithMaster();
         startListener();
     }
 
     private void handShakeWithMaster() throws IOException, ClassNotFoundException {
-        
+
         System.out.println("Waiting for handshake message ");
         Object obj = receiveRequestFromMaster();
 
@@ -85,7 +85,7 @@ public class Slave {
               //Logger.printMsg("Client Settings "+keyStr+" --> "+val);
               dfsClientConf.set(keyStr, val);
             }
-            
+
             benchmark = Benchmark.getBenchmark(dfsClientConf, bmConf, slaveId);
 
             sendResponseToMaster(new Handshake.Response());
@@ -135,3 +135,4 @@ public class Slave {
         System.out.println("Sent response to master. Time: "+(System.currentTimeMillis() - startTime)+" ms");
     }
 }
+

@@ -9,10 +9,7 @@ package io.hops.experiments.benchmarks.common;
  * @author salman
  */
 public enum BenchMarkFileSystemName {
-    HopsFS      ("HopsFS"),
-    HDFS        ("HDFS"),
-    CephFS      ("CephFS"),
-    MapRFS      ("MapR-FS");
+    HopsFS      ("HopsFS");
 
     private final String phase;
     private BenchMarkFileSystemName(String phase){

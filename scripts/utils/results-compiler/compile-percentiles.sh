@@ -25,7 +25,7 @@ if [ "$#" -ne 4 ]; then
 fi
 
 date1=$(date +"%s")
-java -Xmx5g -cp $DIR/../../../target/hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 $4
+java -Xmx5g -cp $DIR/hammer-bench.jar  io.hops.experiments.results.compiler.CalculatePercentiles $1 $2 $3 $4
 date2=$(date +"%s")
 diff=$(($date2-$date1))
 echo "Execution Time $currentExpDir $(($diff / 60)) minutes and $(($diff % 60)) seconds."

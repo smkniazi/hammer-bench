@@ -29,16 +29,14 @@ PRSYNC=$($DIR/prsynccmd.sh)
  echo "***   Copying the Experiment to $HopsFS_Experiments_Remote_Dist_Folder  on ${BM_Machines_FullList[*]}***"
         $PSSH -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  'mkdir -p '$HopsFS_Experiments_Remote_Dist_Folder
 
-	JarFileName=hop-experiments-1.0-SNAPSHOT-jar-with-dependencies.jar
 	temp_folder=/tmp/hop_exp_distro
 	rm -rf $temp_folder
 	mkdir -p $temp_folder	
-	cp $HopsFS_Src_Folder/target/$JarFileName $temp_folder/
+	cp $Dist_Dir/$Bench_JAR $temp_folder/
 	cp ./internals/HopsFS_Exp_Remote_Scripts/* $temp_folder/
 	cp ./master.properties $temp_folder/
 	cp ./slave.properties $temp_folder/
 
-        sed -i 's|JAVA_BIN|'$JAVA_BIN'|g' $temp_folder/*.sh
-        sed -i 's|CPU_AFFINITY=.*|CPU_AFFINITY='$CPU_AFFINITY'|g' $temp_folder/*.sh
+  sed -i 's|JAVA_BIN|'$JAVA_BIN'|g' $temp_folder/*.sh
 
 	$PRSYNC -arzv -H "${BM_Machines_FullList[*]}" --user $HopsFS_User     $temp_folder/   $HopsFS_Experiments_Remote_Dist_Folder  
