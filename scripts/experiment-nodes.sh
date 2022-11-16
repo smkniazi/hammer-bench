@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-nohup JAVA_BIN  -Dlog4j.configuration=file:$DIR/log4j.properties  -Xmx10g -cp $DIR/hammer-bench.jar  io.hops.experiments.controller.Slave  $DIR/slave.properties &> hops-slave.log &
-PID=$!
 
-killer="$DIR/kill-slave.sh"
-rm -rf $killer
-touch $killer
-chmod +x $killer
+#echo "host1 host2"
+nodes=()
+for i in $(seq 0 99); do
+  ping -c 1 $i.tester.service.consul > /dev/null
+  if [ "$?" -eq "0" ]; then
+    nodes+="$i.tester.service.consul"
+  else
+    break 
+  fi
+done
 
-echo  \#\!/bin/bash >  $killer
-echo  "kill -9 $PID" >> $killer
-echo "Started Slave"
-
-
+echo ${nodes[@]}
+exit 0

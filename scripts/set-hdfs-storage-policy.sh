@@ -1,1 +1,1 @@
-hdfs storagepolicies -setStoragePolicy -path $1 -policy $2
+/srv/hops/hadoop/bin/hdfs storagepolicies -setStoragePolicy -path $1 -policy $2
