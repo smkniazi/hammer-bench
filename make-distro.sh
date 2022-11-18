@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 version=$(grep -A1 "hammer-bench" pom.xml | grep -ioh "[0-9.]*")
-#mvn clean install
+mvn clean install
 DIST=hammer-bench-$version
 rm -rf $DIST 
 mkdir $DIST 
