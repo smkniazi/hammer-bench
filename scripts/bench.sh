@@ -16,16 +16,57 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
-Dist_Dir=.
-Bench_JAR=hammer-bench.jar
-HopsFS_Experiments_Remote_Dist_Folder=/tmp/hops-benchmark-jars
+#experiments to run
+#NOTE all experiment related parameters are in master.properties file
+Benchmark_Types=(
+  RAW #Test raw throughput of individual operations
+  INTERLEAVED #Test synthetic workload from spotify 
+  ) 
+
+help(){
+  cat <<EOF
+  bench.sh {-b benchmark} 
+  -b benchmark, 
+      Name of the benchmark to run. If this is skipped then it will run all the benchmarks  
+      Right now it supports two benchmarks. 
+      RAW: This tests one file system operation at a time. For example, number of writes/sec, reads/sec etc.
+      INTERLEAVED: Runs an industrial workload from Spotify
+EOF
+}
+
+UserBM=
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+while getopts ":b:" opt; do
+    case "$opt" in
+    b)  UserBM=$OPTARG
+        ;;
+    *)
+        help
+        exit 1
+        ;;
+    esac
+done
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+
+if [ -n "$UserBM" ]; then
+  if [ "$UserBM" != "RAW" ] && [ "$UserBM" != "INTERLEAVED" ]; then
+    echo "Wrong benchmark type $UserBM"
+    help
+    exit 1
+  else
+   Benchmark_Types=($UserBM)
+  fi
+fi
+
+Bench_JAR=$DIR/hammer-bench.jar
 HopsFS_User=hdfs
 NameNodeRpcPort=8020
-All_Results_Folder="/tmp/hops-bm/"                                        #This is where the results are saved. 
-exp_remote_bench_mark_result_dir="/tmp/hops-bm-master-results/"           #This the folder on where the master sotres the results. 
+HopsFS_Experiments_Remote_Dist_Folder="/tmp/hammer-bench-benchmark-jars"
+All_Results_Folder="/tmp/hammer-bench-results/"                            #This is where the results are saved. 
+exp_remote_bench_mark_result_dir="/tmp/hammer-bench-master-results/"       #This the folder on where the master sotres the results. 
 #full path to java or just java if PATH is set
 JAVA_BIN=java
-TOTAL_CLIENTS=40 
 REPEAT_EXP_TIMES=1
 
 #Machines
@@ -35,13 +76,6 @@ NNS_FullList=(`grep -v "^#" $DIR/namenodes`)
 #These are the machines that run the benchmark application.
 #Basically, these machines are containers for DFSClients. 
 BM_Machines_FullList=$($DIR/experiment-nodes.sh)      
-
-#experiments to run
-#NOTE all experiment related parameters are in master.properties file
-Benchmark_Types=(
-  #RAW #Test raw throughput of individual operations
-  INTERLEAVED #Test synthetic workload from spotify 
-  ) 
 
 exp_master_prop_file="$DIR/master.properties"
 exp_deploy_script="$DIR/internals/upload_experiments.sh"
@@ -56,7 +90,6 @@ run() {
   echo "Non_Leader_NNs $Non_Leader_NNs"
   echo "Slaves $ExpMaster ${ExpSlaves[@]}"
   echo "Master $ExpMaster"
-  echo "Threads/Slave $ClientsPerSlave"
   echo "currentExpDir $currentExpDir"
   echo "BenchMark $BenchMark"
   echo "DataNodes $DNS_FullList_STR"
@@ -65,7 +98,6 @@ run() {
 
   sed -i 's|list.of.slaves.*|list.of.slaves='"$ExpMaster ${ExpSlaves[@]}"'|g'       $exp_master_prop_file
   sed -i 's|benchmark.type.*|benchmark.type='$BenchMark'|g'                         $exp_master_prop_file
-  sed -i 's|num.slave.threads.*|num.slave.threads='$ClientsPerSlave'|g'             $exp_master_prop_file
   sed -i 's|results.dir.*|results.dir='$exp_remote_bench_mark_result_dir'|g'        $exp_master_prop_file      
   sed -i 's|fs.defaultFS=.*|fs.defaultFS='$BOOT_STRAP_NN'|g'                        $exp_master_prop_file
   sed -i 's|no.of.namenodes.*|no.of.namenodes='$TotalNNCount'|g'                    $exp_master_prop_file
@@ -122,12 +154,8 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
     mkdir -p $currentDirBM
 
     TotalSlaves=${#BM_Machines_FullList[@]}
-    ClientsPerSlave=$(echo "scale=2; ($TOTAL_CLIENTS)/$TotalSlaves" | bc)
-
-    #ceiling
-    ClientsPerSlave=$(echo "scale=2; ($ClientsPerSlave + 0.5) " | bc)
-    ClientsPerSlave=$(echo "($ClientsPerSlave/1)" | bc)
-    TotalClients=$(echo "($ClientsPerSlave * $TotalSlaves)" | bc) #recalculate
+    ClientsPerSlave=$(grep "num.slave.threads" master.properties | grep -ioh "[0-9]*") 
+    TotalClients=$(echo "($ClientsPerSlave * $TotalSlaves)" | bc)
 
     ExpSlaves=""
     ExpMaster=""
@@ -151,6 +179,6 @@ while [  $counter -lt $REPEAT_EXP_TIMES ]; do
     run
   done
 done
-exit
+exit 0
 
 

@@ -25,7 +25,7 @@ $PSSH -H "${BM_Machines_FullList[*]}"  -l $HopsFS_User -i  'mkdir -p '$HopsFS_Ex
 temp_folder=/tmp/hop_exp_distro
 rm -rf $temp_folder
 mkdir -p $temp_folder	
-cp $Dist_Dir/$Bench_JAR $temp_folder/
+cp $Bench_JAR $temp_folder/
 cp ./internals/HopsFS_Exp_Remote_Scripts/* $temp_folder/
 cp ./master.properties $temp_folder/
 cp ./slave.properties $temp_folder/
