@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -28,7 +28,6 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 /**
- *
  * @author salman
  */
 public class FileTreeGenerator implements FilePool {
@@ -46,19 +45,18 @@ public class FileTreeGenerator implements FilePool {
   private long currentFileDataRead = -1;
 
   public FileTreeGenerator(String baseDir, int filesPerDir,
-          int dirPerDir, int initialTreeDepth, String fileDistribution) {
+                           int dirPerDir, int initialTreeDepth, String fileDistribution) {
 
     this.allThreadFiles = new ArrayList<String>(10000);
     this.allThreadDirs = new ArrayList<String>(10000);
     this.rand1 = new Random(System.currentTimeMillis());
     uuid = UUID.randomUUID();
 
-    if (fileDistribution == null){// return 0
-        fileDistribution = ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT;
+    if (fileDistribution == null) {// return 0
+      fileDistribution = ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT;
     }
 
     fileSizeCoin = new FileSizeMultiFaceCoin(fileDistribution);
-
 
     String machineName = "";
     try {
@@ -72,10 +70,10 @@ public class FileTreeGenerator implements FilePool {
       baseDir = baseDir + "/";
     }
 
-    if(baseDir.compareTo("/")==0){
-      threadDir = baseDir + machineName+"_"+uuid;
-    }else{
-      threadDir = baseDir + machineName+"/"+uuid;
+    if (baseDir.compareTo("/") == 0) {
+      threadDir = baseDir + machineName + "_" + uuid;
+    } else {
+      threadDir = baseDir + machineName + "/" + uuid;
     }
 
     String[] comp = PathUtils.getPathNames(threadDir);
@@ -136,7 +134,7 @@ public class FileTreeGenerator implements FilePool {
   @Override
   public void fileRenamed(String from, String to) {
     String curr = allThreadFiles.get(currIndex);
-    if(curr != from){
+    if (curr != from) {
       IllegalStateException up = new IllegalStateException("File name did not match.");
       throw up;
     }
@@ -148,8 +146,8 @@ public class FileTreeGenerator implements FilePool {
     if (allThreadFiles.isEmpty()) {
       return null;
     }
-    if(allThreadFiles.size()>0){
-      currIndex = allThreadFiles.size()-1;
+    if (allThreadFiles.size() > 0) {
+      currIndex = allThreadFiles.size() - 1;
       String file = allThreadFiles.remove(currIndex);
       return file;
     }
@@ -221,13 +219,13 @@ public class FileTreeGenerator implements FilePool {
   @Override
   public long getFileData(byte[] buffer) throws IOException {
     long toRead = -1;
-    if((currentFileDataRead+buffer.length)>=currentFileSize){
+    if ((currentFileDataRead + buffer.length) >= currentFileSize) {
       toRead = currentFileSize - currentFileDataRead;
-    } else{
+    } else {
       toRead = buffer.length;
     }
 
-    if(toRead>0) {
+    if (toRead > 0) {
       for (int i = 0; i < toRead; i++) {
         buffer[i] = 0;
       }
@@ -246,7 +244,7 @@ public class FileTreeGenerator implements FilePool {
   }
 
   @Override
-  public boolean hasMoreFilesToWrite(){
+  public boolean hasMoreFilesToWrite() {
     return true;
   }
 
@@ -264,14 +262,14 @@ public class FileTreeGenerator implements FilePool {
       }
     }
 
-    System.err.println("Unable to getRandomFile from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
-    Logger.printMsg("Error: Unable to getRandomFile from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
+    System.err.println("Unable to getRandomFile from file pool: " + this + " PoolSize is: " + allThreadFiles.size());
+    Logger.printMsg("Error: Unable to getRandomFile from file pool: " + this + " PoolSize is: " + allThreadFiles.size());
     return null;
   }
 
-  private int getPathLength(String path){
+  private int getPathLength(String path) {
 //    return PathUtils.getPathNames(path).length;
-     return StringUtils.countMatches(path,"/");
+    return StringUtils.countMatches(path, "/");
   }
 
   public String getRandomDir() {
@@ -289,8 +287,8 @@ public class FileTreeGenerator implements FilePool {
       }
     }
 
-    System.err.println("Unable to getRandomDir from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
-    Logger.printMsg("Error: Unable to getRandomDir from file pool: "+this+" PoolSize is: "+allThreadFiles.size());
+    System.err.println("Unable to getRandomDir from file pool: " + this + " PoolSize is: " + allThreadFiles.size());
+    Logger.printMsg("Error: Unable to getRandomDir from file pool: " + this + " PoolSize is: " + allThreadFiles.size());
     return null;
   }
 

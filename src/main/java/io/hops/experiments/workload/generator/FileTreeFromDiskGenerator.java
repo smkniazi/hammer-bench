@@ -31,61 +31,60 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- *
  * @author salman
  */
 public class FileTreeFromDiskGenerator extends FileTreeGenerator {
 
-    private File currentFile = null;
-    private FileInputStream inputStream = null;
+  private File currentFile = null;
+  private FileInputStream inputStream = null;
 
-    DiskNameSpaceReader diskNameSpaceReader = null;
+  DiskNameSpaceReader diskNameSpaceReader = null;
 
-    public FileTreeFromDiskGenerator(String baseDir, int filesPerDir,
-                                     int dirPerDir, int initialTreeDepth, String path) {
-        super(baseDir, filesPerDir, dirPerDir, initialTreeDepth, null);
-        diskNameSpaceReader = DiskNameSpaceReader.getInstance(path);
+  public FileTreeFromDiskGenerator(String baseDir, int filesPerDir,
+                                   int dirPerDir, int initialTreeDepth, String path) {
+    super(baseDir, filesPerDir, dirPerDir, initialTreeDepth, null);
+    diskNameSpaceReader = DiskNameSpaceReader.getInstance(path);
+  }
+
+  @Override
+  public long getFileData(byte[] buffer) throws IOException {
+    if (inputStream != null) {
+      return inputStream.read(buffer);
+    } else {
+      return -1;
+    }
+  }
+
+
+  @Override
+  public long getNewFileSize() throws IOException {
+    if (inputStream != null) {
+      //close the old file
+      inputStream.close();
+    }
+    currentFile = diskNameSpaceReader.getFile();
+    if (currentFile != null) {
+      System.out.println("File: " + currentFile.getCanonicalPath() + " Size: " + currentFile.length());
+      inputStream = new FileInputStream(currentFile.getAbsoluteFile());
+      return currentFile.length();
+    } else {
+      inputStream = null;
+      currentFile = null;
+      return 0;
     }
 
-    @Override
-    public long getFileData(byte[] buffer) throws IOException {
-        if(inputStream != null){
-            return  inputStream.read(buffer);
-        } else {
-            return -1;
-        }
-    }
 
+  }
 
-    @Override
-    public long getNewFileSize() throws IOException {
-        if(inputStream != null){
-           //close the old file
-            inputStream.close();
-        }
-        currentFile = diskNameSpaceReader.getFile();
-        if (currentFile != null) {
-            System.out.println("File: " + currentFile.getCanonicalPath() + " Size: " + currentFile.length());
-            inputStream = new FileInputStream(currentFile.getAbsoluteFile());
-            return currentFile.length();
-        } else {
-            inputStream = null;
-            currentFile = null;
-            return 0;
-        }
+  @Override
+  public boolean hasMoreFilesToWrite() {
+    return diskNameSpaceReader.hasMoreFiles();
+  }
 
-
-    }
-
-    @Override
-    public boolean hasMoreFilesToWrite(){
-        return diskNameSpaceReader.hasMoreFiles();
-    }
-
-    @Override
-    public String getFileToRead() {
+  @Override
+  public String getFileToRead() {
 //        return super.getFileToRead();
-        return super.getFileToDelete();
-    }
+    return super.getFileToDelete();
+  }
 }
 

@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -19,6 +19,7 @@ package io.hops.experiments.benchmarks.interleaved.coin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+
 import io.hops.experiments.benchmarks.common.BenchmarkOperations;
 import io.hops.experiments.utils.DFSOperationsUtils;
 
@@ -51,7 +52,7 @@ public class InterleavedMultiFaceCoin {
   private BigDecimal dirChown;
   //private BigDecimal 
   private Random rand;
-  private BigDecimal expansion = new BigDecimal(100.00,new MathContext(4,RoundingMode.HALF_UP));
+  private BigDecimal expansion = new BigDecimal(100.00, new MathContext(4, RoundingMode.HALF_UP));
   //1000 face dice
   ArrayList<BenchmarkOperations> dice = new ArrayList<BenchmarkOperations>();
 
@@ -86,17 +87,17 @@ public class InterleavedMultiFaceCoin {
             + mkdirs + " rename: " + rename + " delete: " + delete + " lsFile: "
             + lsFile + " lsDir: " + lsDir + " chmod files: " + chmodFiles + " chmod dirs: " + chmodDirs
             + " setReplication: " + setReplication + " fileInfo: " + fileInfo + " dirInfo: " + dirInfo
-            + " fileChown: "+fileChown+" dirChown: "+dirChown);
+            + " fileChown: " + fileChown + " dirChown: " + dirChown);
 
     BigDecimal total = create.add(append).add(read).add(rename).add(delete).add(lsFile).add(lsDir)
             .add(chmodFiles).add(chmodDirs).add(mkdirs).add(setReplication).add(fileInfo).
             add(dirInfo).add(fileChown).add(dirChown);
 
-    if (total.compareTo(new BigDecimal(100))!=0) {
+    if (total.compareTo(new BigDecimal(100)) != 0) {
       throw new IllegalArgumentException("All probabilities should add to 100. Got: " + total);
     }
 
-    
+
     for (int i = 0; i < create.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.CREATE_FILE);
     }
@@ -113,7 +114,7 @@ public class InterleavedMultiFaceCoin {
       dice.add(BenchmarkOperations.RENAME_FILE);
     }
 
-    
+
     for (int i = 0; i < delete.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.DELETE_FILE);
     }
@@ -149,11 +150,11 @@ public class InterleavedMultiFaceCoin {
     for (int i = 0; i < dirInfo.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.DIR_INFO);
     }
-    
+
     for (int i = 0; i < fileChown.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.CHOWN_FILE);
     }
-    
+
     for (int i = 0; i < dirChown.multiply(expansion).intValueExact(); i++) {
       dice.add(BenchmarkOperations.CHOWN_DIR);
     }
@@ -170,8 +171,8 @@ public class InterleavedMultiFaceCoin {
         counts.put(op, opCount);
       }
       for (BenchmarkOperations op : counts.keySet()) {
-        double percent = ((double) counts.get(op) / ((double)expectedSize) * 100);
-                
+        double percent = ((double) counts.get(op) / ((double) expectedSize) * 100);
+
         System.out.println(op + " count " + counts.get(op) + ",  " + DFSOperationsUtils.round(percent) + "%");
       }
       throw new IllegalStateException("Dice is not properfly created. Dice should have  " + expectedSize + " faces. Found " + dice.size());
@@ -200,11 +201,11 @@ public class InterleavedMultiFaceCoin {
 
 
     for (BenchmarkOperations op : counts.keySet()) {
-      double percent = (double) counts.get(op) / ( times.doubleValue()) * (double) 100;
-      System.out.println(op + ": count: "+counts.get(op)+"        " + DFSOperationsUtils.round(percent)+"%");
+      double percent = (double) counts.get(op) / (times.doubleValue()) * (double) 100;
+      System.out.println(op + ": count: " + counts.get(op) + "        " + DFSOperationsUtils.round(percent) + "%");
     }
   }
-  
+
 //  public static void main(String [] argv){
 //    System.out.println(new BigDecimal((double)0.09,new MathContext(4,RoundingMode.HALF_UP)).multiply(new BigDecimal(100)).intValueExact());
 //    

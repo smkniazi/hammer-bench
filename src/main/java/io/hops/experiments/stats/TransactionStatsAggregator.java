@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ public class TransactionStatsAggregator {
   private final String headerPattern;
 
   public TransactionStatsAggregator(File statsCSVFile,
-      String transaction, String headerPattern) {
+                                    String transaction, String headerPattern) {
     this.statsCSVFile = statsCSVFile;
     this.transaction = transaction.toUpperCase();
     this.headerPattern = headerPattern.toUpperCase();
@@ -49,19 +49,19 @@ public class TransactionStatsAggregator {
 
 
   public static Map<String, DescriptiveStatistics> aggregate(File statsFile,
-      String transaction) throws IOException {
+                                                             String transaction) throws IOException {
     return aggregate(statsFile, ALL, transaction, false);
   }
 
   public static Map<String, DescriptiveStatistics> aggregate(File statsFile,
-      String header, String transaction) throws IOException {
+                                                             String header, String transaction) throws IOException {
     return aggregate(statsFile, header, transaction, false);
   }
 
   public static Map<String, DescriptiveStatistics> aggregate(File statsFile,
-      String headerPattern, String transaction, boolean printSummary)
-      throws IOException {
-    if(!statsFile.exists())
+                                                             String headerPattern, String transaction, boolean printSummary)
+          throws IOException {
+    if (!statsFile.exists())
       return null;
 
     transaction = transaction.toUpperCase();
@@ -70,24 +70,24 @@ public class TransactionStatsAggregator {
     String tx = reader.readLine();
     String[] headers = null;
     Map<Integer, DescriptiveStatistics> statistics = Maps.newHashMap();
-    if(tx != null){
+    if (tx != null) {
       headers = tx.split(",");
-      for(int i=1; i< headers.length; i++){
+      for (int i = 1; i < headers.length; i++) {
         String h = headers[i].toUpperCase();
-        if(h.contains(headerPattern) || headerPattern.equals(ALL)){
+        if (h.contains(headerPattern) || headerPattern.equals(ALL)) {
           statistics.put(i, new DescriptiveStatistics());
         }
       }
     }
 
     int txCount = 0;
-    while ((tx = reader.readLine()) != null){
-      if(tx.startsWith(transaction) || transaction.equals(ALL)){
+    while ((tx = reader.readLine()) != null) {
+      if (tx.startsWith(transaction) || transaction.equals(ALL)) {
         txCount++;
         String[] txStats = tx.split(",");
-        if(txStats.length == headers.length) {
+        if (txStats.length == headers.length) {
           for (Map.Entry<Integer, DescriptiveStatistics> e : statistics
-              .entrySet()) {
+                  .entrySet()) {
             e.getValue().addValue(Double.valueOf(txStats[e.getKey()]));
           }
         }
@@ -96,10 +96,10 @@ public class TransactionStatsAggregator {
 
     reader.close();
 
-    if(headers == null)
+    if (headers == null)
       return null;
 
-    if(printSummary) {
+    if (printSummary) {
       System.out.println("Transaction: " + transaction + " " + txCount);
 
       List<Integer> keys = new ArrayList<Integer>(statistics.keySet());
@@ -112,14 +112,14 @@ public class TransactionStatsAggregator {
         }
         System.out.println(headers[i]);
         System.out.println("Min " + stats.getMin() + " Max " + stats.getMax() +
-            " Avg " + stats.getMean() + " Std " + stats.getStandardDeviation());
+                " Avg " + stats.getMean() + " Std " + stats.getStandardDeviation());
       }
     }
 
     Map<String, DescriptiveStatistics> annotatedStats = Maps
-        .newHashMap();
-    for(Map.Entry<Integer, DescriptiveStatistics> e : statistics
-        .entrySet()){
+            .newHashMap();
+    for (Map.Entry<Integer, DescriptiveStatistics> e : statistics
+            .entrySet()) {
       annotatedStats.put(headers[e.getKey()].trim(), e.getValue());
     }
     return annotatedStats;

@@ -26,83 +26,82 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- *
  * @author salman
  */
 public class InterleavedBenchmarkCommand {
 
-    public static class Request implements BenchmarkCommand.Request {
-        private BMConfiguration config;
+  public static class Request implements BenchmarkCommand.Request {
+    private BMConfiguration config;
 
-        public Request(BMConfiguration config) {
-          this.config = config;
-        }
-
-        public BMConfiguration getConfig(){
-            return config;
-        }
-
-        @Override
-        public BenchmarkType getBenchMarkType() {
-            return BenchmarkType.INTERLEAVED;
-        }
+    public Request(BMConfiguration config) {
+      this.config = config;
     }
 
-    public static class Response implements BenchmarkCommand.Response {
-
-        private final long runTime;
-        private final long totalSuccessfulOps;
-        private final long totalFailedOps;
-        private final double opsPerSec;
-        private final double avgOpLatency;
-        private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
-        private final List<String> failOverLog;
-        private final int nnCount;
-
-        public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
-                        HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog,
-                        int nnCount) {
-            this.runTime = runTime;
-            this.totalSuccessfulOps = totalSuccessfulOps;
-            this.totalFailedOps = totalFailedOps;
-            this.opsPerSec = opsPerSec;
-            this.opsExeTimes = opsExeTimes;
-            this.failOverLog = failOverLog;
-            this.avgOpLatency = avgOpLatency;
-            this.nnCount = nnCount;
-        }
-
-        public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
-            return opsExeTimes;
-        }
-
-
-        public long getRunTime() {
-            return runTime;
-        }
-
-        public long getTotalSuccessfulOps() {
-            return totalSuccessfulOps;
-        }
-
-        public long getTotalFailedOps() {
-            return totalFailedOps;
-        }
-
-        public double getOpsPerSec() {
-            return opsPerSec;
-        }
-
-        public List<String> getFailOverLog() {
-            return failOverLog;
-        }
-
-        public double getAvgOpLatency() {
-            return avgOpLatency;
-        }
-
-        public int getNnCount() {
-            return nnCount;
-        }
+    public BMConfiguration getConfig() {
+      return config;
     }
+
+    @Override
+    public BenchmarkType getBenchMarkType() {
+      return BenchmarkType.INTERLEAVED;
+    }
+  }
+
+  public static class Response implements BenchmarkCommand.Response {
+
+    private final long runTime;
+    private final long totalSuccessfulOps;
+    private final long totalFailedOps;
+    private final double opsPerSec;
+    private final double avgOpLatency;
+    private final HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes;
+    private final List<String> failOverLog;
+    private final int nnCount;
+
+    public Response(long runTime, long totalSuccessfulOps, long totalFailedOps, double opsPerSec,
+                    HashMap<BenchmarkOperations, ArrayList<Long>> opsExeTimes, double avgOpLatency, List<String> failOverLog,
+                    int nnCount) {
+      this.runTime = runTime;
+      this.totalSuccessfulOps = totalSuccessfulOps;
+      this.totalFailedOps = totalFailedOps;
+      this.opsPerSec = opsPerSec;
+      this.opsExeTimes = opsExeTimes;
+      this.failOverLog = failOverLog;
+      this.avgOpLatency = avgOpLatency;
+      this.nnCount = nnCount;
+    }
+
+    public HashMap<BenchmarkOperations, ArrayList<Long>> getOpsExeTimes() {
+      return opsExeTimes;
+    }
+
+
+    public long getRunTime() {
+      return runTime;
+    }
+
+    public long getTotalSuccessfulOps() {
+      return totalSuccessfulOps;
+    }
+
+    public long getTotalFailedOps() {
+      return totalFailedOps;
+    }
+
+    public double getOpsPerSec() {
+      return opsPerSec;
+    }
+
+    public List<String> getFailOverLog() {
+      return failOverLog;
+    }
+
+    public double getAvgOpLatency() {
+      return avgOpLatency;
+    }
+
+    public int getNnCount() {
+      return nnCount;
+    }
+  }
 }

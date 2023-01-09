@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,40 +24,40 @@ import java.io.IOException;
  *
  * @author salman
  */
-public interface FilePool {     
-    
+public interface FilePool {
+
   public String getDirToCreate();
-  
+
   public String getFileToCreate();
-  
+
   public void fileCreationSucceeded(String file);
 
   public String getFileToAppend();
-  
+
   public String getFileToRead();
-  
+
   public String getFileToStat();
-  
+
   public String getDirToStat();
-  
+
   public String getFileToInfo();
-  
+
   public String getDirToInfo();
-  
+
   public String getFileToSetReplication();
-  
+
   public String getFilePathToChangePermissions();
-  
+
   public String getDirPathToChangePermissions();
-  
+
   public String getFileToRename();
-  
+
   public void fileRenamed(String from, String to);
-  
+
   public String getFileToDelete();
-  
+
   public String getFileToChown();
-  
+
   public String getDirToChown();
 
   public long getFileData(byte[] buffer) throws IOException;

@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,10 +29,11 @@ import java.util.*;
  */
 public class FileSizeMultiFaceCoin {
 
-  private class Point{
+  private class Point {
     long size;
     BigDecimal percentage;
-    Point(long size, BigDecimal percentage){
+
+    Point(long size, BigDecimal percentage) {
       this.size = size;
       this.percentage = percentage;
     }
@@ -40,7 +41,7 @@ public class FileSizeMultiFaceCoin {
 
   //private BigDecimal
   private Random rand;
-  private BigDecimal expansion = new BigDecimal(100.00,new MathContext(4,RoundingMode.HALF_UP));
+  private BigDecimal expansion = new BigDecimal(100.00, new MathContext(4, RoundingMode.HALF_UP));
   //1000 face dice
   ArrayList<Long> dice = new ArrayList<Long>();
 
@@ -52,15 +53,15 @@ public class FileSizeMultiFaceCoin {
   private void createCoin(List<Point> points) {
 
     BigDecimal total = new BigDecimal(0);
-    for(Point point : points){
+    for (Point point : points) {
       total = total.add(point.percentage);
     }
 
-    if (total.compareTo(new BigDecimal(100.0))!=0) {
+    if (total.compareTo(new BigDecimal(100.0)) != 0) {
       throw new IllegalArgumentException("All probabilities should add to 100. Got: " + total);
     }
 
-    for(Point point : points){
+    for (Point point : points) {
       for (int i = 0; i < point.percentage.multiply(expansion).intValueExact(); i++) {
         dice.add(point.size);
       }
@@ -79,7 +80,7 @@ public class FileSizeMultiFaceCoin {
       }
 
       for (Long size : counts.keySet()) {
-        double percent = ((double) counts.get(size) / ((double)expectedSize) * 100);
+        double percent = ((double) counts.get(size) / ((double) expectedSize) * 100);
         System.out.println(size + " count " + counts.get(size) + ",  " + DFSOperationsUtils.round(percent) + "%");
       }
       throw new IllegalStateException("Dice is not properfly created. Dice should have  " + expectedSize + " faces. Found " + dice.size());
@@ -88,22 +89,22 @@ public class FileSizeMultiFaceCoin {
     Collections.shuffle(dice);
   }
 
-  private List<Point> parse(String str){
+  private List<Point> parse(String str) {
     List<Point> points = new ArrayList<Point>();
-    try{
-      StringTokenizer strTok = new StringTokenizer(str," ,[]()");
-      while(strTok.hasMoreElements()){
+    try {
+      StringTokenizer strTok = new StringTokenizer(str, " ,[]()");
+      while (strTok.hasMoreElements()) {
         String size = strTok.nextToken();
         String percentage = strTok.nextToken();
         long s = Long.parseLong(size);
         double pd = Double.parseDouble(percentage);
-        if(!DFSOperationsUtils.isTwoDecimalPlace(pd)){
+        if (!DFSOperationsUtils.isTwoDecimalPlace(pd)) {
           throw new IllegalArgumentException("Wrong default Value. Only one decimal place is supported.");
         }
         points.add(new Point(s, new BigDecimal(pd, new MathContext(4, RoundingMode.HALF_UP))));
       }
-    }catch (Exception e){
-      throw new IllegalArgumentException("Malformed file size parameter. See documentation. Exception caused: "+e);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Malformed file size parameter. See documentation. Exception caused: " + e);
     }
     return points;
   }
@@ -127,12 +128,12 @@ public class FileSizeMultiFaceCoin {
     }
 
     for (Long size : counts.keySet()) {
-      double percent = (double) counts.get(size) / ( times.doubleValue()) * (double) 100;
-      System.out.println(size + ": count: "+counts.get(size)+"        " + DFSOperationsUtils.round(percent)+"%");
+      double percent = (double) counts.get(size) / (times.doubleValue()) * (double) 100;
+      System.out.println(size + ": count: " + counts.get(size) + "        " + DFSOperationsUtils.round(percent) + "%");
     }
   }
-  
-  public static void main(String [] argv){
+
+  public static void main(String[] argv) {
     FileSizeMultiFaceCoin coin = new FileSizeMultiFaceCoin("[(1024,10),(2024,20),(3303,70)]");
     coin.testFlip();
   }

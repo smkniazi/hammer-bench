@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author salman
  */
 public class CompileResults {
@@ -93,7 +92,7 @@ public class CompileResults {
     System.out.println("Processing Hops Files");
     parseFiles(hopsResulsFiles, hopsRawAggregatredResults, hopsInterleavedAggregatedResults);
     generateOutputFiles(hdfsRawAggregatredResults, hdfsInterleavedAggregatedResults,
-      hopsRawAggregatredResults, hopsInterleavedAggregatedResults, outputDir);
+            hopsRawAggregatredResults, hopsInterleavedAggregatedResults, outputDir);
   }
 
   public static List<File> findFiles(String path, String suffix) {
@@ -129,7 +128,7 @@ public class CompileResults {
 
   private void parseFiles(List<File> files, RawBMResultAggregator rawAggregatredResults,
                           InterleavedBMResultsAggregator interleavedAggregatedResults)
-    throws FileNotFoundException, IOException, ClassNotFoundException {
+          throws FileNotFoundException, IOException, ClassNotFoundException {
     for (File file : files) {
       System.out.println("Processing File " + file);
       parsetFile(file, rawAggregatredResults, interleavedAggregatedResults);
@@ -139,7 +138,7 @@ public class CompileResults {
   private void parsetFile(File file,
                           RawBMResultAggregator rawAggregatredResults,
                           InterleavedBMResultsAggregator interleavedAggregatedResults)
-    throws FileNotFoundException, IOException, ClassNotFoundException {
+          throws FileNotFoundException, IOException, ClassNotFoundException {
     FileInputStream fin = new FileInputStream(file);
     ObjectInputStream ois = new ObjectInputStream(fin);
 
@@ -222,9 +221,9 @@ public class CompileResults {
 
 
     InterleavedBMResultsAggregator.combineResults(
-      hdfsInterleavedAggregatedResults.getResults(),
-      hopsInterleavedAggregatedResults.getResults(),
-      outputDir);
+            hdfsInterleavedAggregatedResults.getResults(),
+            hopsInterleavedAggregatedResults.getResults(),
+            outputDir);
   }
 
   public static void writeToFile(String file, String msg, boolean append) throws IOException {

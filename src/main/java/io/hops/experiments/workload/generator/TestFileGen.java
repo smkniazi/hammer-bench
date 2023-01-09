@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,17 +25,17 @@ import io.hops.experiments.benchmarks.common.config.ConfigKeys;
  * @author salman
  */
 public class TestFileGen {
-    public static void main(String[] argv){
-        FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test",5, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
+  public static void main(String[] argv) {
+    FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test", 5, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
 
-        for(int i = 0; i < 10000; i++){
-            System.out.println(gen.getDirToCreate());
-        }
-        
-        
-        for(int i = 0; i < 10; i++){
-            System.out.println(gen.getFileToCreate());
-        }
+    for (int i = 0; i < 10000; i++) {
+      System.out.println(gen.getDirToCreate());
     }
-        
+
+
+    for (int i = 0; i < 10; i++) {
+      System.out.println(gen.getFileToCreate());
+    }
+  }
+
 }

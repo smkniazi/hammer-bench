@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- *
  * @author salman
  */
 public class Logger {
@@ -45,9 +44,10 @@ public class Logger {
   //send one error per sec. this avoids printing too much to the output of the master
   static long lastError = 0;
   static long errorCounter = 0;
+
   public static synchronized void error(Throwable e) {
     e.printStackTrace();
-    if(((System.currentTimeMillis() - lastError) > 2000)){
+    if (((System.currentTimeMillis() - lastError) > 2000)) {
       final int MSG_SIZE = 200; //send small messages
       String msg = e.getClass().getName() + " ";
       int consumed = msg.length();
@@ -56,21 +56,21 @@ public class Logger {
         msg += " ... ";
       }
 
-      printMsg(errorCounter+" errors since last error. New error is: "+msg);
-      errorCounter=0;
+      printMsg(errorCounter + " errors since last error. New error is: " + msg);
+      errorCounter = 0;
       lastError = System.currentTimeMillis();
-    }else{
+    } else {
       errorCounter++;
     }
 
   }
 
-  public static void resetTimer(){
+  public static void resetTimer() {
     lastmsg = System.currentTimeMillis();
   }
 
- public static synchronized void printMsg(String msg) {
-    if (enableRemoteLogging && msg.length() > 0 ) {
+  public static synchronized void printMsg(String msg) {
+    if (enableRemoteLogging && msg.length() > 0) {
       try {
         if (socket == null) {
           socket = new DatagramSocket();
@@ -103,12 +103,12 @@ public class Logger {
   }
 
   public static void setLoggerIp(InetAddress loggerIp) {
-    System.out.println("Remote Logger IP: "+loggerIp);
+    System.out.println("Remote Logger IP: " + loggerIp);
     Logger.loggerIp = loggerIp;
   }
 
   public static void setLoggerPort(int loggerPort) {
-    System.out.println("Remote Logger Port: "+loggerPort);
+    System.out.println("Remote Logger Port: " + loggerPort);
     Logger.loggerPort = loggerPort;
   }
 
@@ -145,27 +145,27 @@ public class Logger {
           ByteArrayInputStream in = new ByteArrayInputStream(recvData);
           ObjectInputStream is = new ObjectInputStream(in);
           String msg = (String) is.readObject();
-          System.out.println(DFSOperationsUtils.format(20,recvPacket.getAddress().getHostName()+" -> ") + msg);
+          System.out.println(DFSOperationsUtils.format(20, recvPacket.getAddress().getHostName() + " -> ") + msg);
           continuousAggSpeed(recvPacket.getAddress().getHostName(), msg);
           is.close();
           in.close();
           recvPacket = null;
         } catch (Exception e) { // Logger should not crash the application
-          if(recvPacket != null){
-            System.out.println("Exception when receiving from "+recvPacket.getAddress().getHostName()+" "+e);
+          if (recvPacket != null) {
+            System.out.println("Exception when receiving from " + recvPacket.getAddress().getHostName() + " " + e);
           }
         }
       }
     }
 
-    public synchronized void continuousAggSpeed(String address, String msg){
-      try{
+    public synchronized void continuousAggSpeed(String address, String msg) {
+      try {
         String token = "Speed:";
-        if(msg.contains(token)){
+        if (msg.contains(token)) {
           StringTokenizer st = new StringTokenizer(msg, " ");
-          while(st.hasMoreTokens()){
+          while (st.hasMoreTokens()) {
             String t = st.nextToken();
-            if (t.compareToIgnoreCase(token)==0){
+            if (t.compareToIgnoreCase(token) == 0) {
               String speedStr = st.nextToken();
               Double speed = Double.parseDouble(speedStr);
               speedMap.put(address, speed);
@@ -174,17 +174,17 @@ public class Logger {
           }
         }
 
-        if(speedMap.size() == maxSlaves ){
+        if (speedMap.size() == maxSlaves) {
           double aggSpeed = 0;
-          for(Double speed: speedMap.values()){
+          for (Double speed : speedMap.values()) {
             aggSpeed += speed;
           }
-          Master.blueColoredText("Current Aggregated Speed is "+aggSpeed);
+          Master.blueColoredText("Current Aggregated Speed is " + aggSpeed);
           speedMap.clear();
         }
-      }catch(NumberFormatException e){
+      } catch (NumberFormatException e) {
       }
- }
+    }
 
     public void stop() {
       this.running = false;

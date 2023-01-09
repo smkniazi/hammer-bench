@@ -96,17 +96,17 @@ public class BMConfiguration implements Serializable {
     if (getBenchMarkType() == BenchmarkType.INTERLEAVED) {
       //create a coin to check the percentages
       new InterleavedMultiFaceCoin(getInterleavedBmCreateFilesPercentage(),
-        getInterleavedBmAppendFilePercentage(),
-        getInterleavedBmReadFilesPercentage(),
-        getInterleavedBmRenameFilesPercentage(),
-        getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
-        getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
-        getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
-        getInterleavedBmSetReplicationPercentage(),
-        getInterleavedBmGetFileInfoPercentage(),
-        getInterleavedBmGetDirInfoPercentage(),
-        getInterleavedBmFileChangeOwnerPercentage(),
-        getInterleavedBmDirChangeOwnerPercentage());
+              getInterleavedBmAppendFilePercentage(),
+              getInterleavedBmReadFilesPercentage(),
+              getInterleavedBmRenameFilesPercentage(),
+              getInterleavedBmDeleteFilesPercentage(), getInterleavedBmLsFilePercentage(),
+              getInterleavedBmLsDirPercentage(), getInterleavedBmChmodFilesPercentage(),
+              getInterleavedBmChmodDirsPercentage(), getInterleavedBmMkdirPercentage(),
+              getInterleavedBmSetReplicationPercentage(),
+              getInterleavedBmGetFileInfoPercentage(),
+              getInterleavedBmGetDirInfoPercentage(),
+              getInterleavedBmFileChangeOwnerPercentage(),
+              getInterleavedBmDirChangeOwnerPercentage());
     }
 
     if (testFailover()) {
@@ -137,13 +137,13 @@ public class BMConfiguration implements Serializable {
       }
       if (getInterleavedBmDuration() < (getFailOverTestStartTime() + getFailOverTestDuration())) {
         throw new IllegalArgumentException(ConfigKeys.FAIL_OVER_TEST_DURATION_KEY + " + " + ConfigKeys.FAIL_OVER_TEST_START_TIME_KEY
-          + " should be greater than " + ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
+                + " should be greater than " + ConfigKeys.INTERLEAVED_BM_DURATION_KEY);
       }
     }
 
     if (getBRNumInvalidBuckets() > getNumBuckets()) {
       throw new IllegalArgumentException("Number of invalid buckets cannot be more than the " +
-        "total number of the buckets");
+              "total number of the buckets");
     }
 
 //    if(!brReadStateFromDisk() && getBenchMarkType() == BenchmarkType.BR) {
@@ -501,7 +501,7 @@ public class BMConfiguration implements Serializable {
     if (getBenchMarkFileSystemName() == BenchMarkFileSystemName.HopsFS) {
       System.out.println("Creating config for HopsFS");
       dfsClientConf.setProperty(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY,
-        Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
+              Integer.toString(getInt(ConfigKeys.DFS_DB_FILE_MAX_SIZE_KEY, ConfigKeys.DFS_DB_FILE_MAX_SIZE_DEFAULT)));
 
       if (isSSLEnabled()) {
         dfsClientConf.setProperty("ipc.server.ssl.enabled", "true");

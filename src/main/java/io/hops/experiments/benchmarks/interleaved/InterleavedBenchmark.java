@@ -85,8 +85,8 @@ public class InterleavedBenchmark extends Benchmark {
         workers.add(worker);
       }
       executor.invokeAll(workers); // blocking call
-      Logger.printMsg("Finished. Warmup Phase. Created ("+bmConf.getSlaveNumThreads()+"*"+bmConf.getFilesToCreateInWarmUpPhase()+") = "+
-              (bmConf.getSlaveNumThreads()*bmConf.getFilesToCreateInWarmUpPhase())+" files. ");
+      Logger.printMsg("Finished. Warmup Phase. Created (" + bmConf.getSlaveNumThreads() + "*" + bmConf.getFilesToCreateInWarmUpPhase() + ") = " +
+              (bmConf.getSlaveNumThreads() * bmConf.getFilesToCreateInWarmUpPhase()) + " files. ");
       workers.clear();
     }
 

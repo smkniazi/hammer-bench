@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -32,7 +32,7 @@ public class MoveThenDelete {
   private BMConfiguration args;
 
   public static void main(String[] argv) throws Exception {
-    
+
     String configFilePath = "master.properties";
     if (argv.length != 1) {
       System.out.println("Enter the folder name to rename  and then delete ");
@@ -41,37 +41,36 @@ public class MoveThenDelete {
     new MoveThenDelete().start("master.properties", argv[0]);
   }
 
-  private void start(String configFilePath, String hdfsFolder)  {
+  private void start(String configFilePath, String hdfsFolder) {
     try {
       args = new BMConfiguration(configFilePath);
       org.apache.hadoop.conf.Configuration conf = createHdfsConf();
 
       // do shit here
       FileSystem dfs = DFSOperationsUtils.getDFSClient(conf);
-      
+
 
       Path from = new Path(hdfsFolder);
-      Path to = new Path(hdfsFolder+"1");
-      
+      Path to = new Path(hdfsFolder + "1");
+
       Long startTime = System.currentTimeMillis();
       dfs.rename(from, to);
       Long endTime = System.currentTimeMillis();
 
       System.out.println("Move time taken in ms " + (endTime - startTime));
       System.out.println("Move time taken in minutes " + (endTime - startTime) / (double) (1000 * 60));
-      
-      
+
+
       startTime = System.currentTimeMillis();
-      dfs.delete(to,true);
+      dfs.delete(to, true);
       endTime = System.currentTimeMillis();
 
       System.out.println("Delete time taken in ms " + (endTime - startTime));
       System.out.println("Delete time taken in minutes " + (endTime - startTime) / (double) (1000 * 60));
-      
-    } catch(Throwable e){
+
+    } catch (Throwable e) {
       System.out.println(e);
-    }
-    finally {
+    } finally {
       System.out.println("Exiting ... ");
       System.exit(0);
     }

@@ -39,7 +39,6 @@ import io.hops.experiments.workload.generator.FilePool;
 import org.apache.hadoop.fs.FileSystem;
 
 /**
- *
  * @author salman
  */
 public class RawBenchmark extends Benchmark {

@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
  * @author salman
  */
 public class Master {
@@ -130,95 +129,95 @@ public class Master {
 
     if (config.getRawBmMkdirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.MKDIRS, config.getRawBmMkdirPhaseDuration()));
+              BenchmarkOperations.MKDIRS, config.getRawBmMkdirPhaseDuration()));
     }
 
     if (config.getRawBmFilesCreationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCreateCommand.Request(
-        config.getRawBmMaxFilesToCreate(),
-        BenchmarkOperations.CREATE_FILE,
-        config.getRawBmFilesCreationPhaseDuration()));
+              config.getRawBmMaxFilesToCreate(),
+              BenchmarkOperations.CREATE_FILE,
+              config.getRawBmFilesCreationPhaseDuration()));
     }
 
     if (config.getRawBmAppendFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.APPEND_FILE,
-        config.getRawBmAppendFilePhaseDuration()));
+              BenchmarkOperations.APPEND_FILE,
+              config.getRawBmAppendFilePhaseDuration()));
     }
 
     if (config.getRawBmReadFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.READ_FILE,
-        config.getRawBmReadFilesPhaseDuration()));
+              BenchmarkOperations.READ_FILE,
+              config.getRawBmReadFilesPhaseDuration()));
     }
 
     if (config.getRawBmLsFilePhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.LS_FILE,
-        config.getRawBmLsFilePhaseDuration()));
+              BenchmarkOperations.LS_FILE,
+              config.getRawBmLsFilePhaseDuration()));
     }
 
     if (config.getRawBmLsDirPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.LS_DIR,
-        config.getRawBmLsDirPhaseDuration()));
+              BenchmarkOperations.LS_DIR,
+              config.getRawBmLsDirPhaseDuration()));
     }
 
     if (config.getRawBmChmodFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.CHMOD_FILE,
-        config.getRawBmChmodFilesPhaseDuration()));
+              BenchmarkOperations.CHMOD_FILE,
+              config.getRawBmChmodFilesPhaseDuration()));
     }
 
     if (config.getRawBmChmodDirsPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.CHMOD_DIR,
-        config.getRawBmChmodDirsPhaseDuration()));
+              BenchmarkOperations.CHMOD_DIR,
+              config.getRawBmChmodDirsPhaseDuration()));
     }
 
     if (config.getRawBmSetReplicationPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.SET_REPLICATION,
-        config.getRawBmSetReplicationPhaseDuration()));
+              BenchmarkOperations.SET_REPLICATION,
+              config.getRawBmSetReplicationPhaseDuration()));
     }
 
     if (config.getRawBmGetFileInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.FILE_INFO,
-        config.getRawBmGetFileInfoPhaseDuration()));
+              BenchmarkOperations.FILE_INFO,
+              config.getRawBmGetFileInfoPhaseDuration()));
     }
 
     if (config.getRawBmGetDirInfoPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.DIR_INFO,
-        config.getRawBmGetDirInfoPhaseDuration()));
+              BenchmarkOperations.DIR_INFO,
+              config.getRawBmGetDirInfoPhaseDuration()));
     }
 
 
     if (config.getRawFileChangeUserPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.CHOWN_FILE,
-        config.getRawFileChangeUserPhaseDuration()));
+              BenchmarkOperations.CHOWN_FILE,
+              config.getRawFileChangeUserPhaseDuration()));
     }
 
 
     if (config.getRawDirChangeUserPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.CHOWN_DIR,
-        config.getRawDirChangeUserPhaseDuration()));
+              BenchmarkOperations.CHOWN_DIR,
+              config.getRawDirChangeUserPhaseDuration()));
     }
 
 
     if (config.getRawBmRenameFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.RENAME_FILE,
-        config.getRawBmRenameFilesPhaseDuration()));
+              BenchmarkOperations.RENAME_FILE,
+              config.getRawBmRenameFilesPhaseDuration()));
     }
 
     if (config.getRawBmDeleteFilesPhaseDuration() > 0) {
       startRawBenchmarkPhase(new RawBenchmarkCommand.Request(
-        BenchmarkOperations.DELETE_FILE,
-        config.getRawBmDeleteFilesPhaseDuration()));
+              BenchmarkOperations.DELETE_FILE,
+              config.getRawBmDeleteFilesPhaseDuration()));
     }
   }
 
@@ -226,7 +225,7 @@ public class Master {
     System.out.println("Starting Interleaved Benchmark ...");
     prompt();
     InterleavedBenchmarkCommand.Request request =
-      new InterleavedBenchmarkCommand.Request(config);
+            new InterleavedBenchmarkCommand.Request(config);
     sendToAllSlaves(request, 0/*delay*/);
 
     Thread.sleep(config.getInterleavedBmDuration());
@@ -251,18 +250,18 @@ public class Master {
   }
 
   private void warmUpSlaves()
-    throws IOException, ClassNotFoundException, SQLException {
+          throws IOException, ClassNotFoundException, SQLException {
     printMasterLogMessages("Warming Up ... ");
     prompt();
     WarmUpCommand.Request warmUpCommand = null;
     if (config.getBenchMarkType() == BenchmarkType.INTERLEAVED
-      || config.getBenchMarkType() == BenchmarkType.RAW) {
+            || config.getBenchMarkType() == BenchmarkType.RAW) {
       warmUpCommand = new NamespaceWarmUp.Request(config.getBenchMarkType(), config.getFilesToCreateInWarmUpPhase(), config.getReplicationFactor(),
-        config.getFileSizeDistribution(), config.getAppendFileSize(),
-        config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
+              config.getFileSizeDistribution(), config.getAppendFileSize(),
+              config.getBaseDir(), config.getReadFilesFromDisk(), config.getDiskNameSpacePath());
     } else {
       throw new UnsupportedOperationException("Wrong Benchmark type for"
-        + " warm up " + config.getBenchMarkType());
+              + " warm up " + config.getBenchMarkType());
     }
 
     sendToAllSlaves(warmUpCommand, config.getSlaveWarmUpDelay()/*delay*/);
@@ -278,15 +277,15 @@ public class Master {
 
   public void startRawBenchmarkPhase(RawBenchmarkCommand.Request request) throws IOException, InterruptedException, ClassNotFoundException {
     printMasterLogMessages("Starting " + request.getPhase() + " using "
-      + config.getSlaveNumThreads() * config.getSlavesList().size()
-      + " client(s). Time phase duration "
-      + request.getDurationInMS() / (double) (1000 * 60) + " mins");
+            + config.getSlaveNumThreads() * config.getSlavesList().size()
+            + " client(s). Time phase duration "
+            + request.getDurationInMS() / (double) (1000 * 60) + " mins");
     prompt();
 
     sendToAllSlaves(request, 0/*delay*/);
 
     Collection<Object> responses =
-      receiveFromAllSlaves((int) (request.getDurationInMS() + 120 * 1000)/*sec wait*/);
+            receiveFromAllSlaves((int) (request.getDurationInMS() + 120 * 1000)/*sec wait*/);
 
     RawBMResults result = RawBMResultAggregator.processSlaveResponses(responses, request, config);
     printMasterResultMessages(result);
@@ -313,7 +312,7 @@ public class Master {
   }
 
   private void sendHandshakeToAllSlaves(Handshake.Request handshake) throws
-    IOException {
+          IOException {
     if (!slavesConnections.isEmpty()) {
       int slaveId = 0;
       for (InetAddress slave : slavesConnections.keySet()) {

@@ -48,13 +48,13 @@ public abstract class Benchmark {
   }
 
   protected abstract WarmUpCommand.Response warmUp(WarmUpCommand.Request warmUp)
-    throws Exception;
+          throws Exception;
 
   protected abstract BenchmarkCommand.Response processCommandInternal(BenchmarkCommand.Request command) throws Exception,
-    InterruptedException;
+          InterruptedException;
 
   public final BenchmarkCommand.Response processCommand(BenchmarkCommand.Request command)
-    throws Exception {
+          throws Exception {
     if (command instanceof WarmUpCommand.Request) {
       return warmUp((WarmUpCommand.Request) command);
     }
@@ -92,17 +92,17 @@ public abstract class Benchmark {
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf,
-        bmConf.getBaseDir(), bmConf.getDirPerDir(),
-        bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
-        bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
-        bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
+              bmConf.getBaseDir(), bmConf.getDirPerDir(),
+              bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
+              bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
+              bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
         try {
           filePath = filePool.getFileToCreate();
           DFSOperationsUtils
-            .createFile(dfs, filePath, bmConf.getReplicationFactor(), filePool);
+                  .createFile(dfs, filePath, bmConf.getReplicationFactor(), filePool);
           filePool.fileCreationSucceeded(filePath);
           DFSOperationsUtils.readFile(dfs, filePath);
           filesCreatedInWarmupPhase.incrementAndGet();

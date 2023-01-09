@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -41,7 +41,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   public void processRecord(BMResult result) {
     //System.out.println(result);
     InterleavedBMResults ilResult = (InterleavedBMResults) result;
-    if(ilResult.getSpeed()<=0){
+    if (ilResult.getSpeed() <= 0) {
       return;
     }
 
@@ -71,8 +71,8 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     if (ilResult.getSpeed() > 0 && ilResult.getNoOfAcutallAliveNNs() == ilResult.getNoOfExpectedAliveNNs()) {
       return true;
     }
-    System.err.println("Inconsistent/Wrong results.  Speed: "+ilResult.getSpeed()+
-        " Expected NNs: "+ilResult.getNoOfExpectedAliveNNs()+" Actual NNs: "+ilResult.getNoOfAcutallAliveNNs());
+    System.err.println("Inconsistent/Wrong results.  Speed: " + ilResult.getSpeed() +
+            " Expected NNs: " + ilResult.getNoOfExpectedAliveNNs() + " Actual NNs: " + ilResult.getNoOfAcutallAliveNNs());
     return false;
   }
 
@@ -83,12 +83,12 @@ public class InterleavedBMResultsAggregator extends Aggregator {
   public static void combineResults(Map<String, Map<Integer, InterleavedAggregate>> hdfsAllWorkLoads, Map<String, Map<Integer, InterleavedAggregate>> hopsfsAllWorkloas, String outpuFolder) throws IOException {
 
     String plot = "set terminal postscript eps enhanced color font \"Helvetica,18\"  #monochrome\n";
-    plot +=  "set output '| ps2pdf - interleaved.pdf'\n";
-    plot +=  "#set size 1,0.75 \n ";
-    plot +=  "set ylabel \"ops/sec\" \n";
-    plot +=  "set xlabel \"Number of Namenodes\" \n";
-    plot +=  "set format y \"%.0s%c\"\n";
-    plot +=  "plot ";
+    plot += "set output '| ps2pdf - interleaved.pdf'\n";
+    plot += "#set size 1,0.75 \n ";
+    plot += "set ylabel \"ops/sec\" \n";
+    plot += "set xlabel \"Number of Namenodes\" \n";
+    plot += "set format y \"%.0s%c\"\n";
+    plot += "plot ";
 
     for (String workload : hopsfsAllWorkloas.keySet()) {
       Map<Integer, InterleavedAggregate> hopsWorkloadResult = hopsfsAllWorkloas.get(workload);
@@ -115,7 +115,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         return;
       }
 
-      plot +=  " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\" \n";
+      plot += " '" + workload + "-interleaved.dat' using 2:xticlabels(1) not with lines, '' using 0:2:3:4:xticlabels(1) title \"HopsFS-" + workload + "\" with errorbars, " + hdfsVal + " title \"HDFS-" + workload + "\" \n";
       String data = "";
       SortedSet<Integer> sorted = new TreeSet<Integer>(); // Sort my number of NN
       sorted.addAll(hopsWorkloadResult.keySet());
@@ -155,7 +155,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
         noOfNNs.addValue(response.getNnCount());
       }
     }
-    
+
     //write the response objects to files. 
     //these files are processed by CalculatePercentiles.java
     int responseCount = 0;
@@ -165,7 +165,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
       } else {
         String filePath = args.getResultsDir();
         InterleavedBenchmarkCommand.Response response = (InterleavedBenchmarkCommand.Response) obj;
-        filePath += "ResponseRawData"+responseCount+++ConfigKeys.RAW_RESPONSE_FILE_EXT;
+        filePath += "ResponseRawData" + responseCount++ + ConfigKeys.RAW_RESPONSE_FILE_EXT;
         System.out.println("Writing Rwaw results to " + filePath);
         FileOutputStream fout = new FileOutputStream(filePath);
         ObjectOutputStream oos = new ObjectOutputStream(fout);
@@ -175,12 +175,12 @@ public class InterleavedBMResultsAggregator extends Aggregator {
 
         System.out.println("Writing CSV results ");
         HashMap<BenchmarkOperations, ArrayList<Long>> times = response.getOpsExeTimes();
-        for(BenchmarkOperations op : times.keySet()){
-          filePath=args.getResultsDir();
-          filePath+=op.toString()+".txt";
+        for (BenchmarkOperations op : times.keySet()) {
+          filePath = args.getResultsDir();
+          filePath += op.toString() + ".txt";
           FileWriter out = new FileWriter(filePath, true);
-          for(Long time : times.get(op)){
-            out.write(((double)time/1000000.0)+"\n");
+          for (Long time : times.get(op)) {
+            out.write(((double) time / 1000000.0) + "\n");
           }
           out.close();
 
@@ -189,7 +189,7 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     }
 
     InterleavedBMResults result = new InterleavedBMResults(args.getNamenodeCount(),
-            (int)Math.floor(noOfNNs.getMean()),
+            (int) Math.floor(noOfNNs.getMean()),
             args.getNdbNodesCount(), args.getInterleavedBmWorkloadName(),
             (successfulOps.getSum() / ((duration.getMean() / 1000))), (duration.getMean() / 1000),
             (successfulOps.getSum()), (failedOps.getSum()), allOpsPercentiles, opsLatency.getMean());
@@ -250,5 +250,5 @@ public class InterleavedBMResultsAggregator extends Aggregator {
     return result;
   }
 
- 
+
 }

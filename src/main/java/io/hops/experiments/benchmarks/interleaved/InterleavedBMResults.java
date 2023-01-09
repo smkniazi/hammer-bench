@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,11 @@ public class InterleavedBMResults extends BMResult {
   private final double duration;
   private final double successfulOps;
   private final double failedOps;
-  private final Map<BenchmarkOperations,double[][]> percentile;
+  private final Map<BenchmarkOperations, double[][]> percentile;
   private final String workloadName;
   private final double avgOpLatency;
 
-  public InterleavedBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations,double[][]> percentile,double avgOpLatency) {
+  public InterleavedBMResults(int noOfExpectedNNs, int noOfActualAliveNNs, int noOfNDBDataNodes, String workloadName, double speed, double duration, double successfulOps, double failedOps, Map<BenchmarkOperations, double[][]> percentile, double avgOpLatency) {
     super(noOfExpectedNNs, noOfActualAliveNNs, noOfNDBDataNodes, BenchmarkType.INTERLEAVED);
     this.speed = speed;
     this.duration = duration;
@@ -52,10 +52,10 @@ public class InterleavedBMResults extends BMResult {
     return workloadName;
   }
 
-  public Map<BenchmarkOperations,double[][]> getPercentile(){
+  public Map<BenchmarkOperations, double[][]> getPercentile() {
     return percentile;
   }
-  
+
   public double getSpeed() {
     return speed;
   }
@@ -84,8 +84,8 @@ public class InterleavedBMResults extends BMResult {
             + " Failed-Ops: " + DFSOperationsUtils.round(failedOps)
             + " Avg-Ops-Latency: " + DFSOperationsUtils.round(avgOpLatency)
             + " Avg-Test-Duration-sec " + DFSOperationsUtils.round(duration)
-            + " No of Expected NNs : "+super.getNoOfExpectedAliveNNs()
-            + " No of Actual Alive NNs : "+super.getNoOfAcutallAliveNNs();
+            + " No of Expected NNs : " + super.getNoOfExpectedAliveNNs()
+            + " No of Actual Alive NNs : " + super.getNoOfAcutallAliveNNs();
 
     return message;
   }
