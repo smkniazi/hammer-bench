@@ -26,14 +26,14 @@ import io.hops.experiments.benchmarks.common.config.ConfigKeys;
  */
 public class TestFileGen {
   public static void main(String[] argv) {
-    FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/test", 5, ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
+    FixeDepthFileTreeGenerator gen = new FixeDepthFileTreeGenerator("/a", false, 5,
+            ConfigKeys.FILE_SIZE_IN_Bytes_DEFAULT);
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 100; i++) {
       System.out.println(gen.getDirToCreate());
     }
 
-
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
       System.out.println(gen.getFileToCreate());
     }
   }

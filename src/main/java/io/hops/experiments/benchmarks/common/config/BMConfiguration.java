@@ -328,6 +328,10 @@ public class BMConfiguration implements Serializable {
     return getString(ConfigKeys.BASE_DIR_KEY, ConfigKeys.BASE_DIR_DEFAULT);
   }
 
+  public boolean isDisablePerThreadDir() {
+    return getBoolean(ConfigKeys.DISABLE_PER_THREAD_DIR, ConfigKeys.DISABLE_PER_THREAD_DIR_DEFAULT);
+  }
+
   public boolean isSkipAllPrompt() {
     return getBoolean(ConfigKeys.SKIP_ALL_PROMPT_KEY, ConfigKeys.SKIP_ALL_PROMPT_DEFAULT);
   }

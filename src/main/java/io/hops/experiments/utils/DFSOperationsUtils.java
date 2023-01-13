@@ -66,16 +66,20 @@ public class DFSOperationsUtils {
   }
 
   public static FilePool getFilePool(Configuration conf, String baseDir,
-                                     int dirsPerDir, int filesPerDir, boolean fixedDepthTree, int treeDepth, String fileSizeDistribution,
+                                     boolean disablePerThreadDir, int dirsPerDir,
+                                     int filesPerDir, boolean fixedDepthTree,
+                                     int treeDepth, String fileSizeDistribution,
                                      boolean readFilesFromDisk, String diskFilesPath) {
     FilePool filePool = filePools.get();
     if (filePool == null) {
       if (fixedDepthTree) {
-        filePool = new FixeDepthFileTreeGenerator(baseDir, treeDepth, fileSizeDistribution);
+        filePool = new FixeDepthFileTreeGenerator(baseDir, disablePerThreadDir, treeDepth,
+                fileSizeDistribution);
       } else if (readFilesFromDisk) {
         filePool = new FileTreeFromDiskGenerator(baseDir, filesPerDir, dirsPerDir, 0, diskFilesPath);
       } else {
-        filePool = new FileTreeGenerator(baseDir, filesPerDir, dirsPerDir, 0, fileSizeDistribution);
+        filePool = new FileTreeGenerator(baseDir, disablePerThreadDir, filesPerDir, dirsPerDir, 0,
+                fileSizeDistribution);
       }
 
       filePools.set(filePool);

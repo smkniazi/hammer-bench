@@ -21,6 +21,7 @@ import io.hops.experiments.benchmarks.common.config.ConfigKeys;
 import io.hops.experiments.controller.Logger;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -44,8 +45,9 @@ public class FileTreeGenerator implements FilePool {
   private long currentFileSize = -1;
   private long currentFileDataRead = -1;
 
-  public FileTreeGenerator(String baseDir, int filesPerDir,
-                           int dirPerDir, int initialTreeDepth, String fileDistribution) {
+  public FileTreeGenerator(String baseDir, boolean disablePerThreadDir,
+                           int filesPerDir, int dirPerDir, int initialTreeDepth,
+                           String fileDistribution) {
 
     this.allThreadFiles = new ArrayList<String>(10000);
     this.allThreadDirs = new ArrayList<String>(10000);
@@ -66,14 +68,17 @@ public class FileTreeGenerator implements FilePool {
     }
 
     baseDir = baseDir.trim();
-    if (!baseDir.endsWith("/")) {
-      baseDir = baseDir + "/";
+    if (baseDir == null || !baseDir.startsWith("/")) {
+      throw new AssertionError("Absolute path required");
     }
 
-    if (baseDir.compareTo("/") == 0) {
-      threadDir = baseDir + machineName + "_" + uuid;
-    } else {
-      threadDir = baseDir + machineName + "/" + uuid;
+    threadDir = baseDir;
+    if (!disablePerThreadDir) {
+      if (baseDir.compareTo("/") == 0) {
+        threadDir = "/" + machineName + "_" + uuid;
+      } else {
+        threadDir = baseDir + "/" + machineName + "/" + uuid;
+      }
     }
 
     String[] comp = PathUtils.getPathNames(threadDir);
@@ -86,7 +91,12 @@ public class FileTreeGenerator implements FilePool {
       }
     }
 
-    nameSpaceGenerator = new NameSpaceGenerator(threadDir, filesPerDir, dirPerDir);
+    if (disablePerThreadDir) {
+      nameSpaceGenerator = new NameSpaceGenerator(threadDir, filesPerDir, dirPerDir,
+              uuid.toString() /* append uuid to file names to avoid overlap*/);
+    } else {
+      nameSpaceGenerator = new NameSpaceGenerator(threadDir, filesPerDir, dirPerDir, null);
+    }
   }
 
   @Override

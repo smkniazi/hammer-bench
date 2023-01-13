@@ -42,7 +42,7 @@ public class FileTreeFromDiskGenerator extends FileTreeGenerator {
 
   public FileTreeFromDiskGenerator(String baseDir, int filesPerDir,
                                    int dirPerDir, int initialTreeDepth, String path) {
-    super(baseDir, filesPerDir, dirPerDir, initialTreeDepth, null);
+    super(baseDir, false, filesPerDir, dirPerDir, initialTreeDepth, null);
     diskNameSpaceReader = DiskNameSpaceReader.getInstance(path);
   }
 

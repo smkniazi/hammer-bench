@@ -140,7 +140,8 @@ public class RawBenchmark extends Benchmark {
       try {
         dfs = DFSOperationsUtils.getDFSClient(conf);
         filePool = DFSOperationsUtils.getFilePool(conf, bmConf.getBaseDir(),
-                bmConf.getDirPerDir(), bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
+                bmConf.isDisablePerThreadDir(), bmConf.getDirPerDir(),
+                bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
                 bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
                 bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
       } catch (Exception e) {
@@ -158,7 +159,7 @@ public class RawBenchmark extends Benchmark {
           } else if ((System.currentTimeMillis() - phaseStartTime) > phaseDurationInMS) {
             return null;
           } else if (opType == BenchmarkOperations.CREATE_FILE &&
-                  bmConf.getRawBmMaxFilesToCreate() < (long) (successfulOps.get() + filesCreatedInWarmupPhase.get())) {
+                  bmConf.getRawBmMaxFilesToCreate() <= (long) (successfulOps.get() + filesCreatedInWarmupPhase.get())) {
             return null;
           } else if (opType == BenchmarkOperations.CREATE_FILE &&
                   bmConf.getReadFilesFromDisk() && !filePool.hasMoreFilesToWrite()) {

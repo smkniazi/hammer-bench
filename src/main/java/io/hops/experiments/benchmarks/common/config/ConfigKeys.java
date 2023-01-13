@@ -184,6 +184,9 @@ public class ConfigKeys {
   public static String BASE_DIR_KEY = "base.dir";
   public static String BASE_DIR_DEFAULT = "/test";
 
+  public static String DISABLE_PER_THREAD_DIR = "disable.per.thread.dir";
+  public static boolean DISABLE_PER_THREAD_DIR_DEFAULT = false;
+
   public static String SKIP_ALL_PROMPT_KEY = "skip.all.prompt";
   public static boolean SKIP_ALL_PROMPT_DEFAULT = false;
 

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Random;
 
 /**
- *
  * @author salman
  */
 public class NameSpaceGenerator {
@@ -35,18 +34,19 @@ public class NameSpaceGenerator {
   private DirNamesGenerator dirGenerator;
   private String DIR_PREFIX = "hops_dir";
   private String FILE_PREFIX = "hops_file";
-  private static Random rand = new Random(System.currentTimeMillis());
 
-  public NameSpaceGenerator(String baseDir, int filesPerDir, int dirPerDir) {
+  public NameSpaceGenerator(String baseDir, int filesPerDir, int dirPerDir, String filePrefix) {
     this.allDirs = new LinkedList<String>();
     this.FILES_PER_DIR = filesPerDir;
     this.DIR_PER_DIR = dirPerDir;
 
+    if (filePrefix != null) {
+      FILE_PREFIX = filePrefix + "_" + FILE_PREFIX;
+    }
+
     this.fileCounter = 0;
     this.dirGenerator = new DirNamesGenerator(baseDir, DIR_PER_DIR);
     this.filesPerDirCount = 0;
-//        DIR_PREFIX = rand.nextInt()+DIR_PREFIX;
-//        FILE_PREFIX = rand.nextInt()+FILE_PREFIX;
   }
 
   public String generateNewDirPath() {

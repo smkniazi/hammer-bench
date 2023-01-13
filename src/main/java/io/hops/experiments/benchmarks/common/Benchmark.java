@@ -92,10 +92,11 @@ public abstract class Benchmark {
     public Object call() throws Exception {
       dfs = DFSOperationsUtils.getDFSClient(conf);
       filePool = DFSOperationsUtils.getFilePool(conf,
-              bmConf.getBaseDir(), bmConf.getDirPerDir(),
-              bmConf.getFilesPerDir(), bmConf.isFixedDepthTree(),
-              bmConf.getTreeDepth(), bmConf.getFileSizeDistribution(),
-              bmConf.getReadFilesFromDisk(), bmConf.getDiskNameSpacePath());
+              bmConf.getBaseDir(), bmConf.isDisablePerThreadDir(),
+              bmConf.getDirPerDir(), bmConf.getFilesPerDir(),
+              bmConf.isFixedDepthTree(), bmConf.getTreeDepth(),
+              bmConf.getFileSizeDistribution(), bmConf.getReadFilesFromDisk(),
+              bmConf.getDiskNameSpacePath());
       String filePath = null;
 
       for (int i = 0; i < filesToCreate; i++) {
