@@ -47,13 +47,13 @@
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-hdfs</artifactId>
-      <version>3.4.3.4-EE-SNAPSHOT</version>
+      <version>3.4.3.3-EE-RC1</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>3.4.3.4-EE-SNAPSHOT</version>
+      <version>3.4.3.3-EE-RC1</version>
       <type>jar</type>
     </dependency>
 
